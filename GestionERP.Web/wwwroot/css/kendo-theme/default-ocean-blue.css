@@ -875,7 +875,7 @@ script {
 	border-color: var(--kendo-disabled-border, unset);
 	opacity: var(--kendo-disabled-opacity, unset);
 	filter: var(--kendo-disabled-filter, unset);
-	pointer-events: inherit;
+	pointer-events: none;
 	box-shadow: none
 }
 

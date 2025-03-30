@@ -47,7 +47,7 @@
                     string[] url = INavigation.Uri.Replace(INavigation.BaseUri, "").Split("/");
                     codigoWebEmpresa = url.Length > 0 ? url[0].Substring(0, Math.Min(url[0].Length, 15)) : null;
                 }
-                ItemsRutaMenu = await IMenu.ObtenerItemsRutaPorServicio(CodigoServicio, codigoWebEmpresa);
+                ItemsRutaMenu = await IMenu.ObtenerItemsRutaPorServicio(CodigoServicio, codigoWebEmpresa);             
             }
         }
         catch (Exception e)
