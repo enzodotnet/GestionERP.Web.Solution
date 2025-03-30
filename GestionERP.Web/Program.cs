@@ -22,9 +22,6 @@ builder.Services.AddScoped(sp => new HttpClient
 }.EnableIntercept(sp)
 );
 
-//builder.Services.AddHttpContextAccessor();
-//builder.Services.AddScoped<HttpContextAccessor>();
-
 builder.Services.AddHttpClient("ReportService",
     httpClient =>
     {
@@ -177,12 +174,9 @@ builder.Services.AddScoped<UtilService>();
 
 builder.Services.AddTelerikBlazor();
 builder.Services.AddOptions();
-//builder.Services.AddBlazoredLocalStorage();
-//builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
-//builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, CustomAuthenticationHandler>("CustomSchemeName", options => { });
 builder.Services.AddScoped<HttpInterceptorService>();
 
 if (builder.Environment.IsProduction())
@@ -197,69 +191,7 @@ if (builder.Environment.IsProduction())
 builder.Services.AddSingleton<ITelerikStringLocalizer, ResxLocalizer>();
 builder.Services.AddSingleton<ITelerikReportingStringLocalizer, ReportingResxLocalizer>();
 builder.Services.AddLocalization();
-
-/// ***** PRUEBA COOKIES
-
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    options.RequireHttpsMetadata = false;
-//    options.SaveToken = true; //HttpContext
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuerSigningKey = true,
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value)),
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidIssuer = builder.Configuration.GetSection("JwtConfig:Issuer").Value,
-//        ValidAudience = builder.Configuration.GetSection("JwtConfig:Audience").Value,
-//        RequireExpirationTime = true,
-//        ValidateLifetime = true,
-//        ClockSkew = TimeSpan.Zero
-//    };
-//    // Configurar la autenticación para Blazor Server
-//    options.Events = new JwtBearerEvents
-//    {
-//        OnMessageReceived = context =>
-//        {
-//            // Obtener el token desde el encabezado de la solicitud
-//            var accessToken = context.Request.Query["access_token"];
-
-//            // Si la solicitud es para SignalR y contiene el token, se usa para autenticación
-//            var path = context.HttpContext.Request.Path;
-//            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/_blazor"))
-//            {
-//                context.Token = accessToken;
-//            }
-
-//            return Task.CompletedTask;
-//        }
-//    };
-//});
-//.AddJwtBearer("Bearer", options =>
-//{
-//    options.Authority = builder.Configuration["Authentication:Authority"]; // URL del proveedor de autenticación (por ejemplo, IdentityServer o Auth0)
-//    options.Audience = builder.Configuration["Authentication:Audience"]; // El 'audience' de tu token
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidateLifetime = true,
-//        ValidIssuer = builder.Configuration["Authentication:Issuer"], // Issuer del token
-//        ValidAudience = builder.Configuration["Authentication:Audience"]
-//    };
-//});
-
-
 builder.Services.AddAuthorization();
-
-/// FIN PRUEBA COOKIES
-
 builder.Services.AddScoped<ProtectedLocalStorage>();
 
 // Add services to the container.
@@ -286,10 +218,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
-
-//app.UseAuthentication();
-//app.UseAuthorization();
-//app.UseMiddleware<JwtMiddleware>();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddAdditionalAssemblies().AllowAnonymous();
  
 await app.RunAsync(); 
