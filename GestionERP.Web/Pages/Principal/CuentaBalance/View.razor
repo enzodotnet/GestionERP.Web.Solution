@@ -1,0 +1,38 @@
+@page "/cuentas-balance/{Id:guid}"
+
+@attribute [Authorize]
+ 
+<PageTitle>Cuenta Balance - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (CuentaBalanceObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando cuenta de balance" CodigoRegistro="@(CuentaBalanceObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@CuentaBalanceObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@CuentaBalanceObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(CuentaBalanceObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+        </CardBody>
+    </CardContainerComponent> 
+}

@@ -1,0 +1,120 @@
+@page "/documentos/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Documento - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando documento" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@(EditContext)" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>
+            </FormValidation> 
+            <FormItems>
+                <FormGroup Class="formgroup" Columns="3" ColumnSpacing="10px">
+                     <FormItem ColSpan="3">
+                         <Template>
+                             <label>Código*:</label>
+                             <TelerikTextBox Width="100px" AutoComplete="off" @bind-Value="@(DocumentoInsertar.Codigo)" OnChange="@ValueCodigoUpperChanged" Size="sm" />
+                             <TelerikValidationMessage For="@(() => DocumentoInsertar.Codigo)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem ColSpan="3">
+                        <Template>
+                            <label>Nombre*:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(DocumentoInsertar.Nombre)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => DocumentoInsertar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                     <FormItem ColSpan="3">
+                         <Template>
+                             <label>Tipo de entidad*:</label>
+                             <TelerikDropDownList @bind-Value="@DocumentoInsertar.FlagTipoEntidad" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@TiposEntidad" Size="sm">
+                                 <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                             </TelerikDropDownList>
+                             <TelerikValidationMessage For="@(() => DocumentoInsertar.FlagTipoEntidad)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem ColSpan="3">
+                         <Template>
+                             <label>Tipo de documento*:</label>
+                             <div class="item-group"> 
+                                 <TelerikTextBox AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" @bind-Value="@(DocumentoInsertar.CodigoTipoDocumento)" Size="sm" Width="100px" />
+                                 <Principal.TipoDocumentoCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoDocumento)" />
+                                 <TelerikDropDownList @bind-Value="@DocumentoObtener.FlagAtributo" Title="Atributo" DefaultText="- Atributo -" TextField="Nombre" ValueField="Codigo" Enabled="@(false)" Data="@Atributos" Width="150px" Size="sm" />
+                                 <TelerikTextBox @bind-Value="@(DocumentoObtener.NombreTipoDocumento)" Title="@(DocumentoObtener.NombreTipoDocumento)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                             </div>
+                             <TelerikValidationMessage For="@(() => DocumentoInsertar.CodigoTipoDocumento)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem ColSpan="3">
+                         <Template>
+                             <label>Tipo de comprobante:</label>
+                             <div class="item-group">
+                                 <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DocumentoInsertar.CodigoTipoComprobante)" Size="sm" Width="100px" />
+                                <Principal.TipoComprobanteCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoComprobante)" />
+                                <TelerikTextBox @bind-Value="@(DocumentoObtener.NombreTipoComprobante)" Title="@(DocumentoObtener.NombreTipoComprobante)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Genera cuenta corriente:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DocumentoInsertar.GeneraCuentaCorriente)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es registro compra/venta:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DocumentoInsertar.EsRegistroCompraVenta)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es afecto a retención:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DocumentoInsertar.EsAfectoRetencion)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es electrónico:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DocumentoInsertar.EsElectronico)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es de transferencias gratuitas:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DocumentoInsertar.EsTransferenciaGratuita)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Conserva tipo de cambio origen:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DocumentoInsertar.ConservaTipoCambioOrigen)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                 </FormGroup>
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+    </CardBody>
+</CardContainerComponent>  

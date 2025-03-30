@@ -1,0 +1,39 @@
+@page "/modalidades-traslado/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Modalidad de Traslado - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (ModalidadTrasladoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando modalidad de traslado" CodigoRegistro="@(ModalidadTrasladoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@ModalidadTrasladoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ModalidadTrasladoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(ModalidadTrasladoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

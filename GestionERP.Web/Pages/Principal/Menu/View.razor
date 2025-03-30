@@ -1,0 +1,116 @@
+@page "/menus/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Menú - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (MenuObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando menú" CodigoRegistro="@(MenuObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@MenuObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@MenuObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(MenuObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Módulo:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(MenuObtener.CodigoModulo)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(MenuObtener.NombreModulo)" Title="@(MenuObtener.NombreModulo)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Servicio:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(MenuObtener.CodigoServicio)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(MenuObtener.NombreServicio)" Title="@(MenuObtener.NombreServicio)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Permiso:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(MenuObtener.CodigoPermiso)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(MenuObtener.NombrePermiso)" Title="@(MenuObtener.NombrePermiso)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox @bind-Value="@(MenuObtener.Descripcion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Número de nivel:</label>
+                            <TelerikTextBox @bind-Value="@(MenuObtener.Nivel)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Ruta web:</label>
+                            <TelerikTextBox @bind-Value="@(MenuObtener.RutaWebServicio)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Icono:</label>
+                            <TelerikTextBox @bind-Value="@(MenuObtener.Icono)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Número de orden:</label>
+                            <TelerikTextBox @bind-Value="@(MenuObtener.NumeroOrden)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es predeterminado:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@MenuObtener.EsPredeterminado" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es grupo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@MenuObtener.EsGrupo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Menú referencia:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(MenuObtener.CodigoMenuReferencia)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(MenuObtener.NombreMenuReferencia)" Title="@(MenuObtener.NombreMenuReferencia)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

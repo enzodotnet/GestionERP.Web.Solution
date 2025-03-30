@@ -1,0 +1,36 @@
+﻿@page "/{CodigoWebEmpresa}/inicio"
+
+@layout EmpresaLayout
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>@Empresa?.Acronimo - Inicio</PageTitle>
+
+<TooltipButtonComponent />
+ 
+@if (IsLoading)
+{
+    <LoaderContainerComponent />
+}
+else 
+{  
+    <CardContainerComponent Titulo=@($"Bienvenido al panel de control de la empresa {Empresa.Nombre}")> 
+        @if(EsVisibleAlert)
+        {
+            <div class="k-alert-window k-alert-window-warning" >
+                <TelerikSvgIcon Icon="@(SvgIcon.XCircle)" ThemeColor="warning"/> <text>@MensajeAlert</text>
+            </div>
+        }
+    </CardContainerComponent>
+} 
+
+<style>
+    .flex-wrap {
+        flex-wrap: wrap;
+    }
+
+    .k-card-body {
+        padding-block: 16px;
+        padding-inline: 16px;
+    } 
+</style>

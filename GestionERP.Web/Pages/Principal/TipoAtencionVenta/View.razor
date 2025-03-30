@@ -1,0 +1,44 @@
+@page "/tipos-atencion-venta/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Tipo de Atención Venta - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoAtencionVentaObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de atención de venta" CodigoRegistro="@(TipoAtencionVentaObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoAtencionVentaObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoAtencionVentaObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoAtencionVentaObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox @bind-Value="@(TipoAtencionVentaObtener.Descripcion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

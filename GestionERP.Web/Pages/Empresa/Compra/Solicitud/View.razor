@@ -1,0 +1,291 @@
+@page "/{CodigoWebEmpresa}/compra/solicitudes/{Id:guid}"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Compra
+
+<PageTitle>@Empresa?.Acronimo - Solicitud Compra - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)"/>
+
+<TooltipButtonComponent/>
+
+@if(Solicitud is not null)
+{
+    <CardContainerComponent Titulo="Visualizando solicitud de compra" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@(Solicitud)" Size="sm">
+                <FormItems>
+                    <FormGroup Class="formgroup" Columns="7" ColumnSpacing="10px">
+                        <FormItem ColSpan="5">
+                            <Template>
+                                <label>Documento:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(Solicitud.CodigoDocumento)" Size="sm" Width="70px" />
+                                    <TelerikTextBox AutoComplete="off" Title="Código de Serie" Class="t-main" ReadOnly="@true" @bind-Value="@(Solicitud.CodigoSerieDocumento)" Size="sm" Width="70px" />
+                                    <TelerikTextBox AutoComplete="off" Title="Número secuencia de la serie" Class="t-main" ReadOnly="@true" @bind-Value="@(Solicitud.NumeroSerieDocumento)" Size="sm" Width="120px" />
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreSerieDocumento)" Title="@(Solicitud.NombreSerieDocumento)" Class="t-main" ReadOnly="@true" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de emisión:</label>
+                                <TelerikDateInput Width="110px" Size="sm" Enabled="@(false)" @bind-Value="@(Solicitud.FechaEmision)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Estado:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(Solicitud.CodigoEstado)" Size="sm" Width="38px" />
+                                    <TelerikTextBox AutoComplete="off" Class="t-main" ReadOnly="@true" @bind-Value="@(Solicitud.NombreEstado)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="5">
+                            <Template>
+                                <label>Proveedor:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(Solicitud.CodigoEntidad)" Size="sm" Width="120px" />
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreEntidad)" Title="@(Solicitud.NombreEntidad)" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Local de recepción:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(Solicitud.CodigoLocalRecepcion)" Title="Código" Enabled="@(false)" Size="sm" Width="60px" />
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreLocalRecepcion)" Title="@(Solicitud.NombreLocalRecepcion)" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="5">
+                            <Template>
+                                <label>Referencia del proveedor:</label>
+                                <TelerikTextBox @bind-Value="@(Solicitud.ReferenciaProveedor)" Title="@(Solicitud.ReferenciaProveedor)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de entrega:</label>
+                                <TelerikDateInput Width="110px" Size="sm" Enabled="@(false)" @bind-Value="@(Solicitud.FechaEntrega)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Nivel de prioridad:</label>
+                                <TelerikDropDownList @bind-Value="@Solicitud.FlagNivelPrioridad" Enabled="@(false)" TextField="Nombre" ValueField="Codigo" Data="@NivelesPrioridad" Size="sm" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <div class="item-group-block">
+                                    <label>Usuario solicitante:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(Solicitud.CodigoUsuarioSolicitante)" Size="sm" Width="60px" />
+                                        <TelerikTextBox @bind-Value="@(Solicitud.NombreUsuarioSolicitante)" Title="@(Solicitud.NombreUsuarioSolicitante)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                    <span class="ig-space" />
+                                    <label>Area solicitante:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(Solicitud.CodigoArea)" Size="sm" Width="60px" />
+                                        <TelerikTextBox @bind-Value="@(Solicitud.NombreArea)" Title="@(Solicitud.NombreArea)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Motivo:</label>
+                                <TelerikTextArea Class="textarea-wrapper" @bind-Value="@(Solicitud.Motivo)" Enabled="@(false)" Rows="3" Title="@(Solicitud.Motivo)" Size="sm" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Observación:</label>
+                                <TelerikTextBox @bind-Value="@(Solicitud.Observacion)" Enabled="@(false)" Title="@(Solicitud.Observacion)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Es requerido revisión:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(Solicitud.EsRequeridoRevision)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        @if (Solicitud.CodigoEstado is "AP" or "AD")
+                        {
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Es atendido parcial:</label>
+                                    <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(Solicitud.EsAtendidoParcial)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                </Template>
+                            </FormItem>
+                            @if (Solicitud.EsRescindido)
+                            {
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Es rescindido:</label>
+                                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(Solicitud.EsRescindido)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                    </Template>
+                                </FormItem>
+                            }
+                        }
+                    </FormGroup>
+
+                    <FormItem Field="GrdDetalle">
+                        <Template>
+                            <label>Detalle:</label>
+                            <TelerikGrid Height="auto" Data="@(Solicitud.Detalles)" Pageable="false" Sortable="true" Resizable="true" Size="sm">
+                                <GridColumns> 
+                                    <GridColumn Field="NombreTipoArticulo" Width="80px" Title="Tipo" />
+                                    <GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" />
+                                    <GridColumn Field="NombreArticulo" Width="400px" Title="Nombre de artículo" />
+                                    <GridColumn Field="Presentacion" Width="200px" Title="Presentación del artículo" />
+                                    <GridColumn Field="CodigoUnidadMedida" Width="45px" >
+										<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
+									</GridColumn>
+                                    <GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+                                    <GridColumn Field="CantidadAtendida" Width="120px" Title="Cantidad atendida" DisplayFormat="{0:N3}" Visible="@(Solicitud.CodigoEstado is "AP" or "AD")" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+                                    <GridColumn Field="CantidadRescindida" Width="125px" Title="Cantidad rescindida" DisplayFormat="{0:N3}" Visible="@(Solicitud.CodigoEstado is "AP" or "AD" && Solicitud.EsRescindido)" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+                                    <GridColumn Width="68px" Title="Acciones" Locked="@(true)" TextAlign="@ColumnTextAlign.Center">
+                                        <Template>
+                                            <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem del detalle" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemDetalle(context as SolicitudDetalleObtenerDto))" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem Visible="@(EsVisibleEditar)">
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleEliminar)">
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" OnClick="@(() => MostrarAccionDialog())">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleEditar)">
+                    <TelerikButton Icon="@(SvgIcon.XOutline)" Id="tbtn" Title="Anular registro" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoAnular)" OnClick="@(() => MostrarAccionDialog("AX"))">Anular</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleExcluir)">
+                    <TelerikButton Icon="@(SvgIcon.MinusOutline)" Id="tbtn" Title="Excluir registro de la vista del usuario" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoExcluir)" OnClick="@(() => MostrarAccionDialog("EX"))">Excluir</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleEditar && Solicitud.EsRequeridoRevision)">
+                    <TelerikButton Icon="@(SvgIcon.RotateRight)" Id="tbtn" Title="Enviar registro a revisión" ButtonType="ButtonType.Button" Size="sm" Class="b-success btn-auth" Enabled="@(EsAsignadoEnviarRevision)" OnClick="@(() => MostrarAccionDialog("ER"))">Enviar a revisión</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleRevertirEnvioRevision)">
+                    <TelerikButton Icon="@(SvgIcon.RotateLeft)" Id="tbtn" Title="Revertir el envío del registro a revisión" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoRevertirEnvioRevision)" OnClick="@(() => MostrarAccionDialog("RO"))">Revertir envío a revisión</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleEditar && !Solicitud.EsRequeridoRevision)">
+                    <TelerikButton Icon="@(SvgIcon.RotateRight)" Id="tbtn" Title="Enviar registro a aprobación" ButtonType="ButtonType.Button" Size="sm" Class="b-success btn-auth" Enabled="@(EsAsignadoEnviarAprobacion)" OnClick="@(() => MostrarAccionDialog("EA"))">Enviar a aprobación</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleRevertirEnvioAprobacion)">
+                    <TelerikButton Icon="@(SvgIcon.RotateLeft)" Id="tbtn" Title="Revertir el envío del registro a aprobación" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoRevertirEnvioAprobacion)" OnClick="@(() => MostrarAccionDialog("RC"))">Revertir envío a aprobación</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.ClipboardText)" Id="tbtn" Title="Ir a ver reporte del registro" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoVerReporte)" OnClick="@(IrReporte)">Ver reporte</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem Visible="@(EsVisibleImprimirDirecto)">
+                    <TelerikButton Icon="@(SvgIcon.Print)" Id="tbtn" Title="Imprimir registro de forma directa" ButtonType="ButtonType.Button" Size="sm" OnClick="@(() => MostrarPrintDialog(true))" Class="b-primary btn-auth" Enabled="@(EsAsignadoImprimirDirecto & !IsLoadingAction)">Imprimir directo</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <AuditoriaComponent Data="@(Solicitud.Auditorias)" CodigoRegistro="@(Solicitud.Codigo)" EsAsignadoVer="@(EsAsignadoVerAuditoria)" />
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikWindow Visible="@EsVisibleModalDetalle" VisibleChanged="@VisibleDetalleChangedHandler" ThemeColor="dark" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>Visualizando ítem del detalle</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar"/>
+                    <WindowAction Name="Close" Title="Cerrar" />
+                </WindowActions>
+                <WindowContent>
+                    <TelerikForm Model="@Detalle" Size="sm">
+                        <FormItems>
+                            <FormItem>
+                                <Template>
+                                    <label>Artículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(Detalle.CodigoArticulo)" Title="Código" Enabled="@false" Size="sm" Width="190px" />
+                                        <TelerikTextBox @bind-Value="@(Detalle.NombreArticulo)" Title="@(Detalle.NombreArticulo)" Enabled="@false" Size="sm" />
+                                    </div>
+                                    <label>Tipo de artículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(Detalle.CodigoTipoArticulo)" Title="Código" Enabled="@(false)" Size="sm" Width="30px" />
+                                        <TelerikTextBox @bind-Value="@(Detalle.NombreTipoArticulo)" Enabled="@(false)" Size="sm" Width="160px" />
+                                    </div>
+                                    <label>Presentación del artículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(Detalle.Presentacion)" Title="@(Detalle.Presentacion)" Enabled="@(false)" AutoComplete="off" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Cantidad:</label>
+                                    <div class="item-group-adornment">
+                                        <TelerikTextBox AutoComplete="off" Enabled="@(false)" @bind-Value="@(Detalle.CodigoUnidadMedida)" Class="adornment" Title="@(Detalle.NombreUnidadMedida)" Size="sm" Width="38px" />
+                                        <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(Detalle.Cantidad)" Enabled="@false" Width="100px" Format="N3" Decimals="3" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Observación:</label>
+                                    <TelerikTextBox @bind-Value="@(Detalle.Observacion)" Title="@(Detalle.Observacion)" Enabled="@false" Size="sm" />
+                                </Template>
+                            </FormItem>
+                        </FormItems>
+                        <FormButtons />
+                    </TelerikForm>
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikDialog @bind-Visible="@EsVisibleAccionDialog" Width="450px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle> <TelerikSvgIcon Size="md" Icon="@(IconoAccionModal)" />@TituloAccionDialog solicitud de compra</DialogTitle>
+                <DialogContent>
+                    <TelerikNotification @ref="@AlertAccionDialog" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)"/>
+                    <div class="item-group-block">
+                        <label>¿Está seguro de @VerboAccionDialog al registro @Solicitud.Codigo.TrimEnd()?</label>
+                        @if (EsEstadoActualizar)
+                        {
+                            <span class="ig-space" />
+                            <TelerikTextArea @bind-Value="@(EstadoActualizar.Motivo)" Class="textarea-vertical-motivo" AutoComplete="off" Rows="4" Placeholder="Ingrese el motivo" Size="sm" />
+                        }
+                    </div>
+                </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Accionar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(CerrarDialog)" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+            <TelerikDialog @bind-Visible="@EsVisiblePrintDialog" Width="450px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle> <TelerikSvgIcon Size="md" Icon="@(SvgIcon.Print)" />Enviando a imprimir solicitud de compra</DialogTitle>
+                <DialogContent>
+                    <TelerikNotification @ref="@AlertPrintDialog" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                    ¿Está seguro de enviar a imprimir de forma directa hacia la impresora <strong>@Numerador.NombreImpresora</strong> al registro @Solicitud.Codigo.TrimEnd()?
+                </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(ImprimirDirecto)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarPrintDialog(false))" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent>
+}

@@ -1,0 +1,52 @@
+@page "/estados/{Id:guid}"
+
+@attribute [Authorize]
+ 
+<PageTitle>Estado - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (EstadoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando estado" CodigoRegistro="@(EstadoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@EstadoObtener" Size="sm"> 
+                <FormItems>
+                
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(EstadoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox @bind-Value="@(EstadoObtener.Descripcion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es primario:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@EstadoObtener.EsPrimario" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Verbo de acción:</label>
+                            <TelerikTextBox @bind-Value="@(EstadoObtener.VerboAccion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

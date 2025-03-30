@@ -1,0 +1,88 @@
+@page "/tipos-impuesto/{Id:guid}"
+
+@attribute [Authorize]
+
+<PageTitle>Tipo de Impuesto - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+@if (TipoImpuestoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de impuesto" CodigoRegistro="@(TipoImpuestoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody> 
+            <TelerikForm Model="@TipoImpuestoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoImpuestoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoImpuestoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem> 
+                    <FormItem>
+                        <Template>
+                            <label>Monto de la tasa:</label>
+                            <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(TipoImpuestoObtener.Porcentaje)" Min="0" Format="P" Decimals="3" Enabled="@false" Size="sm" /> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Monto mínimo MN (Moneda Nacional) @MN.Simbolo :</label>
+                            <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(TipoImpuestoObtener.MontoMinimoMN)" Min="1" Format="N2" Decimals="2" Enabled="@false" Size="sm" /> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es reservado en el sistema:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(TipoImpuestoObtener.EsReservado)" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es operación venta:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(TipoImpuestoObtener.EsOperacionVenta)" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es predeterminado (en operaciones venta) :</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(TipoImpuestoObtener.EsPredeterminado)" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando tipo de impuesto</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

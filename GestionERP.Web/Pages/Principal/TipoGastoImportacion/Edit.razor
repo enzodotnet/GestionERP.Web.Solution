@@ -1,0 +1,69 @@
+@page "/tipos-gasto-importacion/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+<PageTitle>Tipo de Gasto de Importacion - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando tipo de gasto de importacion" CodigoRegistro="@(TipoGastoImportacionObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />  
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoGastoImportacionEditar.Activo" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(TipoGastoImportacionEditar.Nombre)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => TipoGastoImportacionEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Tipo*:</label>
+                             <TelerikDropDownList @bind-Value="@TipoGastoImportacionEditar.FlagTipo" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@Tipos" Size="sm">
+                                 <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                             </TelerikDropDownList>
+                             <TelerikValidationMessage For="@(() => TipoGastoImportacionEditar.FlagTipo)" />
+                         </Template>
+                     </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(TipoGastoImportacionEditar.Descripcion)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => TipoGastoImportacionEditar.Descripcion)" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

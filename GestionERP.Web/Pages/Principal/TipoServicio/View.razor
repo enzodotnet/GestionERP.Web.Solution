@@ -1,0 +1,44 @@
+@page "/tipos-servicio/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Tipo de Servicio - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoServicioObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de servicio" CodigoRegistro="@(TipoServicioObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoServicioObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoServicioObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoServicioObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>  
+                    <FormItem>
+                        <Template>
+                            <label>Registro:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoServicioObtener.FlagRegistro)" TextField="Nombre" ValueField="Codigo" Data="@Registros" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

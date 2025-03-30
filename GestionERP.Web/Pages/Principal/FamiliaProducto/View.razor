@@ -1,0 +1,39 @@
+@page "/familias-producto/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Familia Producto - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (FamiliaProductoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando familia de producto" CodigoRegistro="@(FamiliaProductoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@FamiliaProductoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@FamiliaProductoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(FamiliaProductoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem> 
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

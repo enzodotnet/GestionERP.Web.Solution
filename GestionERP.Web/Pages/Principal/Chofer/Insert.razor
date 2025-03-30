@@ -1,0 +1,96 @@
+@page "/choferes/insertar"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>Chofer - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando chofer" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@(EditContext)" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator" />
+            </FormValidation>
+            <FormItems>
+                <FormItem>
+                    <Template>
+                        <label>Código*:</label>
+                        <TelerikTextBox Width="100px" AutoComplete="off" @bind-Value="@(ChoferInsertar.Codigo)" Size="sm" />
+                        <TelerikValidationMessage For="@(() => ChoferInsertar.Codigo)" />
+                    </Template>
+                </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Nombre*:</label>
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferInsertar.Nombre)" Size="sm" />
+                        <TelerikValidationMessage For="@(() => ChoferInsertar.Nombre)" />
+                    </Template>
+                </FormItem>
+                <FormItem>
+                   <Template>
+                       <label>Tipo de identificación*:</label>
+                       <div class="item-group">
+                           <TelerikTextBox AutoComplete="off" Title="Código" Placeholder="Código" Enabled="@(false)" @bind-Value="@(ChoferInsertar.CodigoTipoIdentificacion)" Size="sm" Width="50px" />
+                           <Principal.TipoIdentificacionCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoIdentificacion)" />
+                           <TelerikTextBox @bind-Value="@(ChoferObtener.NombreTipoIdentificacion)" Width="200px" Title="@(ChoferObtener.NombreTipoIdentificacion)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm"/>
+                       </div>
+                       <TelerikValidationMessage For="@(() => ChoferInsertar.CodigoTipoIdentificacion)" />
+                   </Template>
+                </FormItem>
+                <FormItem>
+                   <Template>
+                       <label>Número del tipo de identificación*:</label>
+                       <div class="item-group">
+                           <TelerikTextBox AutoComplete="off" Title="Sigla del tipo de identificación" Placeholder="Sigla" Enabled="@(false)" @bind-Value="@(ChoferObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                            <TelerikTextBox Width="150px" AutoComplete="off" @bind-Value="@(ChoferInsertar.NumeroTipoIdentificacion)" Size="sm" />
+                       </div>
+                       <TelerikValidationMessage For="@(() => ChoferInsertar.NumeroTipoIdentificacion)" />
+                   </Template>
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>Tipo de categoría*:</label>
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferInsertar.TipoCategoria)" Size="sm" />
+                        <TelerikValidationMessage For="@(() => ChoferInsertar.TipoCategoria)" />
+                    </Template>
+                </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Observación:</label>
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferInsertar.Observacion)" Size="sm" />
+                        <TelerikValidationMessage For="@(() => ChoferInsertar.Observacion)" />
+                    </Template>
+                </FormItem>
+                <FormItem> 
+                    <Template>
+                        <label>Fecha de expiración de licencia:</label>
+                        <TelerikDateInput Width="150px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" @bind-Value="@(ChoferInsertar.FechaExpiracionLicencia)" />
+                        <TelerikValidationMessage For="@(() => ChoferInsertar.FechaExpiracionLicencia)" />
+                    </Template>
+                </FormItem> 
+            </FormItems>
+
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+
+    </CardBody>
+</CardContainerComponent>

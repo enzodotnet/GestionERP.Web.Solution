@@ -1,0 +1,101 @@
+@page "/{CodigoWebEmpresa}/compra/ordenes"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Compra             
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>@Empresa?.Acronimo - Ordenes Compra - Lista</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Lista de órdenes" CodigoServicio="@(codigoServicio)"> 
+    <CardBody>
+
+        <TelerikGrid Data="@ListaOrdenes" Pageable="true" PageSize="@(15)" Sortable="true" FilterMode="@GridFilterMode.FilterMenu" FilterMenuType="@FilterMenuType.CheckBoxList" Resizable="true" Size="sm" Height="570px">
+            <GridToolBarTemplate> 
+                <span>Año:</span>
+                <TelerikDropDownList Data="@CatalogoEjercicios" Value="@CodigoEjercicio" ValueChanged="@((string value) => OnComboEjercicioValueChanged(value))" TextField="AnioEjercicio" ValueField="CodigoEjercicio" DefaultText="@(!string.IsNullOrEmpty(CodigoEjercicio) ? "" : " ")" Size="sm" Width="65px" FillMode="solid">
+                    <ValueTemplate>
+                        <span class="d-item-strong">@((context as EmpresaEjercicioCatalogoDto).AnioEjercicio)</span>
+                    </ValueTemplate>
+                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/> </DropDownListSettings>
+                </TelerikDropDownList>
+
+                <span>Mes:</span>
+                <TelerikDropDownList Data="@CatalogoPeriodos" Value="@CodigoPeriodo" ValueChanged="@((string value) => OnComboPeriodoValueChanged(value))" TextField="NombrePeriodo" ValueField="CodigoPeriodo" DefaultText="@("Todos")" Size="sm" Width="95px">
+                    <ValueTemplate>
+                        <span class="d-item-strong">@((context as EmpresaPeriodoCatalogoDto).NombrePeriodo)</span>
+                    </ValueTemplate>
+                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/> </DropDownListSettings>
+                </TelerikDropDownList>
+
+                <span>Origen:</span>
+                <TelerikDropDownList Data="@Origenes" Value="@FlagOrigen" ValueChanged="@((string value) => OnComboOrigenValueChanged(value))" TextField="Nombre" ValueField="Codigo" DefaultText="Todos" Size="sm" Width="100px">
+                    <ValueTemplate>
+                        <span class="d-item-strong">@((context as OrdenFlag).Nombre)</span>
+                    </ValueTemplate>
+                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/> </DropDownListSettings>
+                </TelerikDropDownList>
+
+                <GridSearchBox Size="md" Width="250px" DebounceDelay="100" Placeholder="Buscar en la lista..." />
+
+                <span class="k-toolbar-spacer"/>
+
+                <TelerikButton Icon="@(SvgIcon.ArrowRotateCwSmall)" ButtonType="@ButtonType.Button" Class="b-secondary grid-toolbar" Id="tbtn" Title="Refrescar la lista de registros" Size="sm" OnClick="@(RefrescarLista)">Refrescar lista</TelerikButton>
+                <TelerikButton Icon="@(SvgIcon.FileAdd)" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ir a registrar orden directa" Class="b-primary btn-auth grid-toolbar" Enabled="@EsAsignadoEmitirDirecta" Size="sm" OnClick="@(IrEmitirDirecta)">Emitir directa</TelerikButton>
+                <TelerikButton Icon="@(SvgIcon.FileAdd)" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ir a registrar orden por solicitud" Class="b-primary btn-auth grid-toolbar" Enabled="@EsAsignadoEmitirPorSolicitud" Size="sm" OnClick="@(IrEmitirPorSolicitud)">Emitir por solicitud</TelerikButton>
+            </GridToolBarTemplate>
+            
+            <GridSettings>
+                <GridPagerSettings InputType="@(PagerInputType.Input)" PageSizes="@([15, 25, 50, null])" Position="@(PagerPosition.Bottom)" />
+            </GridSettings>
+
+            <GridColumns> 
+                <GridColumn Field="CodigoDocumento" Width="80px" Title="Documento" Filterable="@false" Locked="@(true)" />
+                <GridColumn Field="CodigoSerieDocumento" Width="50px" Title="Serie" Filterable="@false" Locked="@(true)" />
+                <GridColumn Field="NumeroSerieDocumento" Width="75px" Title="Número" Filterable="@false" Locked="@(true)" />
+                <GridColumn Field="NombreSerieDocumento" Width="300px" Title="Nombre de la serie del documento" Filterable="@false" />
+                <GridColumn Field="FechaEmision" Width="115px" Title="Fecha emisión" DisplayFormat="{0:dd/MM/yyyy}" />
+                <GridColumn Field="FlagOrigen" Width="90px" Title="Origen" Filterable="@false">
+                    <Template>
+                        <label>@(Origenes.Where(x => x.Codigo == (context as OrdenListarDto).FlagOrigen).Select(x => x.Nombre).FirstOrDefault())</label>
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="NombreEstado" Width="95px" Title="Estado" /> 
+                <GridColumn Field="CodigoEntidad" Width="115px" Title="Código proveedor" Filterable="@false" />
+                <GridColumn Field="NombreEntidad" Width="300px" Title="Nombre/razón social del proveedor" Filterable="@false" /> 
+                <GridColumn Field="CodigoMoneda" Width="80px" Title="Moneda" />
+                <GridColumn Field="TotalImporteNeto" Width="135px" Title="Total importe neto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+                <GridColumn Width="100px" Title="Acciones" Locked="@(true)">
+                    <Template>
+                        @{
+                            OrdenListarDto item = context as OrdenListarDto;
+                        }
+                        <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ir a ver registro" Class="b-primary" OnClick="@(() => IrVer(item.Id))" />
+                        <TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" Id="tbtn" Title="Ir a editar registro" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Visible="@(item.CodigoEstado is "ED")" OnClick="@(() => IrEditar(item.Id))" />
+                        <TelerikButton Icon="@(SvgIcon.Trash)" Size="sm" Id="tbtn" Title="Eliminar registro" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Visible="@(item.CodigoEstado is "AX" or "EX" or "DX" or "CX")" OnClick="@(() => MostrarEliminar(true, item.Id))" />
+                    </Template>
+                </GridColumn>  
+            </GridColumns>
+
+            <NoDataTemplate>
+                @if(IsInitGrid)
+                {
+                    <TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+                }
+            </NoDataTemplate> 
+        </TelerikGrid>
+
+        <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+            <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando orden de compra</DialogTitle>
+            <DialogContent> ¿Está seguro de eliminar al registro @CodigoRegistro?  </DialogContent>
+            <DialogButtons>
+                <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(() => MostrarEliminar(false))" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton> 
+            </DialogButtons>
+        </TelerikDialog>
+
+    </CardBody>
+</CardContainerComponent>

@@ -1,0 +1,51 @@
+@page "/grupos-devengo/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Grupo de Devengo - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando grupo de devengo" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@EditContext" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>  
+            </FormValidation> 
+            <FormItems>
+                <FormItem>
+                    <Template>
+                        <label>Código*:</label> 
+                         <TelerikTextBox Width="100px" AutoComplete="off" @bind-Value="@(GrupoDevengoInsertar.Codigo)" OnChange="@ValueCodigoUpperChanged" Size="sm" />
+                        <TelerikValidationMessage For="@(() => GrupoDevengoInsertar.Codigo)" />
+                    </Template>
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>Nombre*:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(GrupoDevengoInsertar.Nombre)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => GrupoDevengoInsertar.Nombre)" />
+                    </Template>
+                </FormItem>  
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+    </CardBody>
+</CardContainerComponent>

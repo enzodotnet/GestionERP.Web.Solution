@@ -1,0 +1,113 @@
+@page "/almacenes/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Almacén - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando almacén" CodigoRegistro="@(AlmacenObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator"/>
+                </FormValidation> 
+                <FormItems>
+                    <FormGroup Class="formgroup" Columns="3" ColumnSpacing="10px">
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Activo:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(AlmacenEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Nombre*:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(AlmacenEditar.Nombre)" Size="sm" />
+                                <TelerikValidationMessage For="@(() => AlmacenEditar.Nombre)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Atributo:</label>
+                                <TelerikDropDownList @bind-Value="@AlmacenObtener.FlagAtributo" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@Atributos" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Tipo de almacén:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" @bind-Value="@(AlmacenEditar.CodigoTipoAlmacen)" Size="sm" Width="100px" />
+                                    <Principal.TipoAlmacenCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoAlmacen)" />
+                                    <TelerikTextBox @bind-Value="@(AlmacenObtener.NombreTipoAlmacen)" Title="@(AlmacenObtener.NombreTipoAlmacen)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationMessage For="@(() => AlmacenEditar.CodigoTipoAlmacen)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Cuenta contable:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(AlmacenEditar.CodigoCuentaContable)" Size="sm" Width="100px" />
+                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContable)" />
+                                    <TelerikTextBox @bind-Value="@(AlmacenObtener.NombreCuentaContable)" Title="@(AlmacenObtener.NombreCuentaContable)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es destinado a venta:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(AlmacenEditar.EsDestinadoVenta)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es destinado a compra:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(AlmacenEditar.EsDestinadoCompra)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es destinado a producción:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(AlmacenEditar.EsDestinadoProduccion)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es destinado a traslado:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(AlmacenEditar.EsDestinadoTraslado)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es destinado a control:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(AlmacenEditar.EsDestinadoControl)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                    </FormGroup>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

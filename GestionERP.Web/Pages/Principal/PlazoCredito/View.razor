@@ -1,0 +1,51 @@
+@page "/plazos-credito/{Id:guid}"
+
+@attribute [Authorize]
+ 
+<PageTitle>Plazo Crédito - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (PlazoCreditoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando plazo de crédito" CodigoRegistro="@(PlazoCreditoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@PlazoCreditoObtener" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PlazoCreditoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox @bind-Value="@(PlazoCreditoObtener.Nombre)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Cantidad de días:</label>
+                            <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(PlazoCreditoObtener.CantidadDias)" Enabled="@(false)" Min="0" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox Width="200px" @bind-Value="@(PlazoCreditoObtener.Descripcion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

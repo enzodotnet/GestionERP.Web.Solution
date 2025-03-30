@@ -1,0 +1,63 @@
+@page "/aduanas/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Aduana - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando aduana" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@EditContext" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>  
+            </FormValidation> 
+            <FormItems>
+                <FormItem>
+                    <Template>
+                        <label>Código*:</label> 
+                         <TelerikTextBox Width="100px" AutoComplete="off" @bind-Value="@(AduanaInsertar.Codigo)" OnChange="@ValueCodigoUpperChanged" Size="sm" />
+                        <TelerikValidationMessage For="@(() => AduanaInsertar.Codigo)" />
+                    </Template>
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>Nombre*:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(AduanaInsertar.Nombre)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => AduanaInsertar.Nombre)" />
+                    </Template>
+                </FormItem>  
+                <FormItem>
+                    <Template>
+                        <label>Región*:</label>
+                        <div class="item-group">
+                            <TelerikTextBox Title="Código Ubigeo" Placeholder="Código" Enabled="@(false)" @bind-Value="@(AduanaInsertar.CodigoRegion)" Size="sm" Width="100px" />
+                            <Principal.RegionCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoRegion)" />
+                            <TelerikTextBox @bind-Value="@(AduanaObtener.NombreRegion)" Placeholder="Nombre o Descripción" Title="@(AduanaObtener.NombreRegion)" Enabled="@(false)" Size="sm" />
+                        </div>
+                        <TelerikValidationMessage For="@(() => AduanaInsertar.CodigoRegion)" />
+                    </Template>
+                </FormItem>
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+
+    </CardBody>
+</CardContainerComponent>

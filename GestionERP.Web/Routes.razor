@@ -1,0 +1,28 @@
+﻿@inject NavigationManager INavigation
+<NotifyComponent>
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        @if (context.User.Identity?.IsAuthenticated != true)
+                        {
+                            INavigation.NavigateTo("/");
+                        }
+                        else
+                        {
+                            <p> You are not authorized to access this resource. </p>
+                        }
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound> 
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@typeof(BlankLayout)">
+                    <NotFoundPage/>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
+</NotifyComponent>

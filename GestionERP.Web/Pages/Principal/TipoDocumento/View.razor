@@ -1,0 +1,48 @@
+@page "/tipos-documento/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Tipo de documento - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoDocumentoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de documento" CodigoRegistro="@(TipoDocumentoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoDocumentoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoDocumentoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoDocumentoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Atributo:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoDocumentoObtener.FlagAtributo)" TextField="Nombre" ValueField="Codigo" Data="@Atributos" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.HyperlinkOpen)" Id="tbtn" Title="Ir a ver lista de tipos de procesos de documentos por tipo de documento" ButtonType="@ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoVerProcesoDocumento)" Size="sm" OnClick="@(() => IrVerProcesosDocumento())">Ver tipos de procesos</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

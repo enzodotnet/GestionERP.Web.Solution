@@ -1,0 +1,24 @@
+﻿@layout TelerikLayout
+@inherits LayoutComponentBase  
+@implements IDisposable
+
+<div class="menu-container mc-black">
+    <TelerikButton Class="button-menu" Size="sm" Icon="@SvgIcon.Menu" FillMode="@(ThemeConstants.Button.FillMode.Flat)">Menú</TelerikButton>
+    <span class="separator"></span>
+
+    <figure>
+        <a href="inicio">
+            <img src="img/gerp_banner.png">
+        </a> 
+    </figure>
+    <h3 class="tk-title">estión ERP</h3> 
+    <LoginDisplay></LoginDisplay>
+</div> 
+
+<div class="container-black">
+    @Body
+</div>
+
+@code {  
+    public void Dispose() => GC.SuppressFinalize(this);
+}

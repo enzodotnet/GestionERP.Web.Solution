@@ -1,0 +1,76 @@
+@page "/glosarios-analisis/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Glosario de Análisis - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+@if (GlosarioAnalisisObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando glosario de análisis" CodigoRegistro="@(GlosarioAnalisisObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@(GlosarioAnalisisObtener)" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(GlosarioAnalisisObtener.Activo)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Registro:</label>
+                            <TelerikDropDownList @bind-Value="@GlosarioAnalisisObtener.FlagRegistro" TextField="Nombre" ValueField="Codigo" Data="@Registros" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Idioma original:</label>
+                            <TelerikDropDownList @bind-Value="@GlosarioAnalisisObtener.FlagIdiomaOriginal" TextField="Nombre" ValueField="Codigo" Data="@IdiomasOriginal" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(GlosarioAnalisisObtener.Descripcion)" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción traducida:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(GlosarioAnalisisObtener.DescripcionTraducida)" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+             
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando glosario de análisis</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton> 
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent>  
+}

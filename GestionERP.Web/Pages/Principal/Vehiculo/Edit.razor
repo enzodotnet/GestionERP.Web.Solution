@@ -1,0 +1,75 @@
+@page "/vehiculos/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+<PageTitle>Vehículo - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando vehículo" CodigoRegistro="@(VehiculoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />  
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@VehiculoEditar.Activo" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Marca*:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(VehiculoEditar.Marca)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => VehiculoEditar.Marca)" />
+                        </Template>
+                    </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Modelo*:</label>
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(VehiculoEditar.Modelo)" Size="sm" />
+                             <TelerikValidationMessage For="@(() => VehiculoEditar.Modelo)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Número de circulación:</label>
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(VehiculoEditar.NumeroCirculacion)" Size="sm" />
+                             <TelerikValidationMessage For="@(() => VehiculoEditar.NumeroCirculacion)" />
+                         </Template>
+                     </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(VehiculoEditar.Descripcion)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => VehiculoEditar.Descripcion)" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

@@ -1,0 +1,51 @@
+﻿@page "/inicio"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>Inicio</PageTitle> 
+
+<TooltipButtonComponent />
+
+@if (IsLoading)
+{
+    <LoaderContainerComponent />
+}
+else 
+{  
+    <CardContainerComponent Titulo="Catálogo de acceso a empresas del sistema"> 
+        @if(EsVisibleAlert)
+        {
+            <div class="k-alert-window k-alert-window-warning" >
+                <TelerikSvgIcon Icon="@(SvgIcon.XCircle)" ThemeColor="warning"/> <text>@MensajeAlert</text>
+            </div>
+        }
+        @if (CatalogoEmpresas != null)
+        {
+            <div class="k-card-deck flex-wrap">
+                @foreach (UsuarioEmpresaCatalogoPorSesionDto item in CatalogoEmpresas)
+                {
+                    <TelerikCard Width="300px" ThemeColor="@(ThemeConstants.Card.ThemeColor.Light)">
+                        <CardImage Src="@(item.UrlArchivoLogo)" Height="192px" ></CardImage>
+                        <CardBody>
+                            <CardTitle>@item.NombreEmpresa</CardTitle>
+                            <CardSubTitle>@item.SiglaTipoIdentificacion: @item.NumeroTipoIdentificacion</CardSubTitle>
+                            <TelerikButton Id="tbtn" Title="Acceder al panel de los módulos" OnClick="@(() => IrEmpresa(item.CodigoWebEmpresa))" ThemeColor="primary" Size="sm" FillMode="@(ThemeConstants.Button.FillMode.Solid)">Abrir</TelerikButton>
+                        </CardBody>
+                    </TelerikCard>
+                }
+            </div>
+        }
+    </CardContainerComponent>
+}
+
+<style>
+    .flex-wrap {
+        flex-wrap: wrap;
+    }
+
+    .k-card-body {
+        padding-block: 16px;
+        padding-inline: 16px;
+    } 
+</style>

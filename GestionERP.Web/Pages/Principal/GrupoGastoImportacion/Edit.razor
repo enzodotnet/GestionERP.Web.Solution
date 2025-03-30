@@ -1,0 +1,61 @@
+@page "/grupos-gasto-importacion/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+<PageTitle>Grupo de Gasto de Importacion - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando grupo de gasto de importacion" CodigoRegistro="@(GrupoGastoImportacionObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />  
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@GrupoGastoImportacionEditar.Activo" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(GrupoGastoImportacionEditar.Nombre)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => GrupoGastoImportacionEditar.Nombre)" />
+                        </Template>
+                    </FormItem> 
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(GrupoGastoImportacionEditar.Descripcion)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => GrupoGastoImportacionEditar.Descripcion)" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

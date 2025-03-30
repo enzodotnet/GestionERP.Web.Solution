@@ -1,0 +1,199 @@
+@page "/{CodigoWebEmpresa}/produccion/solicitudes/emitir"
+@using GestionERP.Web.Models.Dtos.Produccion
+
+@attribute [Authorize] 
+
+<PageTitle>@Empresa?.Acronimo - Solicitud Producción - Emitir</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Emitiendo solicitud de producción" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator Validator="@(Validator)" />
+                </FormValidation>
+                <FormItems>
+                    <FormGroup Class="formgroup" Columns="7" ColumnSpacing="10px">
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Documento*:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(SolicitudInsertar.CodigoDocumento)" Id="codigodoc" AutoComplete="off" Placeholder="Código" Title="Código" Class="t-main" ReadOnly="@true" Size="sm" Width="70px" />
+                                    @if (EsVisibleBotonDocumento)
+                                    {
+                                        <Empresa.SerieDocumentoCatalogoPorSesionComponent CodigoEmpresa="@Empresa.Codigo" FlagTipoAccion="P" CodigoTipoDocumento="@CodigoTipoDocumento" CodigoExcluir="@(string.Concat(SolicitudInsertar.CodigoDocumento?.TrimEnd(), SolicitudInsertar.CodigoSerieDocumento?.TrimEnd()))" CargarItemSeleccionado="@(CargarItemCatalogoSerieDocumento)" />
+                                    }
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Serie" Title="Código de Serie" Class="t-main" ReadOnly="@true" @bind-Value="@(SolicitudInsertar.CodigoSerieDocumento)" Size="sm" Width="60px" />
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreSerieDocumento)" Title="@(Solicitud.NombreSerieDocumento)" Placeholder="Nombre de numerador" Class="t-main" ReadOnly="@true" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.CodigoDocumento)" TargetSelector="#codigodoc" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Tipo de registro:</label>
+                                <TelerikDropDownList Data="@TiposRegistro" @bind-Value="@SolicitudInsertar.FlagTipoRegistro" Enabled="@(false)" TextField="Nombre" Width="120px" ValueField="Codigo" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Fecha de emisión*:</label>
+                                <TelerikDatePicker @bind-Value="@(SolicitudInsertar.FechaEmision)" OnChange="@OnChangeFechaEmisionHandler" Id="fecemision" Width="110px" Size="sm" Min="@FechaIntervalo.FechaInicio" Max="@FechaIntervalo.FechaFin" DisabledDates="@FechasCerradoOperacion" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.FechaEmision)" TargetSelector="#fecemision" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Plan de producción*:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Value="@(SolicitudInsertar.CodigoPlan)" DebounceDelay="@(0)" ValueChanged="@ValueChangePlanHandler" ValueExpression="@(() => SolicitudInsertar.CodigoPlan)" OnChange="@OnChangePlanHandler" Id="codigoplanprod" AutoComplete="off" Placeholder="Código" Title="Código" MaxLength="5" Enabled="@(!string.IsNullOrEmpty(SolicitudInsertar.CodigoDocumento))" Size="sm" Width="60px" />
+                                    @if (!string.IsNullOrEmpty(SolicitudInsertar.CodigoDocumento))
+                                    {
+                                        <Empresa.PlanProduccionCatalogoComponent CodigoEmpresa="@(Empresa.Codigo)" FlagTipoProceso="@SolicitudInsertar.FlagTipoRegistro" CodigoExcluir="@(SolicitudInsertar.CodigoPlan)" CargarItemSeleccionado="@(CargarItemCatalogoPlan)" />
+                                    }
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombrePlan)" Title="@(Solicitud.NombrePlan)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.CodigoPlan)" TargetSelector="#codigoplanprod" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Tipo de producción:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(Solicitud.CodigoTipoProduccion)" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" Size="sm" Width="60px" />
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreTipoProduccion)" Title="@(Solicitud.NombreTipoProduccion)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </div> 
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Local de recepción:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Value="@(SolicitudInsertar.CodigoLocalRecepcion)" DebounceDelay="@(0)" ValueChanged="@ValueChangeLocalHandler" ValueExpression="@(() => SolicitudInsertar.CodigoLocalRecepcion)" OnChange="@OnChangeLocalHandler" Id="local" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(!string.IsNullOrEmpty(SolicitudInsertar.CodigoDocumento) && string.IsNullOrEmpty(CodigoLocalNumerador))" Size="sm" Width="60px" MaxLength="3" />
+                                    @if (!string.IsNullOrEmpty(SolicitudInsertar.CodigoDocumento) && string.IsNullOrEmpty(CodigoLocalNumerador))
+                                    {
+                                        <Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(SolicitudInsertar.CodigoLocalRecepcion)" />
+                                    }
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreLocalRecepcion)" Title="@(Solicitud.NombreLocalRecepcion)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.CodigoLocalRecepcion)" TargetSelector="#local" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="5">
+                            <Template>
+                                <label>Entidad*:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Value="@(SolicitudInsertar.CodigoEntidad)" DebounceDelay="@(0)" ValueChanged="@ValueChangeEntidadHandler" ValueExpression="@(() => SolicitudInsertar.CodigoEntidad)" OnChange="@OnChangeEntidadHandler" Id="codigoentidad" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(TipoProduccion.FlagTipoEncargo is "C" or "P")" Size="sm" MaxLength="11" Width="120px" />
+                                    @if (TipoProduccion.FlagTipoEncargo is "C" or "P")
+                                    {
+                                        <Empresa.EntidadCatalogoComponent CodigoEmpresa="@Empresa.Codigo" FlagTipo="@(TipoProduccion.FlagTipoEncargo)" CodigoExcluir="@(SolicitudInsertar.CodigoEntidad)" CargarItemSeleccionado="@(CargarItemCatalogoEntidad)" />
+                                    }
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreEntidad)" Title="@(Solicitud.NombreEntidad)" Placeholder="Nombre o razón social del proveedor" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.CodigoEntidad)" TargetSelector="#codigoentidad" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de entrega*:</label>
+                                <TelerikDateInput @bind-Value="@(SolicitudInsertar.FechaEntrega)" OnChange="@OnChangeFechaEntregaHandler" Id="fecentrega" Width="110px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.FechaEntrega)" TargetSelector="#fecentrega" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Nivel de prioridad*:</label>
+                                <TelerikDropDownList @bind-Value="@SolicitudInsertar.FlagNivelPrioridad" OnChange="@OnChangeFlagNivelPrioridadHandler" Id="nivelprioridad" TextField="Nombre" ValueField="Codigo" Data="@NivelesPrioridad" Size="sm">
+                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                                </TelerikDropDownList>
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.FlagNivelPrioridad)" TargetSelector="#nivelprioridad" />
+                            </Template>
+                        </FormItem>
+                         
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Artículo terminado:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(Solicitud.CodigoArticuloTerminado)" Title="Código" Enabled="@false" Size="sm" Width="170px" />
+                                    <TelerikTextBox @bind-Value="@(Solicitud.NombreArticuloTerminado)" Title="@(Solicitud.NombreArticuloTerminado)" Enabled="@false" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Presentación del artículo:</label>
+                                <TelerikTextBox @bind-Value="@(Solicitud.PresentacionArticulo)" Title="@(Solicitud.PresentacionArticulo)" Enabled="@(false)" AutoComplete="off" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                 <label>Cantidad*:</label>
+                                 <div class="item-group-adornment">
+                                    <TelerikTextBox @bind-Value="@(Solicitud.CodigoUnidadMedida)" AutoComplete="off" Enabled="@(false)" Class="adornment" Title="@(Solicitud.NombreUnidadMedida)" Size="sm" Width="54px" />
+                                    <TelerikNumericTextBox @bind-Value="@(SolicitudInsertar.Cantidad)" OnChange="@OnChangeCantidadHandler" Id="cantidad" AutoComplete="off" Arrows="@(false)" Min="0" Format="N3" Decimals="3" Size="sm" />
+                                 </div>
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.Cantidad)" TargetSelector="#cantidad" />
+                            </Template>
+                        </FormItem>
+                         
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <div class="item-group-block">
+                                    <label>Usuario solicitante:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(SolicitudInsertar.CodigoUsuarioSolicitante)" Size="sm" Width="60px" />
+                                        <TelerikTextBox @bind-Value="@(Solicitud.NombreUsuarioSolicitante)" Title="@(Solicitud.NombreUsuarioSolicitante)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                    <span class="ig-space" />
+                                    <label>Area solicitante:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(SolicitudInsertar.CodigoArea)" Size="sm" Width="60px" />
+                                        <TelerikTextBox @bind-Value="@(Solicitud.NombreArea)" Title="@(Solicitud.NombreArea)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Motivo:</label>
+                                <TelerikTextArea @bind-Value="@(SolicitudInsertar.Motivo)" OnChange="@OnChangeMotivoHandler" Id="motivo" AutoComplete="off" Class="textarea-wrapper" Rows="3" Title="@(SolicitudInsertar.Motivo)" MaxLength="200" Size="sm" />
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.Motivo)" TargetSelector="#motivo" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Observación:</label>
+                                <TelerikTextBox @bind-Value="@(SolicitudInsertar.Observacion)" OnChange="@OnChangeObservacionHandler" AutoComplete="off" Id="observacion" Title="@(SolicitudInsertar.Observacion)" MaxLength="100" Size="sm" />
+                                <TelerikValidationTooltip For="@(() => SolicitudInsertar.Observacion)" TargetSelector="#observacion" />
+                            </Template>
+                        </FormItem> 
+                    </FormGroup>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" Size="sm" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar> 
+        </CardBody>
+    </CardContainerComponent>
+} 

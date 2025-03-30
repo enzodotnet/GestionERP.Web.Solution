@@ -1,0 +1,59 @@
+@page "/tipos-provision/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Tipo de provisión - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoProvisionObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de provisión" CodigoRegistro="@(TipoProvisionObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoProvisionObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoProvisionObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoProvisionObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem> 
+                    <FormItem>
+                        <Template>
+                            <label>Moneda:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(TipoProvisionObtener.CodigoMoneda)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(TipoProvisionObtener.FlagRegistro)" Title="@(TipoProvisionObtener.NombreMoneda)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Registro:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoProvisionObtener.FlagRegistro)" TextField="Nombre" ValueField="Codigo" Data="@Registros" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es afecto a impuesto (del tipo general a operaciones comerciales):</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoProvisionObtener.EsAfectoImpuesto" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

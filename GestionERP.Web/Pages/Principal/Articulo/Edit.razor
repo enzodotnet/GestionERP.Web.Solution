@@ -1,0 +1,119 @@
+@page "/articulos/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Artículo - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando artículo" CodigoRegistro="@(ArticuloObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator"/>
+                </FormValidation> 
+                <FormItems>
+                     <FormItem>
+                         <Template>
+                             <label>Activo:</label>
+                             <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(ArticuloEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Nombre*:</label> 
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(ArticuloEditar.Nombre)" Size="sm"/>  
+                             <TelerikValidationMessage For="@(() => ArticuloEditar.Nombre)" />
+                         </Template>
+                     </FormItem>
+
+                    <FormGroup LabelText="Clasificación de código:" Class="formgroup-legend" Columns="1">
+                         <FormItem ColSpan="1">
+                             <Template>
+                                 <div class="item-group-legend">
+                                    <label>Grupo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Placeholder="Código" Enabled="@(false)" @bind-Value="@(ArticuloObtener.CodigoGrupoArticulo)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(ArticuloObtener.NombreGrupoArticulo)" Title="@(ArticuloObtener.NombreGrupoArticulo)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                    <label>Segmento:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Placeholder="Código" Enabled="@(false)" @bind-Value="@(ArticuloObtener.CodigoSegmentoArticulo)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(ArticuloObtener.NombreSegmentoArticulo)" Title="@(ArticuloObtener.NombreSegmentoArticulo)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                    <label>Línea:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Placeholder="Código" Enabled="@(false)" @bind-Value="@(ArticuloObtener.CodigoLineaArticulo)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(ArticuloObtener.NombreLineaArticulo)" Title="@(ArticuloObtener.NombreLineaArticulo)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                    <label>Número correlativo de la línea:</label>
+                                    <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(ArticuloObtener.NumeroLineaArticulo)" Enabled="@false" Size="sm" />
+                                </div>
+                             </Template>
+                         </FormItem>
+                     </FormGroup>
+
+                     <FormItem>
+                         <Template>
+                             <label>Categoría:</label>
+                             <TelerikDropDownList @bind-Value="@ArticuloObtener.FlagCategoria" TextField="Nombre" ValueField="Codigo" Data="@Categorias" Enabled="@false" Size="sm" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Unidad de medida:</label>
+                             <div class="item-group"> 
+                                 <TelerikTextBox AutoComplete="off" Enabled="@(false)" @bind-Value="@(ArticuloObtener.CodigoUnidadMedida)" Size="sm" Width="100px"/>
+                                 <TelerikTextBox @bind-Value="@(ArticuloObtener.NombreUnidadMedida)" Title="@(ArticuloObtener.NombreUnidadMedida)" Enabled="@(false)" Size="sm"/>
+                             </div>
+                         </Template>
+                     </FormItem>
+                     <FormItem ColSpan="3">
+                         <Template>
+                             <label>Descripción:</label> 
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(ArticuloEditar.Descripcion)" Size="sm"/>  
+                             <TelerikValidationMessage For="@(() => ArticuloEditar.Descripcion)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem ColSpan="3">
+                         <Template>
+                             <label>Tipo de Producto:</label>
+                             <div class="item-group"> 
+                                 <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(ArticuloEditar.CodigoFamiliaProducto)" Size="sm" Width="100px"/>
+                                 <Principal.FamiliaProductoCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoFamiliaProducto)"/>
+                                 <TelerikTextBox @bind-Value="@(ArticuloObtener.NombreFamiliaProducto)" Title="@(ArticuloObtener.NombreFamiliaProducto)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm"/>
+                             </div>
+                         </Template>
+                     </FormItem> 
+                    <FormItem Field="EsAfectoImpuesto">
+                        <Template>
+                            <label>Es afecto a impuesto:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(ArticuloObtener.EsAfectoImpuesto)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

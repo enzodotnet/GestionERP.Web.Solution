@@ -1,0 +1,90 @@
+@page "/operaciones-logisticas/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Operación Logística - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando operación logística" CodigoRegistro="@(OperacionLogisticaObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(OperacionLogisticaEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(OperacionLogisticaEditar.Nombre)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => OperacionLogisticaEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de movimiento:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código" Enabled="@(false)" @bind-Value="@(OperacionLogisticaObtener.CodigoTipoMovimiento)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(OperacionLogisticaObtener.NombreTipoMovimiento)" Title="@(OperacionLogisticaObtener.NombreTipoMovimiento)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de operación almacén*:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código" Enabled="@(false)" @bind-Value="@(OperacionLogisticaEditar.CodigoTipoOperacionAlmacen)" Size="sm" Width="100px" />
+                                <Principal.TipoOperacionAlmacenCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoOperacionAlmacen)" />
+                                <TelerikTextBox @bind-Value="@(OperacionLogisticaObtener.NombreTipoOperacionAlmacen)" Title="@(OperacionLogisticaObtener.NombreTipoOperacionAlmacen)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                            </div>
+                            <TelerikValidationMessage For="@(() => OperacionLogisticaEditar.CodigoTipoOperacionAlmacen)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Operación logística destino:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código" Enabled="@(false)" @bind-Value="@(OperacionLogisticaObtener.CodigoOperacionLogisticaDestino)" Size="sm" Width="100px" /> 
+                                <TelerikTextBox @bind-Value="@(OperacionLogisticaObtener.NombreOperacionLogisticaDestino)" Title="@(OperacionLogisticaObtener.NombreOperacionLogisticaDestino)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                            </div> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(OperacionLogisticaEditar.Descripcion)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => OperacionLogisticaEditar.Descripcion)" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

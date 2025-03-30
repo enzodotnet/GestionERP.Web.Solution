@@ -1,0 +1,392 @@
+@page "/{CodigoWebEmpresa}/servicio/contratos/estado/{VistaAccion}"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Servicio
+
+<PageTitle>@Empresa?.Acronimo - Contratos - @TituloVistaAccion</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="@TituloCardAccion" CodigoServicio="@(codigoServicio)"> 
+    <CardBody>
+            <TelerikGrid Data="@CatalogoContratos" Pageable="true" PageSize="@(15)" Sortable="true" FilterMode="@GridFilterMode.FilterMenu" FilterMenuType="@FilterMenuType.CheckBoxList" Resizable="true" Size="sm" Height="562px">
+            <GridToolBarTemplate>
+                <GridSearchBox Size="md" Width="250px" DebounceDelay="100" Placeholder="Buscar en la lista..." />
+                @if (EsVisibleBotonFiltro)
+                {
+                    <TelerikToggleButton Icon="@(IconoBotonFiltro)" Class="b-primary grid-toolbar" @bind-Selected="@IsSelectedBotonFiltro" OnClick="@OnToggleButtonFiltroClick" Size="sm"> @NombreBotonFiltro </TelerikToggleButton>
+                } 
+                <span class="k-toolbar-spacer"/>
+                <TelerikButton Icon="@(SvgIcon.ArrowRotateCwSmall)" Class="b-secondary grid-toolbar" ButtonType="@ButtonType.Button" Id="tbtn" Title="Refrescar el catálogo de registros" Size="sm" OnClick="@(RefrescarCatalogoContratos)">Refrescar catálogo</TelerikButton>
+            </GridToolBarTemplate>
+            
+            <GridSettings>
+                <GridPagerSettings InputType="@(PagerInputType.Input)" PageSizes="@([15, 25, 50, null])" Position="@(PagerPosition.Bottom)"/>
+            </GridSettings>
+
+            <GridColumns>
+                <GridColumn Field="CodigoEjercicio" Width="85px" Title="Ejercicio" />
+                <GridColumn Field="CodigoPeriodo" Width="80px" Title="Periodo" />
+                <GridColumn Field="FechaEmision" Width="100px" Title="Fecha emisión" DisplayFormat="{0:dd/MM/yyyy}" Filterable="@false" />
+                <GridColumn Field="CodigoContrato" Width="130px" Title="Código contrato" Filterable="@false" /> 
+                <GridColumn Field="NombreSerieDocumento" Width="250px" Title="Nombre de la serie del documento" Filterable="@false" />
+                <GridColumn Field="NombreEstado" Width="95px" Title="Estado" Filterable="@false" />
+                <GridColumn Field="CodigoEntidad" Width="120px" Title="Código proveedor" Filterable="@false" />
+                <GridColumn Field="NombreEntidad" Width="300px" Title="Nombre o razón social proveedor" Filterable="@false" />
+                <GridColumn Field="CodigoMoneda" Width="80px" Title="Moneda" />
+                <GridColumn Field="TotalImporteNeto" Width="135px" Title="Total importe neto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+                <GridColumn Width="150px" Title="Acciones" Locked="@(true)">
+                    <Template>
+                        @{
+                            ContratoCatalogoActualizarEstadoDto item = context as ContratoCatalogoActualizarEstadoDto;
+                        }
+                        <TelerikButton Icon="@(IconoAccion)" Size="sm" Id="tbtn" Title="@TitleAccionBoton" Class=@($"button-cell-grid {ClassAccionBoton} btn-auth") Enabled="@(EsAsignadoAccion)" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarAccionDialog(item.ContratoId))">@VerboAccionBoton</TelerikButton>
+                        <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver registro" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemCatalogo(item))" />
+                        <TelerikButton Icon="@(SvgIcon.XCircle)" Size="sm" Id="tbtn" Title="Desestimar registro" Visible="@(EsVisibleDesestimar)" Class="icon-x btn-auth" Enabled="@(EsAsignadoDesestimar)" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarAccionDialog(item.ContratoId, esDesestimar: true))" />
+                    </Template>
+                </GridColumn>  
+            </GridColumns>
+
+            <NoDataTemplate>
+                @if(IsInitGrid)
+                {
+                    <TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+                }
+            </NoDataTemplate> 
+        </TelerikGrid>
+
+        <TelerikWindow Visible="@EsVisibleModalCatalogo" VisibleChanged="@VisibleModalChangedHandler" ThemeColor="dark" Modal="true" Height="500px" MinHeight="500px" Width="800px" MinWidth="800px" CloseOnOverlayClick="false" FooterLayoutAlign="WindowFooterLayoutAlign.Start">
+            <WindowTitle>Visualizando contrato por @TituloModalCatalogoAccion</WindowTitle>
+            <WindowActions>
+                <WindowAction Name="Maximize" Title="Maximizar"/>
+                <WindowAction Name="Close" Title="Cerrar" />
+            </WindowActions>
+            <WindowContent>
+                <TelerikForm Model="@(ContratoCatalogo)" Size="sm">
+                    <FormItems>
+                        <FormGroup Class="formgroup inmodal" Columns="7" ColumnSpacing="4px">
+                            <FormItem ColSpan="4">
+                                <Template>
+                                    <label>Documento:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(ContratoCatalogo.CodigoDocumento)" Size="sm" Width="75px" />
+                                        <TelerikTextBox Title="Código de Serie" Class="t-main" ReadOnly="@true" @bind-Value="@(ContratoCatalogo.CodigoSerieDocumento)" Size="sm" Width="75px" />
+                                        <TelerikTextBox Title="Número secuencia de la serie" Class="t-main" ReadOnly="@true" @bind-Value="@(ContratoCatalogo.NumeroSerieDocumento)" Size="sm" Width="125px" />
+                                        <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreSerieDocumento)" Title="@(ContratoCatalogo.NombreSerieDocumento)" Class="t-main" ReadOnly="@true" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Tipo de registro:</label>
+                                    <TelerikDropDownList Data="@TiposRegistro" @bind-Value="@ContratoCatalogo.FlagTipoRegistro" TextField="Nombre" ValueField="Codigo" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Fecha de emisión:</label>
+                                    <TelerikDateInput @bind-Value="@(ContratoCatalogo.FechaEmision)" Width="103px" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Estado:</label>
+                                    <TelerikTextBox Class="t-main" ReadOnly="@true" @bind-Value="@(ContratoCatalogo.NombreEstado)" Size="sm" />
+                                </Template>
+                            </FormItem>
+
+                            <FormItem ColSpan="6">
+                                <Template>
+                                    <label>Proveedor:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(ContratoCatalogo.CodigoEntidad)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+                                        <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreEntidad)" Title="@(ContratoCatalogo.NombreEntidad)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Moneda:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreMoneda)" Title="@(ContratoCatalogo.NombreMoneda)" Class="t-main" ReadOnly="@(true)" Size="sm" />
+                                </Template>
+                            </FormItem>
+
+                            <FormItem ColSpan="3">
+                                <Template>
+                                    <label>Tipo de provisión:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreTipoProvision)" Title="@(ContratoCatalogo.NombreTipoProvision)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Afecto impuesto:</label>
+                                    <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(ContratoCatalogo.EsAfectoImpuesto)" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Modo de pago:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreModoPago)" Title="@(ContratoCatalogo.NombreModoPago)" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Medio de pago:</label>
+                                    <TelerikDropDownList @bind-Value="@ContratoCatalogo.FlagMedioPago" TextField="Nombre" ValueField="Codigo" Data="@MediosPago" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            @if (!string.IsNullOrEmpty(ContratoCatalogo.NombrePlazoCredito))
+                            {
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Plazo de crédito:</label>
+                                        <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombrePlazoCredito)" Title="@(ContratoCatalogo.NombrePlazoCredito)" Enabled="@(false)" Size="sm" />
+                                    </Template>
+                                </FormItem>
+                            }
+
+                            <FormItem ColSpan="3">
+                                <Template>
+                                    <label>Tipo de servicio</label>                                                                                                                              
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreTipoServicio)" Title="@(ContratoCatalogo.NombreTipoServicio)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Fecha de inicio</label>
+                                    <TelerikDateInput @bind-Value="@(ContratoCatalogo.FechaInicio)" Width="103px" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Fecha de fin</label>
+                                    <TelerikDateInput @bind-Value="@(ContratoCatalogo.FechaFin)" Width="103px" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="2">
+                                <Template>
+                                    <label>Cantidad de duración:</label>
+                                    <div class="item-group">
+                                        <span class="item-text">Años</span>
+                                        <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.CantidadAnios)" Arrows="@(false)" Width="30px" Format="N0" Decimals="0" Min="0" Enabled="@(false)" Size="sm" />
+                                        <span class="item-text">Meses</span>
+                                        <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.CantidadMeses)" Arrows="@(false)" Width="30px" Format="N0" Decimals="0" Min="0" Enabled="@(false)" Size="sm" />
+                                        <span class="item-text">Días</span>
+                                        <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.CantidadDias)" Arrows="@(false)" Width="30px" Format="N0" Decimals="0" Min="0" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Cantidad de cuotas</label>
+                                    <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.CantidadCuotas)" Arrows="@(false)" Width="65px" Format="N0" Decimals="0" Min="0" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Cuotas del contrato</label>
+                                    <TelerikButton Icon="@(SvgIcon.ParameterInteger)" Id="tbtn" Title="Mostrar lista de cuotas del contrato" Class="b-primary b-action" ButtonType="@ButtonType.Button" Size="sm" OnClick="() => VisibleListaCuotaChangedHandler(true)">Mostrar cuotas</TelerikButton>
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Genera devengo:</label>
+                                    <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(ContratoCatalogo.EsGenerableDevengo)" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="4">
+                                <Template>
+                                    @if (ContratoCatalogo.EsGenerableDevengo)
+                                    {
+                                        <label>Tipo de devengo</label>
+                                        <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreTipoDevengo)" Title="@(ContratoCatalogo.NombreTipoDevengo)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                    }
+                                    else
+                                    {
+                                        <span />
+                                    }
+                                </Template>
+                            </FormItem>  
+
+                            <FormItem ColSpan="2">
+                                <Template>
+                                    <label>Usuario verifica:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreUsuarioVerifica)" Title="@(ContratoCatalogo.NombreUsuarioVerifica)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="2">
+                                <Template>
+                                    <label>Usuario autoriza:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreUsuarioAutoriza)" Title="@(ContratoCatalogo.NombreUsuarioAutoriza)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="2">
+                                <Template>
+                                    <label>Términos del contrato:</label>
+                                    <TelerikButton Icon="@(SvgIcon.Book)" Id="tbtn" Title="Mostrar lista de términos del contrato" Class="b-primary b-action" ButtonType="@ButtonType.Button" Size="sm" OnClick="() => VisibleListaTerminoChangedHandler(true)">Mostrar términos</TelerikButton>
+                                </Template>
+                            </FormItem>
+                            @if (ContratoCatalogo.FlagTipoRegistro == "SH")
+                            {
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Informe:</label>
+                                        <TelerikDropDownList Data="@IntervalosInforme" @bind-Value="@ContratoCatalogo.FlagIntervaloInforme" TextField="Nombre" ValueField="Codigo" Size="sm" Enabled="@(false)" />
+                                    </Template>
+                                </FormItem>
+                            }
+
+                            <FormItem ColSpan="2">
+                                <Template>
+                                    <label>Área solicitante:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreArea)" Title="@(ContratoCatalogo.NombreArea)" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="3">
+                                <Template>
+                                    <label>Centro de costo:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.NombreCentroCosto)" Title="@(ContratoCatalogo.NombreCentroCosto)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem ColSpan="2">
+                                <Template>
+                                    <label>Referencia:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.Referencia)" Title="@(ContratoCatalogo.Referencia)" MaxLength="50" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+
+                            <FormItem ColSpan="7">
+                                <Template>
+                                    <label>Observación:</label>
+                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.Observacion)" Title="@(ContratoCatalogo.Observacion)" MaxLength="100" Size="sm" Enabled="@(false)" />
+                                </Template>
+                            </FormItem>
+                        </FormGroup>
+
+                        <FormItem Field="GrdDetalle">
+                            <Template>
+                                <label>Detalle:</label>
+                                <TelerikGrid Height="auto" Data="@(ContratoCatalogo.Detalles)" Pageable="false" Sortable="true" Resizable="true" Size="sm">
+                                    <GridToolBarTemplate>
+                                        <span class="k-toolbar-spacer"/>
+                                        
+                                        <div class="group-amount">
+                                            <span class="item-title t-strong">Totales importe:</span>
+                                            <div class="item-group-amount">
+                                                <span class="item-text t-strong">Bruto</span>
+                                                <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.TotalImporteBruto)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+                                            </div>
+                                            <div class="item-group-amount">
+                                                <span class="item-text t-strong">Impuesto</span>
+                                                @if(ContratoCatalogo.EsAfectoImpuesto)
+                                                {
+                                                    <TelerikTextBox @bind-Value="@(ContratoCatalogo.CodigoTipoImpuesto)" Title="@(ContratoCatalogo.NombreTipoImpuesto)" Enabled="@(false)" Size="sm" Width="33px" />
+                                                    <TelerikNumericTextBox Arrows="@(false)" @bind-Value="@(ContratoCatalogo.PorcentajeImpuesto)" Format="P0" Decimals="3" Enabled="@(false)" Size="sm" Width="38px" />
+                                                }
+                                                <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.TotalImporteImpuesto)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+                                            </div>
+                                            <div class="item-group-amount">
+                                                <span class="item-text t-strong">Neto</span>
+                                                <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.TotalImporteNeto)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+                                            </div>
+                                        </div> 
+                                    </GridToolBarTemplate>
+                                    <GridColumns> 
+                                        <GridColumn Field="CodigoArticulo" Width="120px" Title="Código servicio" />
+                                        <GridColumn Field="NombreArticulo" Width="400px" Title="Nombre de servicio" />
+                                        <GridColumn Field="ImporteBruto" Width="138px" Title="Importe bruto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center"/>
+                                        <GridColumn Field="ImporteImpuesto" Width="138px" Title="Importe impuesto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center"/>
+                                        <GridColumn Field="ImporteNeto" Width="145px" Title="Importe neto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center"/>                                    
+                                        <GridColumn Field="ImporteBrutoAtendido" Width="138px" Title="Importe bruto atendido" DisplayFormat="{0:N2}" Visible="@(EsVisibleCantidadAtendida)" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center"/>
+                                        <GridColumn Field="Observacion" Width="200px" Title="Observación" />
+                                    </GridColumns>
+                                </TelerikGrid>
+                            </Template>
+                        </FormItem>
+                    </FormItems>
+                    <FormButtons/>
+                </TelerikForm>
+            </WindowContent>
+            <WindowFooter>
+                <TelerikButton Icon="@(IconoAccion)" Size="sm" Id="tbtn" Title="@TitleAccionBoton" Class=@($"{ClassAccionBoton} b-base btn-auth") Enabled="@(EsAsignadoAccion)" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarAccionDialog(ContratoCatalogo.ContratoId))">@VerboAccionBoton</TelerikButton>
+                <TelerikButton Icon="@(SvgIcon.XCircle)" Size="sm" Id="tbtn" Title="Desestimar registro" Visible="@(EsVisibleDesestimar)" Class="icon-x b-base btn-auth" Enabled="@(EsAsignadoDesestimar)" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarAccionDialog(ContratoCatalogo.ContratoId, esDesestimar: true))">Desestimar</TelerikButton>
+            </WindowFooter>
+        </TelerikWindow>
+
+        <TelerikWindow Visible="@EsVisibleListaCuotas" VisibleChanged="@VisibleListaCuotaChangedHandler" ThemeColor="dark" Modal="true" Height="325px" MinHeight="325px" Width="600px" MinWidth="600px" FooterLayoutAlign="@WindowFooterLayoutAlign.Start" CloseOnOverlayClick="false">
+            <WindowTitle>Lista de cuotas</WindowTitle>
+            <WindowActions>
+                <WindowAction Name="Maximize" Title="Maximizar" />
+                <WindowAction Name="Close" Title="Cerrar" />
+            </WindowActions>
+            <WindowContent>
+                <TelerikGrid Height="100%" Data="@(ContratoCatalogo.Cuotas)" Pageable="false" Sortable="true" Resizable="true" Size="sm">
+                    <GridToolBarTemplate>
+                        <span class="k-toolbar-spacer" />
+                        <span class="t-strong">Importe bruto total de cuotas @ContratoCatalogo.SimboloMoneda</span>
+                        <TelerikNumericTextBox @bind-Value="@(ContratoCatalogo.TotalImporteBruto)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+                    </GridToolBarTemplate>
+                    <GridColumns>
+                        <GridColumn Field="NumeroCuota" Width="82px" Title="Nº de cuota" />
+                        <GridColumn Field="FechaVencimiento" Width="125px" Title="Fecha vencimiento" DisplayFormat="{0:dd/MM/yyyy}" />
+                        <GridColumn Field="ImporteBruto" Width="138px" Title="@($"Importe bruto {ContratoCatalogo.SimboloMoneda}")" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+                        <GridColumn Field="Observacion" Width="200px" Title="Observación" />
+                    </GridColumns>
+                </TelerikGrid>
+            </WindowContent>
+        </TelerikWindow>
+
+        <TelerikWindow Visible="@EsVisibleListaTerminos" VisibleChanged="@VisibleListaTerminoChangedHandler" ThemeColor="dark" Modal="true" Height="300px" MinHeight="300px" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+            <WindowTitle>Lista de términos</WindowTitle>
+            <WindowActions>
+                <WindowAction Name="Maximize" Title="Maximizar" />
+                <WindowAction Name="Close" Title="Cerrar" />
+            </WindowActions>
+            <WindowContent>
+                <TelerikGrid Height="100%" Data="@(ContratoCatalogo.Terminos)" Pageable="false" Sortable="true" Resizable="true" Size="sm">
+                    <GridColumns>
+                        <GridColumn Field="CodigoTipoTermino" Width="145px" Title="Código tipo de término" />
+                        <GridColumn Field="NombreTipoTermino" Width="145px" Title="Nombre tipo de término" />
+                        <GridColumn Field="NumeroTermino" Width="59px" Title="Nº término" />
+                        <GridColumn Field="Descripción" Width="55px" Title="Motivo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                            <Template>
+                                <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver motivo" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerDescripcionTermino((context as ContratoTerminoCatalogoActualizarEstadoDto).Descripcion))" />
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                    <NoDataTemplate>
+                        <span>No existen ítems registrados</span>
+                    </NoDataTemplate>
+                </TelerikGrid>
+            </WindowContent>
+        </TelerikWindow>
+
+        <TelerikDialog Visible="@EsVisibleDescripcionTermino" Width="400px" ShowCloseButton="@(true)" CloseOnOverlayClick="@(true)" VisibleChanged="@VisibleDescripcionTerminoDialogChangedHandler">
+            <DialogTitle>Visualizando descripción</DialogTitle>
+            <DialogContent>
+                <TelerikTextArea Class="textarea-wrapper" @bind-Value="@(DescripcionTerminoDialog)" Rows="8" Enabled="@(false)" Size="sm" />
+            </DialogContent>
+        </TelerikDialog>
+
+        <TelerikDialog @bind-Visible="@EsVisibleAccionDialog" Width="450px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+            <DialogTitle> <TelerikSvgIcon Size="md" Icon="@(EsAccionDesestimar ? SvgIcon.MinusCircle : IconoAccion)" />@TituloAccionDialog contrato</DialogTitle>
+            <DialogContent>
+                <TelerikNotification @ref="@AlertAccionDialog" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                <div class="item-group-block">
+                    <label>¿Está seguro de @VerboAccionDialog al registro @CodigoRegistro?</label>
+                    <span class="ig-space" />
+                    <TelerikTextArea @bind-Value="@(EstadoActualizar.Motivo)" Class="textarea-vertical-motivo" AutoComplete="off" Rows="4" Placeholder="Ingrese el motivo" Size="sm" />
+                </div>
+            </DialogContent>
+            <DialogButtons>
+                <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Accionar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(CerrarDialog)" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+            </DialogButtons>
+        </TelerikDialog>
+    </CardBody>
+</CardContainerComponent>

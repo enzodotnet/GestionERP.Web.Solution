@@ -1,0 +1,640 @@
+@page "/{CodigoWebEmpresa}/importacion/ordenes/emitir/{Origen}"
+
+@attribute [Authorize] 
+@using GestionERP.Web.Models.Dtos.Importacion
+@using GestionERP.Web.Models.Dtos.Principal
+ 
+<PageTitle>@Empresa?.Acronimo - Orden Importación - Emitir</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+	<CardContainerComponent Titulo="@($"Emitiendo orden de importación {TituloTipoOrigen}")" CodigoServicio="@(codigoServicio)">
+		<TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+		<CardBody>
+			<TelerikForm EditContext="@EditContext" Size="sm">
+				<FormValidation>
+						<FluentValidationValidator Validator="@(Validator)" />
+				</FormValidation>
+				<FormItems>
+					<FormGroup Class="formgroup" Columns="7" ColumnSpacing="5px">
+						<FormItem ColSpan="4">
+							<Template>
+								<label>Documento*:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(OrdenInsertar.CodigoDocumento)" Id="codigodoc" Placeholder="Código" Title="Código" Class="t-main" ReadOnly="@true" Size="sm" Width="70px" />
+									@if (EsVisibleBotonDocumento)
+									{
+										<Empresa.SerieDocumentoCatalogoPorSesionComponent CodigoEmpresa="@Empresa.Codigo" FlagTipoAccion="I" CodigoTipoDocumento="@CodigoTipoDocumento" CodigoExcluir="@(string.Concat(OrdenInsertar.CodigoDocumento?.TrimEnd(), OrdenInsertar.CodigoSerieDocumento?.TrimEnd()))" CargarItemSeleccionado="@(CargarItemCatalogoSerieDocumento)" />
+									}
+									<TelerikTextBox AutoComplete="off" Placeholder="Serie" Title="Código de Serie" Class="t-main" ReadOnly="@true" @bind-Value="@(OrdenInsertar.CodigoSerieDocumento)" Size="sm" Width="60px" />
+									<TelerikTextBox @bind-Value="@(Orden.NombreSerieDocumento)" Title="@(Orden.NombreSerieDocumento)" Placeholder="Nombre de numerador" Class="t-main" ReadOnly="@true" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoDocumento)" TargetSelector="#codigodoc" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Origen:</label>
+								<TelerikDropDownList Data="@Origenes" @bind-Value="@OrdenInsertar.FlagOrigen" Enabled="@(false)" TextField="Nombre" ValueField="Codigo" Width="85px" Size="sm" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Fecha de emisión*:</label>
+								<TelerikDatePicker @bind-Value="@(OrdenInsertar.FechaEmision)" OnChange="@OnChangeFechaEmisionHandler" Id="fecemision" Width="110px" Size="sm" Min="@FechaIntervalo.FechaInicio" Max="@FechaIntervalo.FechaFin" DisabledDates="@FechasCerradoOperacion" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.FechaEmision)" TargetSelector="#fecemision" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Proveedor*:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(OrdenInsertar.CodigoEntidad)" DebounceDelay="@(0)" ValueChanged="@ValueChangeEntidadHandler" ValueExpression="@(() => OrdenInsertar.CodigoEntidad)" OnChange="@OnChangeEntidadHandler" Id="codigoprov" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="120px" Enabled="@(OrdenInsertar.FlagOrigen is "D")" MaxLength="11" />
+									@if (OrdenInsertar.FlagOrigen is "D")
+									{
+										<Empresa.EntidadProveedorCatalogoComponent CodigoEmpresa="@Empresa.Codigo" FlagAmbito="I" CargarItemSeleccionado="@(CargarItemCatalogoProveedor)" CodigoExcluir="@(OrdenInsertar.CodigoEntidad)" />
+									}
+									<TelerikTextBox @bind-Value="@(Orden.NombreEntidad)" Title="@(Orden.NombreEntidad)" Placeholder="Nombre o razón social del proveedor" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoEntidad)" TargetSelector="#codigoprov" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Moneda*:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(OrdenInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Class="t-main" Placeholder="Código" Title="Código" ReadOnly="@(true)" Size="sm" Width="60px" />
+									<Principal.MonedaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoMoneda)" CodigoExcluir="@(OrdenInsertar.CodigoMoneda)" />
+									<TelerikTextBox @bind-Value="@(Orden.NombreMoneda)" Title="@(Orden.NombreMoneda)" Class="t-main" Placeholder="Nombre" ReadOnly="@(true)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoMoneda)" TargetSelector="#codmoneda" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Descripción forma de pago*:</label>
+								<TelerikTextBox @bind-Value="@(OrdenInsertar.DescripcionFormaPago)" OnChange="@OnChangeDescripcionFormaPagoHandler" AutoComplete="off" Id="desformapago" Title="@(OrdenInsertar.DescripcionFormaPago)" MaxLength="50" Size="sm" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.DescripcionFormaPago)" TargetSelector="#desformapago" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Modo de pago:</label>
+								<TelerikTextBox @bind-Value="@(Orden.NombreModoPago)" Title="@(Orden.NombreModoPago)" Enabled="@(false)" Size="sm" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Medio de pago*:</label>
+								<TelerikDropDownList @bind-Value="@OrdenInsertar.FlagMedioPago" OnChange="@OnChangeFlagMedioPagoHandler" Id="mediopago" TextField="Nombre" ValueField="Codigo" Data="@MediosPago" Size="sm">
+									<DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+								</TelerikDropDownList>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.FlagMedioPago)" TargetSelector="#mediopago" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								@if (OrdenInsertar.CodigoModoPago is "CR")
+								{
+									<label>Plazo de crédito:</label>
+									<TelerikTextBox @bind-Value="@(Orden.NombrePlazoCredito)" Title="@(Orden.NombrePlazoCredito)" Enabled="@(false)" Size="sm" />
+								}
+								else
+								{
+									<span />
+								}
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Tipo de importación*:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(OrdenInsertar.CodigoTipoImportacion)" DebounceDelay="@(0)" ValueChanged="@ValueChangeTipoImportacionHandler" ValueExpression="@(() => OrdenInsertar.CodigoTipoImportacion)" OnChange="@OnChangeTipoImportacionHandler" Id="tipoimportacion" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="70px" MaxLength="3" />
+									<Principal.TipoImportacionCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoImportacion)" CodigoExcluir="@(OrdenInsertar.CodigoTipoImportacion)" />
+									<TelerikTextBox @bind-Value="@(Orden.NombreTipoImportacion)" Title="@(Orden.NombreTipoImportacion)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoTipoImportacion)" TargetSelector="#tipoimportacion" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Aduana*:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(OrdenInsertar.CodigoAduana)" DebounceDelay="@(0)" ValueChanged="@ValueChangeAduanaHandler" ValueExpression="@(() => OrdenInsertar.CodigoAduana)" OnChange="@OnChangeAduanaHandler" Id="codaduana" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="70px" MaxLength="3" />
+									<Principal.AduanaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoAduana)" CodigoExcluir="@(OrdenInsertar.CodigoAduana)" />
+									<TelerikTextBox @bind-Value="@(Orden.NombreAduana)" Title="@(Orden.NombreAduana)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoAduana)" TargetSelector="#codaduana" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Descripción lugar de entrega:</label>
+								<TelerikTextBox @bind-Value="@(OrdenInsertar.DescripcionLugarEntrega)" OnChange="@OnChangeDescripcionLugarEntregaHandler" AutoComplete="off" Id="deslugarentrega" Title="@(OrdenInsertar.DescripcionLugarEntrega)" MaxLength="50" Size="sm" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.DescripcionLugarEntrega)" TargetSelector="#deslugarentrega" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>País origen*:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(OrdenInsertar.CodigoPaisOrigen)" DebounceDelay="@(0)" ValueChanged="@ValueChangePaisOrigenHandler" ValueExpression="@(() => OrdenInsertar.CodigoPaisOrigen)" OnChange="@OnChangePaisOrigenHandler" Id="paisorigen" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="70px" MaxLength="4" />
+									<Principal.PaisCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoPaisOrigen)" CodigoExcluir="@(OrdenInsertar.CodigoPaisOrigen)" />
+									<TelerikTextBox @bind-Value="@(Orden.NombrePaisOrigen)" Title="@(Orden.NombrePaisOrigen)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoPaisOrigen)" TargetSelector="#paisorigen" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>País procedencia*:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(OrdenInsertar.CodigoPaisProcedencia)" DebounceDelay="@(0)" ValueChanged="@ValueChangePaisProcedenciaHandler" ValueExpression="@(() => OrdenInsertar.CodigoPaisProcedencia)" OnChange="@OnChangePaisProcedenciaHandler" Id="paisprocedencia" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="70px" MaxLength="4" />
+									<Principal.PaisCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoPaisProcedencia)" CodigoExcluir="@(OrdenInsertar.CodigoPaisProcedencia)" />
+									<TelerikTextBox @bind-Value="@(Orden.NombrePaisProcedencia)" Title="@(Orden.NombrePaisProcedencia)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.CodigoPaisProcedencia)" TargetSelector="#paisprocedencia" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha estimada ETD*:</label>
+								<TelerikDateInput @bind-Value="@(OrdenInsertar.FechaEstimadaETD)" OnChange="@OnChangeFechaEstimadaETDHandler" Id="fecestimadaetd" Width="110px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.FechaEstimadaETD)" TargetSelector="#fecestimadaetd" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha estimada ETA*:</label>
+								<TelerikDateInput @bind-Value="@(OrdenInsertar.FechaEstimadaETA)" OnChange="@OnChangeFechaEstimadaETAHandler" Id="fecestimadaeta" Width="110px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.FechaEstimadaETA)" TargetSelector="#fecestimadaeta" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha reposición stock*:</label>
+								<TelerikDateInput @bind-Value="@(OrdenInsertar.FechaReposicionStock)" OnChange="@OnChangeFechaReposicionStockHandler" Id="fecrepstock" Width="110px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.FechaReposicionStock)" TargetSelector="#fecrepstock" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="4">
+							<Template>
+								<label>Observación:</label>
+								<TelerikTextBox @bind-Value="@(OrdenInsertar.Observacion)" OnChange="@OnChangeObservacionHandler" Id="observacion" AutoComplete="off" Title="@(OrdenInsertar.Observacion)" MaxLength="100" Size="sm" />
+								<TelerikValidationTooltip For="@(() => OrdenInsertar.Observacion)" TargetSelector="#observacion" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Notas de la orden:</label>
+								<TelerikButton Icon="@(SvgIcon.PageFooterSection)" Id="tbtn" Title="Mostrar lista de notas" Class="b-primary b-action" ButtonType="@ButtonType.Button" Size="sm" OnClick="() => VisibleListaNotaChangedHandler(true)">Notas</TelerikButton>
+							</Template>
+						</FormItem>
+					</FormGroup>
+
+					<FormItem Field="Detalle">
+						<Template>
+							<label>Detalle*:</label>
+							<TelerikGrid Data="@(GridDetalles)" Height="auto" Pageable="false" Sortable="true" Resizable="true" Size="sm" EditMode="@(GridEditMode.Incell)" OnUpdate=@UpdateItemDetalleHandler OnEdit="@EditDetalleHandler" OnCancel="@CancelDetalleHandler" @ref="GridDetalleRef">
+								<GridSettings>
+									<GridValidationSettings>
+										<ValidatorTemplate>
+											<FluentValidationValidator Validator="@(GridDetalleValidator)"/>
+										</ValidatorTemplate>
+									</GridValidationSettings>
+								</GridSettings>
+
+								<GridToolBarTemplate>
+									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(OrdenInsertar.FlagOrigen is "D")" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@(MostrarAgregarDetalle)">Ir a agregar ítem</TelerikButton>
+
+									<TelerikButton Icon="@(SvgIcon.ZoomIn)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(OrdenInsertar.FlagOrigen is "S")" Enabled="@(!IsLoadingCatalogoSolicitudes & !IsEditingGridDetalle)" Title="Abrir catálogo de solicitudes" Size="sm" OnClick="@(MostrarCatalogoSolicitudes)">
+										Buscar solicitudes
+										<TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm" ThemeColor="secondary" Visible="@IsLoadingCatalogoSolicitudes" />
+									</TelerikButton>
+
+									<span class="k-toolbar-spacer" />
+
+									<div class="group-amount">
+										<span class="item-title t-strong">Total importe:</span>
+										<div class="item-group-amount">
+											<span class="item-text t-strong">Bruto</span>
+											<TelerikNumericTextBox @bind-Value="@(OrdenInsertar.TotalImporteBruto)" AutoComplete="off" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+										</div>
+									</div> 
+								</GridToolBarTemplate>
+
+								<GridColumns> 
+									<GridColumn Field="NombreTipoArticulo" Width="80px" Title="Tipo" Editable="@false" />
+									<GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" Editable="@false" />
+									<GridColumn Field="NombreArticulo" Width="400px" Title="Nombre de artículo" Editable="@false" />
+									<GridColumn Field="Presentacion" Width="200px" Title="Presentación del artículo" Editable="@false" />
+									<GridColumn Field="CodigoUnidadMedida" Width="45px" Editable="@false" >
+										<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
+									</GridColumn>
+									<GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellCantidadRenderHandler">
+										<EditorTemplate>
+											@{
+												OrdenDetalleGrid item = context as OrdenDetalleGrid;
+												<TelerikNumericTextBox @bind-Value="@(item.Cantidad)" Id="griddetcantidad" AutoComplete="off" Arrows="@(false)" Width="100%" Min="0" Format="N3" Decimals="3" Size="sm" />
+												<TelerikValidationTooltip For="@(() => item.Cantidad)" TargetSelector="#griddetcantidad" />
+											}
+										</EditorTemplate>
+									</GridColumn>
+									<GridColumn Field="PrecioUnitario" Width="120px" Title="Precio unitario" DisplayFormat="{0:N6}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellPrecioUnitarioRenderHandler">
+										<EditorTemplate>
+											@{
+												OrdenDetalleGrid item = context as OrdenDetalleGrid;
+												<TelerikNumericTextBox @bind-Value="@(item.PrecioUnitario)" Id="griddetpreciouni" AutoComplete="off" Arrows="@(false)" Width="100%" Min="0" Format="N6" Decimals="6" Size="sm" />
+												<TelerikValidationTooltip For="@(() => item.PrecioUnitario)" TargetSelector="#griddetpreciouni" />
+											}
+										</EditorTemplate>
+									</GridColumn>
+									<GridColumn Field="ImporteBruto" Width="138px" Title="Importe bruto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" Editable="@false" />
+									<GridColumn Field="CodigoSolicitudReferencia" Width="130px" Title="Solicitud referencia" Editable="@false" Visible="@(OrdenInsertar.FlagOrigen is "S")" />
+									<GridColumn Width="100px" Title="Acciones" Locked="@(true)" Editable="@false">
+										<Template>
+											@{
+												OrdenDetalleGrid item = context as OrdenDetalleGrid;
+											}
+											<TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem" Class="b-primary" ButtonType="@ButtonType.Button" Enabled="@(!IsEditingGridDetalle)" OnClick="@(() => VerItemDetalle(item))" />
+											<TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" Id="tbtn" Title="Ir a modificar ítem" Class="b-primary" ButtonType="@ButtonType.Button" Enabled="@(!IsEditingGridDetalle)" OnClick="@(() => MostrarModificarDetalle(item))" />
+											<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" Id="tbtn" Title="Quitar ítem" Class="b-delete" ButtonType="@ButtonType.Button" Enabled="@(!IsEditingGridDetalle)" OnClick="@(() => MostrarQuitarDetalle(item.CodigoArticulo))" />
+										</Template>
+									</GridColumn>
+								</GridColumns>
+
+								<NoDataTemplate>
+									<span>Aún no hay ítems por registrar</span>
+								</NoDataTemplate>
+							</TelerikGrid>
+						</Template>
+
+					</FormItem>
+				</FormItems>
+
+				<FormButtons/> 
+			</TelerikForm>
+
+			<TelerikToolBar Class="toolbar-mainform">
+				<ToolBarTemplateItem>
+					<TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" Size="sm" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" ThemeColor="primary" Enabled="@(!IsLoadingAction & !IsEditingGridDetalle)">Guardar</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarSeparator />
+				<ToolBarTemplateItem>
+					<TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarSpacer />
+				<ToolBarTemplateItem>
+					<span>* Campos obligatorios</span>
+				</ToolBarTemplateItem>
+			</TelerikToolBar>
+
+			<TelerikWindow Visible="@EsVisibleModalDetalle" ThemeColor="dark" Modal="true" Height="auto" Width="525px" MinWidth="525px" CloseOnOverlayClick="false">
+				<WindowTitle>@DescripcionAccionModal ítem de detalle</WindowTitle>
+				<WindowActions>
+					<WindowAction Name="Maximize" Title="Maximizar" />
+					<WindowAction Name="Close" Title="Cerrar" OnClick="@CerrarDetalle" />
+				</WindowActions>
+				<WindowContent>
+					<TelerikNotification @ref="@AlertDetalle" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+
+					@if (TipoAccionModal is "V")
+					{
+						<TelerikForm Model="@Detalle" Size="sm">
+							<FormItems>
+								<FormItem>
+									<Template>
+										<label>Artículo:</label>
+										<div class="item-group">
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoArticulo)" Title="Código" Enabled="@false" Size="sm" Width="190px" />
+											<TelerikTextBox @bind-Value="@(Detalle.NombreArticulo)" Title="@(Detalle.NombreArticulo)" Enabled="@false" Size="sm" />
+										</div>
+										<label>Tipo de artículo:</label>
+										<div class="item-group">
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoTipoArticulo)" Title="Código" Enabled="@(false)" Size="sm" Width="30px" />
+											<TelerikTextBox @bind-Value="@(Detalle.NombreTipoArticulo)" Enabled="@(false)" Size="sm" Width="160px" />
+										</div>
+										<label>Presentación del artículo:</label>
+										<div class="item-group">
+											<TelerikTextBox @bind-Value="@(Detalle.Presentacion)" Title="@(Detalle.Presentacion)" Enabled="@(false)" AutoComplete="off" Size="sm" />
+										</div>
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Cantidad:</label>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoUnidadMedida)" AutoComplete="off" Enabled="@(false)" Class="adornment" Title="@(Detalle.NombreUnidadMedida)" Size="sm" Width="38px" />
+											<TelerikNumericTextBox @bind-Value="@(Detalle.Cantidad)" AutoComplete="off" Arrows="@(false)" Enabled="@false" Width="100px" Format="N3" Decimals="3" Size="sm" />
+										</div>
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Precio unitario:</label>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(Orden.SimboloMoneda)" Enabled="@(false)" Class="adornment" Title="@(Orden.NombreMoneda)" Size="sm" Width="25px" />
+											<TelerikNumericTextBox @bind-Value="@(Detalle.PrecioUnitario)" AutoComplete="off" Arrows="@(false)" Enabled="@false" Width="110px" Min="0" Format="N6" Decimals="6" Size="sm" />
+										</div>
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Importe bruto:</label>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(Orden.SimboloMoneda)" Enabled="@(false)" Class="adornment" Title="@(Orden.NombreMoneda)" Size="sm" Width="25px" />
+											<TelerikNumericTextBox @bind-Value="@(Detalle.ImporteBruto)" AutoComplete="off" Arrows="@(false)" Enabled="@(false)" Width="142px" Min="0" Format="N2" Decimals="2" Size="sm" />
+										</div>
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Observación:</label>
+										<TelerikTextBox @bind-Value="@(Detalle.Observacion)" AutoComplete="off" Title="@(Detalle.Observacion)" Enabled="@false" Size="sm" />
+									</Template>
+								</FormItem>
+								@if (OrdenInsertar.FlagOrigen is "S")
+								{
+									<FormItem>
+										<Template>
+											<label>Código de solicitud referencia:</label>
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoSolicitudReferencia)" AutoComplete="off" Enabled="@(false)" Size="sm" Width="170px" />
+										</Template>
+									</FormItem>
+								}
+							</FormItems>
+							<FormButtons>
+								<TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(() => MostrarModificarDetalle())">Ir a modificar</TelerikButton>
+								<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete" OnClick="@(() => MostrarQuitarDetalle(CodigoItemAccion))">Quitar</TelerikButton>
+							</FormButtons>
+						</TelerikForm>
+					}
+					else if (TipoAccionModal is "I" or "M")
+					{
+						<TelerikForm EditContext="@DetalleContext" Size="sm" OnInvalidSubmit="@InvalidarAccionDetalle" OnValidSubmit="@(() => AccionarDetalle(TipoAccionModal))">
+							<FormValidation>
+								<FluentValidationValidator Validator="@(DetalleValidator)" />
+							</FormValidation>
+							<FormItems> 
+								<FormItem>
+									<Template>
+										@if (TipoAccionModal is "I" && OrdenInsertar.FlagOrigen is "D")
+										{
+											<label>Artículo*:</label>
+											<div class="item-group">
+												<TelerikTextBox Value="@(DetalleInsertar.CodigoArticulo)" DebounceDelay="@(0)" ValueChanged="@ValueChangeArticuloHandler" ValueExpression="@(() => DetalleInsertar.CodigoArticulo)" OnChange="@OnChangeArticuloHandler" Id="detcodarticulo" AutoComplete="off" Placeholder="Código" MaxLength="15" Size="sm" Width="190px" />
+												<Empresa.ArticuloCatalogoPorProcesoDocumentoComponent CodigoEmpresa="@Empresa.Codigo" CodigoProcesoDocumento="@CodigoProcesoDocumento" CodigoExcluir="@(DetalleInsertar.CodigoArticulo)" CodigosExceptuar="@(GridDetalles.Select(x => x.CodigoArticulo.TrimEnd()).ToList())" CargarItemSeleccionado="@(CargarItemCatalogoArticuloPorProcesoDocumento)" />
+												<TelerikTextBox @bind-Value="@(Detalle.NombreArticulo)" Title="@(Detalle.NombreArticulo)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+											</div>
+											<TelerikValidationTooltip For="@(() => DetalleInsertar.CodigoArticulo)" TargetSelector="#detcodarticulo" />
+										}
+										else
+										{
+											<label>Artículo:</label>
+											<div class="item-group">
+												<TelerikTextBox @bind-Value="@(Detalle.CodigoArticulo)" Title="Código" Enabled="@false" Size="sm" Width="190px" />
+												<TelerikTextBox @bind-Value="@(Detalle.NombreArticulo)" Title="@(Detalle.NombreArticulo)" Enabled="@false" Size="sm" />
+											</div>
+										}
+										<label>Tipo de artículo:</label>
+										<div class="item-group">
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoTipoArticulo)" Title="Código" Enabled="@(false)" Size="sm" Width="30px" />
+											<TelerikTextBox @bind-Value="@(Detalle.NombreTipoArticulo)" Enabled="@(false)" Size="sm" Width="160px" />
+										</div>
+										<label>Presentación del artículo:</label>
+										<div class="item-group">
+											<TelerikTextBox @bind-Value="@(Detalle.Presentacion)" Title="@(Detalle.Presentacion)" Enabled="@(false)" AutoComplete="off" Size="sm" />
+										</div>
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Cantidad*:</label>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoUnidadMedida)" AutoComplete="off" Enabled="@(false)" Class="adornment" Title="@(Detalle.NombreUnidadMedida)" Size="sm" Width="38px" />
+											<TelerikNumericTextBox @bind-Value="@(DetalleInsertar.Cantidad)" OnChange="@(OnChangeDetalleCantidadHandler)" Id="detcantidad" AutoComplete="off" Arrows="@(false)" Width="100px" Min="0" Format="N3" Decimals="3" Size="sm" />
+										</div>
+										<TelerikValidationTooltip For="@(() => DetalleInsertar.Cantidad)" TargetSelector="#detcantidad" />
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Precio unitario*:</label>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(Orden.SimboloMoneda)" Enabled="@(false)" Class="adornment" Title="@(Orden.NombreMoneda)" Size="sm" Width="25px" />
+											<TelerikNumericTextBox @bind-Value="@(DetalleInsertar.PrecioUnitario)" OnChange="@(OnChangeDetallePrecioUnitarioHandler)" Id="detpreciouni" AutoComplete="off" Arrows="@(false)" Width="110px" Min="0" Format="N6" Decimals="6" Size="sm" />
+										</div>
+										<TelerikValidationTooltip For="@(() => DetalleInsertar.PrecioUnitario)" TargetSelector="#detpreciouni" />
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Importe bruto:</label>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(Orden.SimboloMoneda)" Enabled="@(false)" Class="adornment" Title="@(Orden.NombreMoneda)" Size="sm" Width="25px" />
+											<TelerikNumericTextBox @bind-Value="@(DetalleInsertar.ImporteBruto)" AutoComplete="off" Arrows="@(false)" Enabled="@(false)" Width="142px" Min="0" Format="N2" Decimals="2" Size="sm" />
+										</div>
+									</Template>
+								</FormItem>
+								<FormItem>
+									<Template>
+										<label>Observación:</label>
+										<TelerikTextBox @bind-Value="@(DetalleInsertar.Observacion)" OnChange="@OnChangeDetalleObservacionHandler" Id="detobservacion" Title="@(DetalleInsertar.Observacion)" AutoComplete="off" MaxLength="100" Size="sm" />
+										<TelerikValidationTooltip For="@(() => DetalleInsertar.Observacion)" TargetSelector="#detobservacion" />
+									</Template>
+								</FormItem>
+								@if (OrdenInsertar.FlagOrigen is "S")
+								{
+									<FormItem>
+										<Template>
+											<label>Código de solicitud referencia:</label>
+											<TelerikTextBox @bind-Value="@(Detalle.CodigoSolicitudReferencia)" AutoComplete="off" Enabled="@(false)" Size="sm" Width="170px" />
+										</Template>
+									</FormItem>
+								}
+							</FormItems>
+							<FormButtons>
+								<TelerikButton Icon="@(IconoAccionModal)" Size="sm" ThemeColor="secondary">@VerboAccionModal</TelerikButton>
+							</FormButtons>
+						</TelerikForm>
+					}
+				</WindowContent>
+			</TelerikWindow>
+
+			<TelerikWindow Visible="@EsVisibleCatalogoSolicitudes" VisibleChanged="@VisibleCatalogoSolicitudesChangedHandler" ThemeColor="dark" Modal="true" Resizable="false" Height="420px" Width="600px" CloseOnOverlayClick="false" FooterLayoutAlign="@WindowFooterLayoutAlign.Start">
+				<WindowTitle>Catálogo de solicitudes de importación pendientes de atención</WindowTitle>
+				<WindowActions>
+					<WindowAction Name="Close" Title="Cerrar" />
+				</WindowActions>
+				<WindowContent>
+					<TelerikNotification @ref="@AlertCatalogoSolicitudes" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+
+					<TelerikGrid Data="@CatalogoSolicitudes" SelectionMode="@(SelectionModeCatalogoSolicitud)" Pageable="true" PageSize="@(10)" SelectedItemsChanged="@((IEnumerable<SolicitudCatalogoAtenderDto> items) => OnSelectCatalogoSolicitud(items))" SelectedItems="@ItemsSelectedSolicitud" Height="100%" Sortable="true" Resizable="true" Size="sm" Class="list-grid" OnRowRender="@(OnRowCatalogoSolicitudRenderHandler)" @ref="GridCatalogoRef">
+						<GridToolBarTemplate>
+							<span>Año:</span>
+							<TelerikDropDownList Data="@CatalogoEjercicios" Value="@CodigoEjercicio" ValueChanged="@((string value) => OnComboEjercicioValueChanged(value))" TextField="AnioEjercicio" ValueField="CodigoEjercicio" DefaultText="@(!string.IsNullOrEmpty(CodigoEjercicio) ? "" : " ")" Size="sm" Width="65px" FillMode="solid">
+								<ValueTemplate>
+									<span class="d-item-strong">@((context as EmpresaEjercicioCatalogoDto).AnioEjercicio)</span>
+								</ValueTemplate>
+								<DropDownListSettings> <DropDownListPopupSettings Height="auto" /> </DropDownListSettings>
+							</TelerikDropDownList>
+							<GridSearchBox Size="md" Width="300px" DebounceDelay="100" Placeholder="Buscar en el catálogo..." />
+
+							<span class="k-toolbar-spacer" />
+
+							<TelerikButton Icon="@(SvgIcon.ArrowRotateCwSmall)" Class="b-secondary" ButtonType="@ButtonType.Button" Id="tbtn" Title="Refrescar catálogo" Size="sm" OnClick="@(CargarCatalogoSolicitudes)" />
+						</GridToolBarTemplate>
+						<GridSettings>
+							<GridPagerSettings InputType="@(PagerInputType.Buttons)" ButtonCount="@(5)" Position="@(PagerPosition.Bottom)" />
+						</GridSettings>
+						<GridColumns>
+							<GridCheckboxColumn Width="33px" Locked="@(true)" CheckBoxOnlySelection="@(true)" SelectAll="@(true)" Visible="@(EsSeleccionableCatalogoSolicitud)" />
+							<GridColumn Field="CodigoSolicitud" Width="130px" Title="Código de solicitud" />
+							<GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" />
+							<GridColumn Field="NombreArticulo" Width="200px" Title="Nombre de artículo" />
+							<GridColumn Field="CodigoUnidadMedida" Width="45px" >
+								<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
+							</GridColumn>
+							<GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+							<GridColumn Field="CodigoPeriodo" Width="60px" Title="Periodo" />
+							<GridColumn Field="NombreSerieDocumentoSolicitud" Width="190px" Title="Nombre numerador solicitud" />
+							<GridColumn Field="NombreEntidad" Width="200px" Title="Nombre de entidad proveedor" />
+						</GridColumns>
+						<NoDataTemplate>
+							<TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+						</NoDataTemplate>
+					</TelerikGrid>
+				</WindowContent>
+				<WindowFooter>
+					<TelerikButton Icon="@(SvgIcon.TableAdd)" ThemeColor="secondary" ButtonType="@ButtonType.Button" Size="sm" OnClick="@(AgregarItemsSolicitud)">Agregar ítem(s)</TelerikButton>
+				</WindowFooter>
+			</TelerikWindow>
+
+			<TelerikWindow Visible="@EsVisibleListaNotas" VisibleChanged="@VisibleListaNotaChangedHandler" ThemeColor="dark" Modal="true" Height="455px" MinHeight="455px" Width="600px" MinWidth="600px" CloseOnOverlayClick="false">
+				<WindowTitle>Lista de notas de la orden</WindowTitle>
+				<WindowActions>
+					<WindowAction Name="Maximize" Title="Maximizar" />
+					<WindowAction Name="Close" Title="Cerrar" />
+				</WindowActions>
+				<WindowContent>
+					<TelerikGrid Height="100%" Data="@(GridNotas)" Sortable="true" Size="sm" @ref="GridNotaRef">
+						<GridToolBarTemplate>
+							<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ir a agregar nuevo ítem" Size="sm" OnClick="@(MostrarAgregarNota)">Ir a agregar ítem</TelerikButton>
+						</GridToolBarTemplate>
+						<GridColumns>
+							<GridColumn Field="CodigoNotaReporteOrden" Width="60px" Title="Código" />
+							<GridColumn Field="NombreNotaReporteOrden" Width="230px" Title="Nombre" />
+							<GridColumn Field="FlagSeccion" Width="80px" Title="Sección">
+								<Template>
+									<label>@(Secciones.Where(x => x.Codigo == (context as OrdenNotaGrid).FlagSeccion).Select(x => x.Nombre).FirstOrDefault())</label>
+								</Template>
+							</GridColumn>
+							<GridColumn Width="80px" Title="Acciones" Locked="@(true)" Editable="@false">
+								<Template>
+									@{
+										OrdenNotaGrid item = context as OrdenNotaGrid;
+									}
+									<TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" Id="tbtn" Title="Ir a modificar ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarModificarNota(item))" />
+									<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" Id="tbtn" Title="Quitar ítem" Class="b-delete" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarQuitarNota(item.CodigoNotaReporteOrden))" />
+								</Template>
+							</GridColumn>
+						</GridColumns>
+						<DetailTemplate>
+							@{
+								OrdenNotaGrid itemNota = context as OrdenNotaGrid;
+								<div class="item-grid-detail">
+									<label class="t-strong">Contenido:</label>
+									<TelerikTextArea @bind-Value="@(itemNota.Contenido)" AutoComplete="off" Width="470px" Class="textarea-wrapper" Rows="6" Enabled="@(false)" Size="sm" />
+								</div>
+							}
+						</DetailTemplate>
+						<NoDataTemplate>
+							<span>Aún no hay ítems por registrar</span>
+						</NoDataTemplate>
+					</TelerikGrid>
+				</WindowContent>
+			</TelerikWindow>
+
+			<TelerikWindow Visible="@EsVisibleModalNota" ThemeColor="dark" Modal="true" Height="auto" Width="525px" MinWidth="525px" CloseOnOverlayClick="false">
+				<WindowTitle>@DescripcionAccionModal ítem de nota</WindowTitle>
+				<WindowActions>
+					<WindowAction Name="Maximize" Title="Maximizar" />
+					<WindowAction Name="Close" Title="Cerrar" OnClick="@CerrarNota" />
+				</WindowActions>
+				<WindowContent>
+					<TelerikNotification @ref="@AlertNota" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+					<TelerikForm EditContext="@NotaContext" Size="sm" OnInvalidSubmit="@InvalidarAccionNota" OnValidSubmit="@(() => AccionarNota(TipoAccionModal))">
+						<FormValidation>
+							<FluentValidationValidator Validator="@(NotaValidator)" />
+						</FormValidation>
+						<FormItems>
+							<FormItem>
+								<Template>
+									@if (TipoAccionModal is "I")
+									{
+										<label>Nota orden de importación*:</label>
+										<div class="item-group">
+											<TelerikTextBox Value="@(NotaInsertar.CodigoNotaReporteOrden)" DebounceDelay="@(0)" ValueChanged="@ValueChangeNotaReporteOrdenHandler" ValueExpression="@(() => NotaInsertar.CodigoNotaReporteOrden)" OnChange="@OnChangeNotaReporteOrdenHandler" Id="notacodigo" AutoComplete="off" Title="Código" Placeholder="Código" Size="sm" Width="100px" MaxLength="4" />
+											<Empresa.NotaReporteOrdenImportacionCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoNotaReporteOrden)" CodigoExcluir="@(NotaInsertar.CodigoNotaReporteOrden)" CodigosExceptuar="@(GridNotas.Select(x => x.CodigoNotaReporteOrden.TrimEnd()).ToList())" />
+											<TelerikTextBox @bind-Value="@(Nota.NombreNotaReporteOrden)" Title="@(Nota.NombreNotaReporteOrden)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+										</div>
+									}
+									else
+									{
+										<label>Nota orden de importación:</label>
+										<div class="item-group">
+											<TelerikTextBox @bind-Value="@(Nota.CodigoNotaReporteOrden)" Title="Código" Enabled="@(false)" Size="sm" Width="100px" />
+											<TelerikTextBox @bind-Value="@(Nota.NombreNotaReporteOrden)" Title="@(Nota.NombreNotaReporteOrden)" Enabled="@(false)" Size="sm" />
+										</div>
+									}
+									<label>Sección:</label>
+									<div class="item-group">
+										<TelerikDropDownList Data="@Secciones" @bind-Value="@Nota.FlagSeccion" TextField="Nombre" ValueField="Codigo" Width="120px" Size="sm" Enabled="@(false)" />
+									</div>
+									<TelerikValidationTooltip For="@(() => NotaInsertar.CodigoNotaReporteOrden)" TargetSelector="#notacodigo" />
+								</Template>
+							</FormItem>
+							<FormItem>
+								<Template>
+									<label>Contenido*:</label>
+									<TelerikTextArea @bind-Value="@(NotaInsertar.Contenido)" OnChange="@OnChangeNotaContenidoHandler" Class="textarea-wrapper" Id="contenido" AutoComplete="off" Rows="6" Placeholder="Ingrese algún texto al contenido" Width="470" Size="sm" />
+									<TelerikValidationTooltip For="@(() => NotaInsertar.Contenido)" TargetSelector="#contenido" />
+								</Template>
+							</FormItem>
+						</FormItems>
+						<FormButtons>
+							<TelerikButton Icon="@(IconoAccionModal)" Size="sm" ThemeColor="secondary">@VerboAccionModal</TelerikButton>
+						</FormButtons>
+					</TelerikForm>
+				</WindowContent>
+			</TelerikWindow>
+
+			<TelerikDialog @bind-Visible="@EsVisibleDialogDetalle" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="dark" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+				<DialogTitle> Quitando ítem del detalle </DialogTitle>
+				<DialogContent> ¿Está seguro de quitar el ítem @Detalle.CodigoArticulo? </DialogContent>
+				<DialogButtons>
+					<TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="secondary" OnClick="@(() => AccionarDetalle(TipoAccionDialog))" Size="sm">Sí</TelerikButton>
+					<TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(() => CerrarDialog())" Size="sm">No</TelerikButton>
+				</DialogButtons>
+			</TelerikDialog>
+
+			<TelerikDialog @bind-Visible="@EsVisibleDialogNota" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="dark" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+				<DialogTitle> Quitando ítem de notas </DialogTitle>
+				<DialogContent> ¿Está seguro de quitar el ítem @Nota.CodigoNotaReporteOrden? </DialogContent>
+				<DialogButtons>
+					<TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="secondary" OnClick="@(() => AccionarNota(TipoAccionDialog))" Size="sm">Sí</TelerikButton>
+					<TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(() => CerrarDialog())" Size="sm">No</TelerikButton>
+				</DialogButtons>
+			</TelerikDialog>
+		</CardBody>
+	</CardContainerComponent>
+}

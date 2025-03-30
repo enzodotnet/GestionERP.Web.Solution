@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ReportViewer_ClientExpired" xml:space="preserve">
+    <value>Haga clic en 'Actualizar' para restaurar la sesión del cliente.</value>
+  </data>
+  <data name="ReportViewer_ErrorCreatingReportDocument" xml:space="preserve">
+    <value>Error al crear documento del reporte (Report = '{0}'; Format = '{1}').</value>
+  </data>
+  <data name="ReportViewer_ErrorSendingDocument" xml:space="preserve">
+    <value>Error al enviar documento del reporte (Report = '{0}').</value>
+  </data>
+  <data name="ReportViewer_InvalidParameter" xml:space="preserve">
+    <value>Por favor ingrese un valor válido.</value>
+  </data>
+  <data name="ReportViewer_LoadedReportPagesComplete" xml:space="preserve">
+    <value>Realizado. Total {0} páginas cargadas.</value>
+  </data>
+  <data name="ReportViewer_LoadingReport" xml:space="preserve">
+    <value>Cargando reporte...</value>
+  </data>
+  <data name="ReportViewer_LoadingReportPagesInProgress" xml:space="preserve">
+    <value>{0} páginas cargadas hasta el momento...</value>
+  </data>
+  <data name="ReportViewer_MissingOrInvalidParameter" xml:space="preserve">
+    <value>Valor de parámetro faltante o no válido. Introduzca datos válidos para todos los parámetros.</value>
+  </data>
+  <data name="ReportViewer_NoPageToDisplay" xml:space="preserve">
+    <value>No hay página para mostrar.</value>
+  </data>
+  <data name="ReportViewer_ParameterEditorSelectAll" xml:space="preserve">
+    <value>seleccionar todo</value>
+  </data>
+  <data name="ReportViewer_ParameterEditorSelectNone" xml:space="preserve">
+    <value>limpiar selección</value>
+  </data>
+  <data name="ReportViewer_ParametersAreaPreviewButton" xml:space="preserve">
+    <value>Vista previa</value>
+  </data>
+  <data name="ReportViewer_PromisesChainStopError" xml:space="preserve">
+    <value>Error mostrado. Error de detención de cadena de promesas de lanzamiento.</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogCancelLabel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogCCLabel" xml:space="preserve">
+    <value>CC:</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogClose" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogFormatLabel" xml:space="preserve">
+    <value>Formato:</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogFromLabel" xml:space="preserve">
+    <value>De:</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogSendLabel" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogSubjectLabel" xml:space="preserve">
+    <value>Asunto:</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogTitle" xml:space="preserve">
+    <value>Enviar correo electrónico</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogToLabel" xml:space="preserve">
+    <value>Para:</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogValidationEmailFormat" xml:space="preserve">
+    <value>El formato de correo electrónico no es válido.</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogValidationEmailRequired" xml:space="preserve">
+    <value>El campo de correo electrónico es obligatorio</value>
+  </data>
+  <data name="ReportViewer_SendEmailDialogValidationFormatRequired" xml:space="preserve">
+    <value>El campo de formato es obligatorio</value>
+  </data>
+  <data name="ReportViewer_ToolbarToggleDocumentMapTitle" xml:space="preserve">
+    <value>Activar mapa de documento</value>
+  </data>
+  <data name="ReportViewer_ToolbarExportTitle" xml:space="preserve">
+    <value>Exportar</value>
+  </data>
+  <data name="ReportViewer_ToolbarFirstPageTitle" xml:space="preserve">
+    <value>Primera página</value>
+  </data>
+  <data name="ReportViewer_ToolbarLastPageTitle" xml:space="preserve">
+    <value>Última página</value>
+  </data>
+  <data name="ReportViewer_ToolbarNextPageTitle" xml:space="preserve">
+    <value>Siguiente página</value>
+  </data>
+  <data name="ReportViewer_ToolbarToggleScaleModeTitle" xml:space="preserve">
+    <value>Activar página completa/ancho de página</value>
+  </data>
+  <data name="ReportViewer_ToolbarToggleParametersAreaTitle" xml:space="preserve">
+    <value>Activar área de parámetros</value>
+  </data>
+  <data name="ReportViewer_ToolbarPreviousPageTitle" xml:space="preserve">
+    <value>Página anterior</value>
+  </data>
+  <data name="ReportViewer_ToolbarTogglePrintPreviewTitle" xml:space="preserve">
+    <value>Activar vista previa de impresión</value>
+  </data>
+  <data name="ReportViewer_ToolbarPrintTitle" xml:space="preserve">
+    <value>Imprimir</value>
+  </data>
+  <data name="ReportViewer_ToolbarRefreshTitle" xml:space="preserve">
+    <value>Refrescar</value>
+  </data>
+  <data name="ReportViewer_ToolbarStopRenderingTitle" xml:space="preserve">
+    <value>Dejar de renderizar</value>
+  </data>
+  <data name="ReportViewer_ToolbarSendMailTitle" xml:space="preserve">
+    <value>Enviar un correo electrónico</value>
+  </data>
+  <data name="ReportViewer_ToolbarZoomInTitle" xml:space="preserve">
+    <value>Acercar zoom</value>
+  </data>
+  <data name="ReportViewer_ToolbarZoomOutTitle" xml:space="preserve">
+    <value>Disminuir zoom</value>
+  </data>
+  <data name="ReportViewer_UnableToGetReportParameters" xml:space="preserve">
+    <value>No se pueden obtener los parámetros del informe.</value>
+  </data>
+  <data name="ReportViewer_RenderingCancelled" xml:space="preserve">
+    <value>El procesamiento del informe fue cancelado.</value>
+  </data>
+  <data name="ReportViewer_PreparingDownload" xml:space="preserve">
+    <value>Preparando documento para descargar. Espere por favor...</value>
+  </data>
+  <data name="ReportViewer_PreparingPrint" xml:space="preserve">
+    <value>Preparando documento para imprimir. Espere por favor...</value>
+  </data>
+  <data name="ReportViewer_ToolbarNavigateBackwardTitle" xml:space="preserve">
+    <value>Navegar hacia atrás</value>
+  </data>
+  <data name="ReportViewer_ToolbarNavigateForwardTitle" xml:space="preserve">
+    <value>Navegar hacia adelante</value>
+  </data>
+  <data name="ReportViewer_SearchDialogCaptionText" xml:space="preserve">
+    <value>Encontrar</value>
+  </data>
+  <data name="ReportViewer_SearchDialogMatchCaseTitle" xml:space="preserve">
+    <value>Coincidir mayúsculas y minúsculas</value>
+  </data>
+  <data name="ReportViewer_SearchDialogMatchWholeWordTitle" xml:space="preserve">
+    <value>Compare la palabra completa</value>
+  </data>
+  <data name="ReportViewer_SearchDialogNavigateDownTitle" xml:space="preserve">
+    <value>Navegar hacia abajo</value>
+  </data>
+  <data name="ReportViewer_SearchDialogNavigateUpTitle" xml:space="preserve">
+    <value>Navegar hacia arriba</value>
+  </data>
+  <data name="ReportViewer_SearchDialogNoResultsLabel" xml:space="preserve">
+    <value>No hay resultados</value>
+  </data>
+  <data name="ReportViewer_SearchDialogPageText" xml:space="preserve">
+    <value>página</value>
+  </data>
+  <data name="ReportViewer_SearchDialogResultsFormatLabel" xml:space="preserve">
+    <value>Resultado {0} de {1}</value>
+  </data>
+  <data name="ReportViewer_SearchDialogSearchInProggress" xml:space="preserve">
+    <value>buscando...</value>
+  </data>
+  <data name="ReportViewer_SearchDialogClearTitle" xml:space="preserve">
+    <value>Limpiar</value>
+  </data>
+  <data name="ReportViewer_SearchDialogTitle" xml:space="preserve">
+    <value>Buscar en el contenido del informe</value>
+  </data>
+  <data name="ReportViewer_SearchDialogUseRegexTitle" xml:space="preserve">
+    <value>Usar expresiones regulares</value>
+  </data>
+  <data name="ReportViewer_ToolbarSearchTitle" xml:space="preserve">
+    <value>Alternar búsqueda</value>
+  </data>
+  <data name="ReportViewer_SearchDialogResultsLimitLabel" xml:space="preserve">
+    <value>Mostrando los primeros {0} resultados.</value>
+  </data>
+</root>

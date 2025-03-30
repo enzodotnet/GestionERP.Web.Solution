@@ -1,0 +1,92 @@
+﻿@page "/"
+
+<PageTitle>Gestión ERP</PageTitle> 
+
+<TelerikNotification @ref="@NotificacionLogin" AnimationType="@(AnimationType.Fade)" HorizontalPosition="@NotificationHorizontalPosition.Center" VerticalPosition="@NotificationVerticalPosition.Top" Class="error-knotification"></TelerikNotification>
+
+<div class="text-center mb-4">
+    <img src="img/gerp-login.png" width="64" height="64" class="img-fluid">   
+</div>
+<div class="card">
+    <h5 class="card-header text-center">Gestión ERP</h5>
+    <div class="card-body">  
+        <div class="text-center intro">
+            <img src="/img/erp_login.png" width="320" class="img-fluid"> 
+        </div> 
+        <div class="mt-4 text-center">
+            <h4>Iniciar Sesión</h4>
+        </div> 
+        <TelerikForm Size="sm" Model="UsuarioAuth" OnSubmit="@HandleValidLogin">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator" />  
+            </FormValidation> 
+            <FormItems>     
+                <div class="container text-center">  
+                    <FormItem Field="@(nameof(UsuarioAuth.CodigoUsuario))">
+                        <Template> 
+                            <label for="codigoUsuario" class="k-label k-form-label" >Código Usuario</label> 
+                            <TelerikTextBox Id="codigoUsuario" @bind-Value="@(UsuarioAuth.CodigoUsuario)"></TelerikTextBox>
+                            <TelerikValidationMessage For="@(() => UsuarioAuth.CodigoUsuario)"/>
+                        </Template>
+                    </FormItem>
+                    
+                    <FormItem Field="@(nameof(UsuarioAuth.Password))">
+                        <Template>
+                            <label for="password" class="k-label k-form-label">Contraseña</label>
+                            <TelerikTextBox Id="password" @bind-Value="UsuarioAuth.Password" Password="true"></TelerikTextBox>
+                            <TelerikValidationMessage For="@(() => UsuarioAuth.Password)"/>
+                        </Template>
+                    </FormItem> 
+                </div>
+            </FormItems> 
+            <FormButtons>   
+                <div class="container text-center">  
+                    <TelerikButton ButtonType="ButtonType.Submit" ThemeColor="primary" Enabled="@(IsLoadingAction)">
+                        @TextLogin
+                        <TelerikLoader Class="loader-indicator" ThemeColor="light" Visible="@EsVisibleLoader"/>
+                    </TelerikButton>
+                </div> 
+            </FormButtons> 
+        </TelerikForm> 
+
+    </div>
+</div>
+<div class="mt-3 text-sm-center">
+    <label>Copyright &copy; @Anio &mdash; GRUPO CORINSER </label>
+</div>
+
+<style>
+    body {
+        background-color: #eee;
+        height: auto;
+    } 
+
+    .error-knotification .k-notification {
+        padding-block: 10px;
+        padding-inline: 10px;
+    }  
+
+    .loader-indicator {
+        margin-left: 5px;
+    }
+
+    label {
+        display: inline-block;
+    }
+
+    .k-form, .k-form-inline {
+        font-size: 14px;
+        line-height: 1.42857;
+    } 
+
+    .k-input-md, .k-picker-md {
+        font-size: 14px;
+        line-height: 1.4285714286;
+    }
+
+    .k-button-md { 
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.4285714286;
+    }
+</style>

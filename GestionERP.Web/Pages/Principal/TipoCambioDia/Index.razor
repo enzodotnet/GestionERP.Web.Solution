@@ -1,0 +1,81 @@
+@page "/tipo-cambio-dias"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>Tipos de cambio del día</PageTitle> 
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModifiedActualizar)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Lista de tipos de cambio del día" CodigoRegistro="@(string.Concat(MonedaTipoCambio.Codigo, " ", MonedaTipoCambio.Nombre))" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikScheduler 
+                Data="@ListaTipoCambioDias"  
+                AllowCreate="false" 
+                AllowDelete="false" 
+                AllowUpdate="true"
+                OnEdit="@EditHandler"
+                Date="@FechaInicio" 
+               
+                DateChanged="@(DateChangedHandler)" 
+                Height="575px"
+                @ref="@schedulerRef"
+                @bind-View="@VistaCalendar" 
+                OnItemRender="@OnItemRenderHandler"
+                TitleField="@(nameof(TipoCambioDiaListarDto.Descripcion))"
+                DescriptionField="@(nameof(TipoCambioDiaListarDto.Descripcion))"
+                StartField="@(nameof(TipoCambioDiaListarDto.Fecha))"
+                EndField="@(nameof(TipoCambioDiaListarDto.Fecha))"
+                IdField="@(nameof(TipoCambioDiaListarDto.Codigo))"
+                IsAllDayField="@(nameof(TipoCambioDiaListarDto.AllDay))">
+            <SchedulerViews>
+                <SchedulerMonthView/>
+            </SchedulerViews>
+        </TelerikScheduler> 
+         
+        <TelerikWindow Visible="@EsVisibleModalActualizar" Modal="true" Height="auto" Width="350px" MinWidth="350px" CloseOnOverlayClick="false">
+            <WindowTitle>Actualizando tipo de cambio del día</WindowTitle>
+            <WindowActions>
+                <WindowAction Name="Maximize" Title="Maximizar"/>
+                <WindowAction Name="Close" Title="Cerrar" Hidden="@(IsLoadingAction)" OnClick="@CerrarTipoCambio" />
+            </WindowActions>
+            <WindowContent>
+                <TelerikNotification @ref="@AlertModalActualizar" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                
+                <TelerikForm EditContext="@(EditContextTipoCambioDiaActualizar)" Size="sm" OnInvalidSubmit="@InvalidarAccionTipoCambio" OnValidSubmit="@(ActualizarTipoCambioDia)">
+                    <FormValidation>
+                        <FluentValidationValidator @ref="validator" />
+                    </FormValidation>
+                    <FormItems>
+                        <FormItem>
+                           <Template>
+                               <label>Fecha del día:</label>
+                               <TelerikDateInput Width="150px" Size="sm" @bind-Value="@(TipoCambioDiaObtener.Fecha)" Enabled="@(false)" />
+                           </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Tipo de cambio:</label>
+                                <TelerikDropDownList @bind-Value="@(TipoCambioDiaObtener.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@Tipos" Enabled="@false" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                           <Template>
+                               <label>Monto de conversión de @MonedaTipoCambio.Codigo a @MonedaConversion.Codigo (@MonedaConversion.Nombre) *:</label>
+                               <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(TipoCambioDiaActualizar.Monto)" Min="0" Format="N4" Decimals="4" Size="sm" />
+                               <TelerikValidationMessage For="@(() => TipoCambioDiaActualizar.Monto)" />
+                           </Template>
+                        </FormItem>
+                    </FormItems>
+                    <FormButtons>
+                        <TelerikButton Icon="@(SvgIcon.Save)" Title="Guardar el cambio en la base de datos" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                    </FormButtons>
+                </TelerikForm>
+            </WindowContent>
+        </TelerikWindow> 
+
+    </CardBody>
+</CardContainerComponent>

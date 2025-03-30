@@ -1,0 +1,79 @@
+@inject NavigationManager INavigation
+@inject AuthenticationStateProvider IAuthState
+@inject IPrincipalUsuario IUsuario
+@implements IDisposable
+@using System.Security.Claims
+@using GestionERP.Web.Models.Dtos.Principal;
+
+<AuthorizeView Context="User">
+    <Authorized> 
+        <TelerikDropDownList Class="user-menu" Value="@CodigoWebEmpresa" TextField="AcronimoEmpresa" ValueField="CodigoWebEmpresa" Data="@CatalogoEmpresas" ValueChanged="@((string value) => OnDropDownEmpresaValueChanged(value))" DefaultText="@(!string.IsNullOrEmpty(CodigoWebEmpresa) ? "" : " ")" Size="sm" Width="auto" Rounded="sm" FillMode="flat">
+            <ValueTemplate >
+                <i class="fa-solid fa-city"></i> 
+                <span class="menu-separator"/>
+                Empresa:
+                <span class="menu-separator"/>
+                <strong>@context.AcronimoEmpresa.ToUpper()</strong> 
+            </ValueTemplate>
+            <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+        </TelerikDropDownList>
+    </Authorized>
+    <NotAuthorized/>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter] public DialogFactory Dialog { get; set; }
+    ClaimsPrincipal UserSesion { get; set; }
+    private IEnumerable<UsuarioEmpresaCatalogoPorSesionDto> CatalogoEmpresas { get; set; }
+    private string CodigoWebEmpresa { get; set; } 
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            CatalogoEmpresas = []; 
+            UserSesion = (await IAuthState.GetAuthenticationStateAsync()).User;
+            if (UserSesion.Identity.IsAuthenticated)
+            {
+                string codigoWebEmpresa = "";
+                string[] url = INavigation.Uri.Replace(INavigation.BaseUri, "").Split("/");
+
+                if (url.Length > 0)
+                    codigoWebEmpresa = url[0].Substring(0, Math.Min(url[0].Length, 15));
+
+                CatalogoEmpresas = await IUsuario.CatalogoEmpresasPorSesion();
+                if (CatalogoEmpresas is not null)
+                    CodigoWebEmpresa = CatalogoEmpresas.Where(x => x.CodigoWebEmpresa == codigoWebEmpresa).Select(x => x.CodigoWebEmpresa).SingleOrDefault();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    private async Task OnDropDownEmpresaValueChanged(string codigoWebEmpresaChanged)
+    {
+        if (!string.IsNullOrEmpty(codigoWebEmpresaChanged) && CodigoWebEmpresa != codigoWebEmpresaChanged)
+        {
+            if (await Dialog.ConfirmAsync("¿Está seguro de redigir la actual página en la que se ubica?", "Cambiar de empresa"))
+                INavigation.NavigateTo($"{codigoWebEmpresaChanged}/inicio", true);
+        }
+    }
+
+    public void Dispose() => GC.SuppressFinalize(this);
+}
+
+<style>
+    .user-menu {
+        color: white;
+    }
+
+    strong {
+        font-weight: 500; 
+    }
+
+    .menu-separator {  
+        padding-left: 4px;
+    }
+</style>

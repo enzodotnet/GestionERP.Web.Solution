@@ -1,0 +1,56 @@
+@page "/tipos-adjunto-recepcion/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Tipo de Adjunto Recepcion - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoAdjuntoRecepcionObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de adjunto de recepcion" CodigoRegistro="@(TipoAdjuntoRecepcionObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoAdjuntoRecepcionObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoAdjuntoRecepcionObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoAdjuntoRecepcionObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>  
+                    <FormItem>
+                        <Template>
+                            <label>Seccion:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoAdjuntoRecepcionObtener.FlagSeccion)" TextField="Nombre" ValueField="Codigo" Data="@Secciones" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es tipo de informe:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoAdjuntoRecepcionObtener.EsTipoInforme" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es obligatorio:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoAdjuntoRecepcionObtener.EsObligatorio" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

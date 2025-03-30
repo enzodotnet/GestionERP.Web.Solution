@@ -1,0 +1,69 @@
+@page "/glosarios-analisis/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Glosario de Análisis - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando glosario de análisis" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@(EditContext)" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>
+            </FormValidation> 
+            <FormItems>
+                 <FormItem>
+                     <Template>
+                         <label>Registro*:</label>
+                         <TelerikDropDownList @bind-Value="@GlosarioAnalisisInsertar.FlagRegistro" TextField="Nombre" ValueField="Codigo" Data="@Registros" Size="sm">
+                             <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                         </TelerikDropDownList>
+                         <TelerikValidationMessage For="@(() => GlosarioAnalisisInsertar.FlagRegistro)" />
+                     </Template>
+                 </FormItem>
+                 <FormItem>
+                     <Template>
+                         <label>Idioma original*:</label>
+                         <TelerikDropDownList @bind-Value="@GlosarioAnalisisInsertar.FlagIdiomaOriginal" TextField="Nombre" ValueField="Codigo" Data="@IdiomasOriginal" Size="sm">
+                             <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                         </TelerikDropDownList>
+                         <TelerikValidationMessage For="@(() => GlosarioAnalisisInsertar.FlagIdiomaOriginal)" />
+                     </Template>
+                 </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Descripción*:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(GlosarioAnalisisInsertar.Descripcion)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => GlosarioAnalisisInsertar.Descripcion)" />
+                    </Template>
+                </FormItem>
+                 <FormItem>
+                     <Template>
+                         <label>Descripción traducida:</label>
+                         <TelerikTextBox AutoComplete="off" @bind-Value="@(GlosarioAnalisisInsertar.DescripcionTraducida)" Size="sm" />
+                         <TelerikValidationMessage For="@(() => GlosarioAnalisisInsertar.DescripcionTraducida)" />
+                     </Template>
+                 </FormItem>
+            </FormItems>
+            <FormButtons/> 
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+    </CardBody>
+</CardContainerComponent>  

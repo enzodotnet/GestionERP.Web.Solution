@@ -1,0 +1,947 @@
+@page "/{CodigoWebEmpresa}/importacion/pedidos/{Id:guid}"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Importacion
+
+<PageTitle>@Empresa?.Acronimo - Pedido Importación - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)"/>
+
+<TooltipButtonComponent/>
+
+@if(Pedido is not null)
+{
+    <CardContainerComponent Titulo="Visualizando pedido de importación" CodigoRegistro="@(Pedido.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@(Pedido)" Size="sm">
+				<FormItems>
+					<FormGroup Class="formgroup intab" Columns="7" ColumnSpacing="5px">
+						<FormItem ColSpan="4">
+							<Template>
+								<label>Documento:</label>
+								<div class="item-group">
+									<TelerikTextBox Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(Pedido.CodigoDocumento)" Size="sm" Width="70px" />
+									<TelerikTextBox Title="Código de Serie" Class="t-main" ReadOnly="@true" @bind-Value="@(Pedido.CodigoSerieDocumento)" Size="sm" Width="70px" />
+									<TelerikTextBox Title="Número secuencia de la serie" Class="t-main" ReadOnly="@true" @bind-Value="@(Pedido.NumeroSerieDocumento)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreSerieDocumento)" Title="@(Pedido.NombreSerieDocumento)" Class="t-main" ReadOnly="@true" Size="sm" />
+								</div>
+							</Template>
+						</FormItem> 
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha de emisión:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEmision)" Enabled="@(false)" Width="110px" Size="sm" />
+							</Template>
+						</FormItem> 
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Tipo de cambio del día:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoTipoCambioDia)" Title="Código" ReadOnly="@(true)" Class="t-main" Size="sm" Width="80px" />
+									<TelerikNumericTextBox @bind-Value="@(Pedido.MontoTipoCambioDia)" Class="t-main" Arrows="@(false)" ReadOnly="@true" Width="50px" Format="N4" Decimals="4" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Estado:</label>
+								<div class="item-group">
+									<TelerikTextBox AutoComplete="off" Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(Pedido.CodigoEstado)" Size="sm" Width="38px" />
+									<TelerikTextBox AutoComplete="off" Class="t-main" ReadOnly="@true" @bind-Value="@(Pedido.NombreEstado)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Orden referencia:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.CodigoOrdenReferencia)" Title="Código" Class="t-main" ReadOnly="@true" Size="sm" Width="190px" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Número de DUA:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NumeroDUA)" Title="@(Pedido.NumeroDUA)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Fecha de costo (numeración):</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaCosto)" Enabled="@(false)" Width="110px" Size="sm" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Proveedor:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidad)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidad)" Title="@(Pedido.NombreEntidad)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Moneda:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoMoneda)" Class="t-main" Title="Código" ReadOnly="@(true)" Size="sm" Width="60px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreMoneda)" Title="@(Pedido.NombreMoneda)" Class="t-main" ReadOnly="@(true)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Tipo de importación:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoTipoImportacion)" Title="Código" Enabled="@(false)" Size="sm" Width="70px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreTipoImportacion)" Title="@(Pedido.NombreTipoImportacion)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Aduana:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoAduana)" Title="Código" Enabled="@(false)" Size="sm" Width="70px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreAduana)" Title="@(Pedido.NombreAduana)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Canal:</label>
+								<TelerikDropDownList @bind-Value="@Pedido.FlagCanal" DefaultText="- No seleccionado -" TextField="Nombre" ValueField="Codigo" Data="@Canales" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Es venta sucesiva:</label>
+								<TelerikSwitch @bind-Value="@(Pedido.EsVentaSucesiva)" OnLabel="Sí" OffLabel="No" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<div class="item-group-block">
+									<label>Descripción forma de pago:</label>
+									<div class="item-group">
+										<TelerikTextBox @bind-Value="@(Pedido.DescripcionFormaPago)" Title="@(Pedido.DescripcionFormaPago)" Size="sm" Enabled="@(false)" />
+										<span class="item-text">Es sujeto a reclamo</span>
+										<TelerikSwitch @bind-Value="@(Pedido.EsSujetoReclamo)" OnLabel="Sí" OffLabel="No" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+									</div>
+									<span class="ig-space" />
+									<label>Situación importación:</label>
+									<div class="item-group">
+										<TelerikTextBox Title="Código" Enabled="@(false)" @bind-Value="@(Pedido.CodigoSituacionImportacion)" Size="sm" Width="50px" />
+										<TelerikTextBox @bind-Value="@(Pedido.NombreSituacionImportacion)" Title="@(Pedido.NombreSituacionImportacion)" Enabled="@(false)" Size="sm" />
+									</div>
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Comentario del reclamo:</label>
+								<TelerikTextArea @bind-Value="@(Pedido.ComentarioReclamo)" Class="textarea-wrapper" Rows="3" Title="@(Pedido.ComentarioReclamo)" Enabled="@(false)" Size="sm" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<div class="item-group-block">
+									<label>Número de BL:</label>
+									<TelerikTextBox @bind-Value="@(Pedido.NumeroBL)" Title="@(Pedido.NumeroBL)" Size="sm" Enabled="@(false)" />
+									<span class="ig-space" />
+									<label>Número de invoice:</label>
+									<TelerikTextBox @bind-Value="@(Pedido.NumeroInvoice)" Title="@(Pedido.NumeroInvoice)" Size="sm" Enabled="@(false)" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<div class="item-group-block">
+									<label>Fecha emisión BL:</label>
+									<TelerikDateInput @bind-Value="@(Pedido.FechaEmisionBL)" Width="100px" Size="sm" Enabled="@(false)" />
+									<span class="ig-space-dpicker" />
+									<label>Fecha emisión invoice:</label>
+									<TelerikDateInput @bind-Value="@(Pedido.FechaEmisionInvoice)" Width="100px" Size="sm" Enabled="@(false)" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="4">
+							<Template>
+								<label>Observación:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.Observacion)" Title="@(Pedido.Observacion)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Afecto y/o libera arancel:</label>
+								<TelerikSwitch @bind-Value="@(Pedido.EsAfectoLiberaArancel)" OnLabel="Sí" OffLabel="No" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label title="Senasa - Digesa - Digemid">Requiere inspección regulador:</label>
+								<TelerikSwitch @bind-Value="@(Pedido.EsRequeridoInspeccion)" OnLabel="Sí" OffLabel="No" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Aforo previo:</label>
+								<TelerikSwitch @bind-Value="@(Pedido.EsPrevioAforo)" OnLabel="Sí" OffLabel="No" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="4">
+							<Template>
+								<label>Comentario:</label>
+								<TelerikTextArea @bind-Value="@(Pedido.Comentario)" Rows="2" Class="textarea-vertical" Title="@(Pedido.Comentario)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Estado de ingreso en almacén:</label>
+								<TelerikDropDownList Data="@EstadosIngreso" @bind-Value="@Pedido.FlagEstadoIngreso" TextField="Nombre" ValueField="Codigo" Size="sm" Width="180px" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+					</FormGroup>
+
+					<FormGroup Class="formgroup intab" Columns="7" ColumnSpacing="5px">
+						<FormItem ColSpan="2">
+							<Template>
+								<label>País origen:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoPaisOrigen)" Title="Código" Enabled="@(false)" Size="sm" Width="70px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombrePaisOrigen)" Title="@(Pedido.NombrePaisOrigen)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>País procedencia:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoPaisProcedencia)" Title="Código" Enabled="@(false)" Size="sm" Width="70px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombrePaisProcedencia)" Title="@(Pedido.NombrePaisProcedencia)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha estimada ETD:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEstimadaETD)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha estimada ETA:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEstimadaETA)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha reposición stock:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaReposicionStock)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Descripción del empaque:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.DescripcionEmpaque)" Title="@(Pedido.DescripcionEmpaque)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Descripción de marca:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.DescripcionMarca)" Title="@(Pedido.DescripcionMarca)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Referencia:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.Referencia)" Title="@(Pedido.Referencia)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<div class="item-group-block">
+									<label>Fecha del documento original:</label>
+									<TelerikDateInput @bind-Value="@(Pedido.FechaOriginalDocumento)" Width="110px" Size="sm" Enabled="@(false)"  />
+									<span class="ig-space" />
+									<label>Fecha de copia del documento:</label>
+									<TelerikDateInput @bind-Value="@(Pedido.FechaCopiaDocumento)" Width="110px" Size="sm" Enabled="@(false)" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="5">
+							<Template>
+								<label>Comentario de la documentación:</label>
+								<TelerikTextArea @bind-Value="@(Pedido.ComentarioDocumentacion)" Class="textarea-wrapper" Rows="3" Title="@(Pedido.ComentarioDocumentacion)" Enabled="@(false)"  Size="sm" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Cantidad de días de sobreestadía:</label>
+								<TelerikNumericTextBox @bind-Value="@(Pedido.CantidadDiasSobreestadia)" Arrows="@(false)" Width="50px" Format="N0" Decimals="0" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Cantidad de días de almacenaje:</label>
+								<TelerikNumericTextBox @bind-Value="@(Pedido.CantidadDiasAlmacenaje)" Arrows="@(false)" Width="50px" Format="N0" Decimals="0" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha direccionamiento:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaDireccionamiento)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha entrega documento:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEntregaDocumento)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha de visto bueno:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaVistoBueno)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Entidad agente de aduana:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidadAgenteAduana)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidadAgenteAduana)" Title="@(Pedido.NombreEntidadAgenteAduana)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Entidad muelle:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidadMuelle)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidadMuelle)" Title="@(Pedido.NombreEntidadMuelle)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Entidad agencia de carga:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidadAgenciaCarga)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidadAgenciaCarga)" Title="@(Pedido.NombreEntidadAgenciaCarga)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Entidad terminal:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidadTerminal)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidadTerminal)" Title="@(Pedido.NombreEntidadTerminal)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Entidad almacén:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidadAlmacen)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidadAlmacen)" Title="@(Pedido.NombreEntidadAlmacen)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Entidad naviera:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoEntidadNaviera)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreEntidadNaviera)" Title="@(Pedido.NombreEntidadNaviera)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Descripción del transporte:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.DescripcionTransporte)" Title="@(Pedido.DescripcionTransporte)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Nombre de nave:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NombreNave)" Title="@(Pedido.NombreNave)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Descripción del local de destino:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.DescripcionLocalDestino)" Title="@(Pedido.DescripcionLocalDestino)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+					</FormGroup>
+
+					<FormGroup Class="formgroup intab" Columns="6" ColumnSpacing="5px">
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Número de manifiesto:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NumeroManifiesto)" Title="@(Pedido.NumeroManifiesto)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="4">
+							<Template>
+								<label>Transporte de importación:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoTransporteImportacion)" Title="Código" Enabled="@(false)" Size="sm" Width="120px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreTransporteImportacion)" Title="@(Pedido.NombreTransporteImportacion)" Enabled="@(false)" Size="sm" Width="400px" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha de embarque:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEmbarque)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Nombre tipo de embarque:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NombreTipoEmbarque)" Title="@(Pedido.NombreTipoEmbarque)" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Modalidad embarque:</label>
+								<TelerikDropDownList @bind-Value="@Pedido.FlagModalidadEmbarque" DefaultText="- No seleccionado -" TextField="Nombre" ValueField="Codigo" Data="@ModalidadesEmbarque" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Transbordo:</label>
+								<TelerikSwitch @bind-Value="@(Pedido.EsTransbordo)" OnLabel="Sí" OffLabel="No" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Fecha estimada de arribo:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEstimadaArribo)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Vía de transporte:</label>
+								<TelerikDropDownList @bind-Value="@Pedido.FlagViaTransporte" DefaultText="- No seleccionado -" TextField="Nombre" ValueField="Codigo" Data="@ViasTransporte" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha de llegada:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaLlegada)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha de descarga:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaDescarga)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="1">
+							<Template>
+								<label>Fecha de tarja:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaTarja)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Fecha desglose de carga:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaDesgloseCarga)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Puerto de embarque:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoPuertoEmbarque)" Title="Código" Enabled="@(false)" Size="sm" Width="60px" /> 
+									<TelerikTextBox @bind-Value="@(Pedido.NombrePuertoEmbarque)" Title="@(Pedido.NombrePuertoEmbarque)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="4">
+							<Template>
+								<label>País de embarque:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoPaisEmbarque)" Title="Código" Enabled="@(false)" Size="sm" Width="50px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombrePaisEmbarque)" Title="@(Pedido.NombrePaisEmbarque)" Enabled="@(false)" Size="sm" Width="250px" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Puerto de llegada:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoPuertoLlegada)" Title="Código" Enabled="@(false)" Size="sm" Width="60px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombrePuertoLlegada)" Title="@(Pedido.NombrePuertoLlegada)" Enabled="@(false)" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="4">
+							<Template>
+								<label>País de llegada:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoPaisLlegada)" Title="Código" Enabled="@(false)" Size="sm" Width="50px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombrePaisLlegada)" Title="@(Pedido.NombrePaisLlegada)" Enabled="@(false)" Size="sm" Width="250px" />
+								</div>
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Nombre del consolidador:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NombreConsolidador)" Title="@(Pedido.NombreConsolidador)" Width="350px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+					</FormGroup>
+
+					<FormGroup Class="formgroup intab" Columns="8" ColumnSpacing="5px">
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Régimen de importación:</label>
+								<div class="item-group">
+									<TelerikTextBox @bind-Value="@(Pedido.CodigoRegimenImportacion)" Title="Código" Enabled="@(false)" Size="sm" Width="70px" />
+									<TelerikTextBox @bind-Value="@(Pedido.NombreRegimenImportacion)" Title="@(Pedido.NombreRegimenImportacion)" Enabled="@(false)" Width="300px" Size="sm" />
+								</div>
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="5">
+							<Template>
+								<label>Descripción trámite ante la Aduana:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.DescripcionTramiteAduana)" Title="@(Pedido.DescripcionTramiteAduana)" Width="350px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Descripción de la modalidad:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.DescripcionModalidad)" Title="@(Pedido.DescripcionModalidad)" Width="350px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="5">
+							<Template>
+								<label>Fecha de aforo del canal:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaAforoCanal)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Fecha de sobreestadía:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaSobreestadia)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="5">
+							<Template>
+								<label>Fecha de levante del canal:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaLevanteCanal)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Fecha lugar de almacenaje:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaLugarAlmacenaje)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="5">
+							<Template>
+								<label>Fecha de inspección regulador (Senasa - Digesa - Digemid):</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaInspeccion)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Fecha de recojo del documento agente aduana:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaRecojoDocumentoAduana)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="5">
+							<Template>
+								<label>Fecha levante de inspección (Senasa):</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaLevanteInspeccion)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="3">
+							<Template>
+								<label>Número del presupuesto:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NumeroPresupuesto)" Title="@(Pedido.NumeroPresupuesto)" Width="150px" Size="sm" Enabled="@(false)" /> 
+							</Template>
+						</FormItem>
+					</FormGroup>
+
+					<FormGroup Class="formgroup intab" Columns="8" ColumnSpacing="5px">
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Tipo de financiamiento:</label>
+								<TelerikDropDownList @bind-Value="@Pedido.FlagTipoFinanciamiento" DefaultText="- No seleccionado -" TextField="Nombre" ValueField="Codigo" Data="@TiposFinanciamiento" Width="150px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Fecha de pago del financiamiento:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaPagoFinanciamiento)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Crédito del agente de aduana:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.CreditoAgenteAduana)" Title="@(Pedido.CreditoAgenteAduana)" Width="180px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Fecha de pago al agente de aduana:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaPagoAgenteAduana)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Fecha de emisión de la DUA:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEmisionDUA)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Fecha de cancelación de la DUA:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaCancelacionDUA)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Fecha de vencimiento del invoice:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaVencimientoInvoice)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Cantidad de días vencimiento del invoice:</label>
+								<TelerikNumericTextBox @bind-Value="@(Pedido.CantidadDiasVenceInvoice)" Arrows="@(false)" Width="50px" Format="N0" Decimals="0" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Número del pack list:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NumeroPackList)" Title="@(Pedido.NumeroPackList)" Width="180px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Fecha del pack list:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaPackList)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+
+						<FormItem ColSpan="2">
+							<Template>
+								<label>Número de la póliza:</label>
+								<TelerikTextBox @bind-Value="@(Pedido.NumeroPoliza)" Title="@(Pedido.NumeroPoliza)" Width="180px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="6">
+							<Template>
+								<label>Fecha de emisión de la póliza:</label>
+								<TelerikDateInput @bind-Value="@(Pedido.FechaEmisionPoliza)" Width="110px" Size="sm" Enabled="@(false)" />
+							</Template>
+						</FormItem>
+					</FormGroup>
+
+					<FormItem Field="Detalle">
+						<Template>
+							<label>Detalle:</label>
+							<TelerikGrid Data="@(Pedido.Detalles)" Height="auto" Pageable="false" Sortable="true" Resizable="true" Size="sm">
+								<GridToolBarTemplate> 
+									<span class="k-toolbar-spacer" />
+
+									<div class="group-amount"> 
+										<span class="item-title t-strong">Totales importe:</span> 
+										<div class="item-group-amount">
+											<span class="item-text t-strong">Bruto</span>
+											<TelerikNumericTextBox @bind-Value="@(Pedido.TotalImporteBruto)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+										</div>
+										<div class="item-group-amount">
+											<span class="item-text t-strong">Flete</span>
+											<TelerikNumericTextBox @bind-Value="@(Pedido.TotalImporteFlete)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+										</div>
+										<div class="item-group-amount">
+											<span class="item-text t-strong">Seguro</span>
+											<TelerikNumericTextBox @bind-Value="@(Pedido.TotalImporteSeguro)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+										</div>
+										<div class="item-group-amount">
+											<span class="item-text t-strong">Neto</span>
+											<TelerikNumericTextBox @bind-Value="@(Pedido.TotalImporteNeto)" Arrows="@(false)" Class="t-main" ReadOnly="@true" Format="N2" Decimals="2" Width="100px" Size="sm" />
+										</div>
+									</div>
+								</GridToolBarTemplate>
+
+								<GridColumns> 
+									<GridColumn Field="NombreTipoArticulo" Width="80px" Title="Tipo" />
+									<GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" />
+									<GridColumn Field="NombreArticulo" Width="300px" Title="Nombre de artículo" />
+									<GridColumn Field="Presentacion" Width="125px" Title="Presentación" />
+									<GridColumn Field="CodigoUnidadMedida" Width="45px" >
+										<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
+									</GridColumn>
+									<GridColumn Field="Cantidad" Width="90px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+									<GridColumn Field="PrecioUnitario" Width="100px" Title="Precio unitario" DisplayFormat="{0:N6}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+									<GridColumn Field="ImporteBruto" Width="100px" Title="Importe bruto" DisplayFormat="{0:N2}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+									<GridColumn Field="CostoEstimadoMN" Width="90px" DisplayFormat="{0:N6}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center">
+										<HeaderTemplate>
+											<span title="Costo unitario estimado @(MN.Nombre)">Costo E. @MN.Simbolo</span>
+										</HeaderTemplate>
+									</GridColumn>
+									<GridColumn Field="CostoEstimadoME" Width="90px" DisplayFormat="{0:N6}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center">
+										<HeaderTemplate>
+											<span title="Costo unitario estimado @(ME.Nombre)">Costo E. @ME.Simbolo</span>
+										</HeaderTemplate>
+									</GridColumn>
+									<GridColumn Field="CantidadIngresada" Width="120px" Title="Cantidad ingresada" DisplayFormat="{0:N3}" Visible="@(Pedido.FlagEstadoIngreso != "NI")" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+									<GridColumn Width="68px" Title="Acciones" Locked="@(true)" TextAlign="@ColumnTextAlign.Center">
+										<Template>
+											<TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem del detalle" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemDetalle(context as PedidoDetalleObtenerDto))" />
+										</Template>
+									</GridColumn>
+								</GridColumns>
+							</TelerikGrid>
+						</Template>
+
+					</FormItem>
+				</FormItems>
+
+				<FormItemsTemplate Context="formContext">
+					@{
+						List<IFormItemBase> formObjects = formContext.Items;
+						List<IFormItem> items = [];
+						List<IFormGroup> groups = [];
+						foreach (IFormItemBase itemBase in formObjects)
+						{
+							if (itemBase is IFormGroup)
+								groups.Add((IFormGroup)itemBase);
+							else
+								items.Add((IFormItem)itemBase);
+						}
+					}
+					<TelerikTabStrip Height="100%" PersistTabContent="@(true)">
+						<TabStripTab Title="Datos Principales">
+							<TelerikFormGroupRenderer Group="@(groups[0])">
+								<Template Context="groupContext">
+									@foreach (IFormItem itemGroup in groupContext.Items)
+									{
+										<TelerikFormItemRenderer Item="@itemGroup" />
+									}
+								</Template>
+							</TelerikFormGroupRenderer>
+							<TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Detalle"))" />
+						</TabStripTab>
+						<TabStripTab Title="Tracking">
+							<TelerikFormGroupRenderer Group="@(groups[1])">
+								<Template Context="groupContext">
+									@foreach (IFormItem itemGroup in groupContext.Items)
+									{
+										<TelerikFormItemRenderer Item="@itemGroup" />
+									}
+								</Template>
+							</TelerikFormGroupRenderer>
+						</TabStripTab>
+						<TabStripTab Title="Naviera y manifiesto">
+							<TelerikFormGroupRenderer Group="@(groups[2])">
+								<Template Context="groupContext">
+									@foreach (IFormItem itemGroup in groupContext.Items)
+									{
+										<TelerikFormItemRenderer Item="@itemGroup" />
+									}
+								</Template>
+							</TelerikFormGroupRenderer>
+						</TabStripTab>
+						<TabStripTab Title="Agencia de aduanas">
+							<TelerikFormGroupRenderer Group="@(groups[3])">
+								<Template Context="groupContext">
+									@foreach (IFormItem itemGroup in groupContext.Items)
+									{
+										<TelerikFormItemRenderer Item="@itemGroup" />
+									}
+								</Template>
+							</TelerikFormGroupRenderer>
+						</TabStripTab>
+						<TabStripTab Title="Pago a proveedores">
+							<TelerikFormGroupRenderer Group="@(groups[4])">
+								<Template Context="groupContext">
+									@foreach (IFormItem itemGroup in groupContext.Items)
+									{
+										<TelerikFormItemRenderer Item="@itemGroup" />
+									}
+								</Template>
+							</TelerikFormGroupRenderer>
+						</TabStripTab>
+					</TelerikTabStrip>
+				</FormItemsTemplate> 
+                <FormButtons/>
+            </TelerikForm>
+
+			<TelerikToolBar Class="toolbar-mainform">
+				<ToolBarTemplateItem>
+					<TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+				</ToolBarTemplateItem> 
+				<ToolBarSeparator />
+				<ToolBarTemplateItem Visible="@(EsVisibleEditar)">
+					<TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" OnClick="@(IrEditar)">Editar</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarTemplateItem Visible="@(EsVisibleCerrar)">
+					<TelerikButton Icon="@(SvgIcon.Lock)" Id="tbtn" Title="Cerrar registro" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoCerrar)" OnClick="@(() => MostrarAccionDialog("CO"))">Cerrar</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarTemplateItem Visible="@(EsVisibleAperturar)">
+					<TelerikButton Icon="@(SvgIcon.Unlock)" Id="tbtn" Title="Aperturar registro" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoAperturar)" OnClick="@(() => MostrarAccionDialog("AU"))">Aperturar</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarTemplateItem Visible="@(Pedido.FlagEstadoIngreso is "NI")">
+					<TelerikButton Icon="@(SvgIcon.RotateRight)" Id="tbtn" Title="Enviar para ingreso en almacén" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoEnviarIngreso)" OnClick="@(() => MostrarAccionDialog("EI"))">Enviar a ingreso</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarTemplateItem Visible="@(Pedido.FlagEstadoIngreso is "PI")">
+					<TelerikButton Icon="@(SvgIcon.RotateLeft)" Id="tbtn" Title="Revertir el envío a ingreso en almacén" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoRevertirEnvioIngreso)" OnClick="@(() => MostrarAccionDialog("RI"))">Revertir envío a ingreso</TelerikButton>
+				</ToolBarTemplateItem>  
+				<ToolBarTemplateItem Visible="@(EsVisibleEditar && Pedido.FlagEstadoIngreso is "NI")">
+					<TelerikButton Icon="@(SvgIcon.XOutline)" Id="tbtn" Title="Anular registro" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoAnular)" OnClick="@(() => MostrarAccionDialog("AX"))">Anular</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarTemplateItem Visible="@(EsVisibleEliminar)">
+					<TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" OnClick="@(() => MostrarAccionDialog())">Eliminar</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarTemplateItem Visible="@(EsVisibleExcluir)">
+					<TelerikButton Icon="@(SvgIcon.MinusOutline)" Id="tbtn" Title="Excluir registro de la vista del usuario" ButtonType="ButtonType.Button" Size="sm" Class="b-delete btn-auth" Enabled="@(EsAsignadoExcluir)" OnClick="@(() => MostrarAccionDialog("EX"))">Excluir</TelerikButton>
+				</ToolBarTemplateItem>  
+				<ToolBarTemplateItem>
+					<TelerikButton Icon="@(SvgIcon.ClipboardText)" Id="tbtn" Title="Ir a ver reporte del registro" ButtonType="ButtonType.Button" Size="sm" Class="b-primary btn-auth" Enabled="@(EsAsignadoVerReporte)" OnClick="@(IrReporte)">Ver reporte</TelerikButton>
+				</ToolBarTemplateItem>
+				<ToolBarSpacer />
+				<ToolBarTemplateItem>
+					<AuditoriaComponent Data="@(Pedido.Auditorias)" CodigoRegistro="@(Pedido.Codigo)" EsAsignadoVer="@(EsAsignadoVerAuditoria)" />
+				</ToolBarTemplateItem>
+			</TelerikToolBar>
+
+            <TelerikWindow Visible="@EsVisibleModalDetalle" VisibleChanged="@VisibleDetalleChangedHandler" ThemeColor="dark" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>Visualizando ítem del detalle</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar"/>
+                    <WindowAction Name="Close" Title="Cerrar" />
+                </WindowActions>
+                <WindowContent>
+                    <TelerikForm Model="@Detalle" Size="sm">
+                        <FormItems>
+                            <FormItem>
+                                <Template>
+                                    <label>Artículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(Detalle.CodigoArticulo)" Title="Código" Enabled="@false" Size="sm" Width="190px" />
+                                        <TelerikTextBox @bind-Value="@(Detalle.NombreArticulo)" Title="@(Detalle.NombreArticulo)" Enabled="@false" Size="sm" />
+                                    </div>
+									<label>Tipo de artículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(Detalle.CodigoTipoArticulo)" Title="Código" Enabled="@(false)" Size="sm" Width="30px" />
+                                        <TelerikTextBox @bind-Value="@(Detalle.NombreTipoArticulo)" Enabled="@(false)" Size="sm" Width="160px" />
+                                    </div>
+                                    <label>Presentación del artículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox @bind-Value="@(Detalle.Presentacion)" Title="@(Detalle.Presentacion)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Cantidad:</label>
+                                    <div class="item-group-adornment">
+                                        <TelerikTextBox @bind-Value="@(Detalle.CodigoUnidadMedida)" Class="adornment" Enabled="@(false)" Title="@(Detalle.NombreUnidadMedida)" Size="sm" Width="38px" />
+                                        <TelerikNumericTextBox @bind-Value="@(Detalle.Cantidad)" Arrows="@(false)" Enabled="@false" Width="100px" Format="N3" Decimals="3" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Precio unitario:</label>
+                                    <div class="item-group-adornment">
+                                        <TelerikTextBox @bind-Value="@(Pedido.SimboloMoneda)" Enabled="@(false)" Class="adornment" Title="@(Pedido.NombreMoneda)" Size="sm" Width="25px" />
+                                        <TelerikNumericTextBox @bind-Value="@(Detalle.PrecioUnitario)" Arrows="@(false)" Enabled="@false" Width="110px" Format="N6" Decimals="6" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Importe bruto:</label>
+                                    <div class="item-group-adornment">
+                                        <TelerikTextBox @bind-Value="@(Pedido.SimboloMoneda)" Enabled="@(false)" Class="adornment" Title="@(Pedido.NombreMoneda)" Size="sm" Width="25px" />
+                                        <TelerikNumericTextBox @bind-Value="@(Detalle.ImporteBruto)" Arrows="@(false)" Enabled="@(false)" Width="142px" Format="N2" Decimals="2" Size="sm" />
+                                    </div> 
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Observación:</label>
+                                    <TelerikTextBox @bind-Value="@(Detalle.Observacion)" Title="@(Detalle.Observacion)" Enabled="@false" Size="sm" />
+                                </Template>
+                            </FormItem>
+							<FormItem>
+								<Template>
+									<label>Costo unitario estimado:</label>
+									<div class="item-group-modal">
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(MN.Simbolo)" Enabled="@(false)" Class="adornment" Title="@(MN.Nombre)" Size="sm" Width="25px" />
+											<TelerikNumericTextBox @bind-Value="@(Detalle.CostoEstimadoMN)" AutoComplete="off" Arrows="@(false)" Enabled="@false" Width="110px" Format="N6" Decimals="6" Size="sm" />
+										</div>
+										<div class="item-group-adornment">
+											<TelerikTextBox @bind-Value="@(ME.Simbolo)" Enabled="@(false)" Class="adornment" Title="@(ME.Nombre)" Size="sm" Width="25px" />
+											<TelerikNumericTextBox @bind-Value="@(Detalle.CostoEstimadoME)" AutoComplete="off" Arrows="@(false)" Enabled="@false" Width="110px" Format="N6" Decimals="6" Size="sm" />
+										</div>
+									</div>
+								</Template>
+							</FormItem>
+                        </FormItems>
+                        <FormButtons/>
+                    </TelerikForm>
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikDialog @bind-Visible="@EsVisibleAccionDialog" Width="450px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle> <TelerikSvgIcon Size="md" Icon="@(IconoAccionModal)" />@TituloAccionDialog pedido de importación</DialogTitle>
+                <DialogContent>
+                    <TelerikNotification @ref="@AlertAccionDialog" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                    <div class="item-group-block">
+                        <label>¿Está seguro de @VerboAccionDialog al registro @Pedido.Codigo.TrimEnd()?</label>
+                        @if (EsEstadoActualizar)
+                        {
+                            <span class="ig-space" />
+							<TelerikTextArea @bind-Value="@(EstadoActualizar.Motivo)" Class="textarea-vertical-motivo" AutoComplete="off" Rows="4" Placeholder="Ingrese el motivo" Size="sm" />
+                        }
+                    </div>
+                </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Accionar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(CerrarDialog)" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent>
+}

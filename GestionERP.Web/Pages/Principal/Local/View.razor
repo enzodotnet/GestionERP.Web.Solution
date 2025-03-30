@@ -1,0 +1,90 @@
+@page "/locales/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Local - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+@if (LocalObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando local" CodigoRegistro="@(LocalObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@(LocalObtener)" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(LocalObtener.Activo)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem> 
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(LocalObtener.Nombre)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Observación:</label>
+                            <TelerikTextBox @bind-Value="@(LocalObtener.Observacion)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Región (departamento):</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código Ubigeo" Enabled="@(false)" @bind-Value="@(LocalObtener.CodigoRegion)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(LocalObtener.NombreRegion)" Title="@(LocalObtener.NombreRegion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Provincia:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código Ubigeo" Enabled="@(false)" @bind-Value="@(LocalObtener.CodigoProvincia)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(LocalObtener.NombreProvincia)" Title="@(LocalObtener.NombreProvincia)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Distrito:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código Ubigeo" Enabled="@(false)" @bind-Value="@(LocalObtener.CodigoDistrito)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(LocalObtener.NombreDistrito)" Title="@(LocalObtener.NombreDistrito)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                </FormItems> 
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando local</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent>  
+}

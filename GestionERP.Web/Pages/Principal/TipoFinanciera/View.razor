@@ -1,0 +1,39 @@
+@page "/tipos-financiera/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Tipo Financiera - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoFinancieraObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de financiera" CodigoRegistro="@(TipoFinancieraObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@TipoFinancieraObtener" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoFinancieraObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox @bind-Value="@(TipoFinancieraObtener.Nombre)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem> 
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

@@ -1,0 +1,73 @@
+@page "/segmentos-articulo/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Segmento Artículo - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando segmento de artículo" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@EditContext" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>  
+            </FormValidation> 
+            <FormItems>
+                 <FormItem>
+                     <Template>
+                         <label>Grupo*:</label>
+                         <div class="item-group">
+                             <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(SegmentoArticuloInsertar.CodigoGrupoArticulo)" Size="sm" Width="100px" />
+                             <Principal.GrupoArticuloCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoGrupo)" />
+                             <TelerikTextBox @bind-Value="@(SegmentoArticuloObtener.NombreGrupoArticulo)" Title="@(SegmentoArticuloObtener.NombreGrupoArticulo)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                         </div>
+                         <TelerikValidationMessage For="@(() => SegmentoArticuloInsertar.CodigoGrupoArticulo)" />
+                     </Template>
+                 </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Código*:</label>
+                        <div class="item-group">
+                            <TelerikButton Icon="@(SvgIcon.InfoCircle)" Id="tbtn" Title="Para poder ingresar el Código deberá primero seleccionar una Clase" Size="sm" FillMode="flat" Rounded="full" ButtonType="@ButtonType.Button" ThemeColor="info" Visible="@(!EnabledCodigo)" />
+                             <TelerikMaskedTextBox @bind-Value="@(SegmentoArticuloInsertar.Codigo)" Mask="@(MaskCodigo)" OnChange="@ValueCodigoUpperChanged" IncludeLiterals="@true" Enabled="@(EnabledCodigo)" Size="sm" />
+                        </div>
+                        <TelerikValidationMessage For="@(() => SegmentoArticuloInsertar.Codigo)" />
+                    </Template>
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>Nombre*:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(SegmentoArticuloInsertar.Nombre)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => SegmentoArticuloInsertar.Nombre)" />
+                    </Template>
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>Descripción:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(SegmentoArticuloInsertar.Descripcion)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => SegmentoArticuloInsertar.Descripcion)" />
+                    </Template>
+                </FormItem>
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+
+    </CardBody>
+</CardContainerComponent>  

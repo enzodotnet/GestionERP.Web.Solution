@@ -1,0 +1,67 @@
+@page "/ejercicios/{Id:guid}"
+
+@attribute [Authorize]
+ 
+<PageTitle>Ejercicio - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (EjercicioObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando ejercicio" CodigoRegistro="@(EjercicioObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@EjercicioObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@EjercicioObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(EjercicioObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Prefijo:</label>
+                            <TelerikTextBox Width="100px" @bind-Value="@(EjercicioObtener.Prefijo)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Año:</label>
+                            <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(EjercicioObtener.Anio)" Enabled="@(false)" Size="sm" />
+                        </Template> 
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Fecha inicio:</label>
+                            <TelerikDateInput Width="150px" Size="sm" @bind-Value="@(EjercicioObtener.FechaInicio)" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Fecha fin:</label>
+                            <TelerikDateInput Width="150px" Size="sm" @bind-Value="@(EjercicioObtener.FechaFin)" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.HyperlinkOpen)" Id="tbtn" Title="Ir a ver lista de periodos por ejercicio" ButtonType="@ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoVerRegistrosPeriodo)" Size="sm" OnClick="@(() => IrVerPeriodos())">Ver periodos</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

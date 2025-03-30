@@ -1,0 +1,695 @@
+@page "/cuentas-contables/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+<PageTitle>Cuenta Contable - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando cuenta contable" CodigoRegistro="@(CuentaContableObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator"/>
+                </FormValidation> 
+                <FormItems>
+                    <FormGroup Class="formgroup intab" Columns="2" ColumnSpacing="10px">
+                         <FormItem ColSpan="2">
+                             <Template>
+                                 <label>Activo:</label>
+                                 <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                             </Template>
+                         </FormItem>
+                         <FormItem ColSpan="2">
+                             <Template>
+                                 <label>Nombre*:</label>
+                                 <TelerikTextBox AutoComplete="off" @bind-Value="@(CuentaContableEditar.Nombre)" Size="sm" />
+                                 <TelerikValidationMessage For="@(() => CuentaContableEditar.Nombre)" />
+                             </Template>
+                         </FormItem>
+                         <FormItem ColSpan="2">
+                             <Template>
+                                 <label>Descripción:</label>
+                                 <TelerikTextBox AutoComplete="off" @bind-Value="@(CuentaContableEditar.Descripcion)" Size="sm" />
+                                 <TelerikValidationMessage For="@(() => CuentaContableEditar.Descripcion)" />
+                             </Template>
+                         </FormItem>
+                         <FormItem>
+                             <Template>
+                                 <label>Plan contable:</label>
+                                 <div class="item-group">
+                                     <TelerikTextBox AutoComplete="off" Placeholder="Código" @bind-Value="@(CuentaContableObtener.CodigoPlanContable)" Size="sm" Width="100px" Enabled="@false" />
+                                     <TelerikTextBox @bind-Value="@(CuentaContableObtener.NombrePlanContable)" Title="@(CuentaContableObtener.NombrePlanContable)" Placeholder="Nombre o Descripción" Size="sm" Enabled="@false" />
+                                 </div>
+                             </Template>
+                         </FormItem>
+                         <FormItem>
+                             <Template>
+                                <label>Bien y Servicio de la:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(CuentaContableEditar.CodigoTipoBienServicio)" Size="sm" Width="100px" />
+                                    <Principal.TipoBienServicioCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoBienServicio)" />
+                                    <TelerikTextBox @bind-Value="@(CuentaContableObtener.NombreTipoBienServicio)" Title="@(CuentaContableObtener.NombreTipoBienServicio)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Tipo:</label>
+                                <TelerikDropDownList @bind-Value="@CuentaContableEditar.FlagTipo" TextField="Nombre" ValueField="Codigo" Data="@Tipos" Size="sm">
+                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                                </TelerikDropDownList>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Formato función:</label>
+                                <TelerikDropDownList @bind-Value="@CuentaContableEditar.FlagFormatoFuncion" TextField="Nombre" ValueField="Codigo" Data="@FormatosFuncion" Size="sm">
+                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                                </TelerikDropDownList>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Tipo naturaleza:</label>
+                                <TelerikDropDownList @bind-Value="@CuentaContableEditar.FlagTipoNaturaleza" TextField="Nombre" ValueField="Codigo" Data="@TiposNaturaleza" Size="sm">
+                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                                </TelerikDropDownList>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Tipo de entidad financiera:</label>
+                                <TelerikDropDownList @bind-Value="@CuentaContableEditar.FlagTipoEntidadFinanciera" TextField="Nombre" ValueField="Codigo" Data="@TiposEntidadFinanciera" Size="sm">
+                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                                </TelerikDropDownList>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Tipo de cuenta corriente:</label>
+                                <TelerikDropDownList @bind-Value="@CuentaContableEditar.FlagTipoCuentaCorriente" TextField="Nombre" ValueField="Codigo" Data="@TiposCuentaCorriente" Size="sm">
+                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto" /></DropDownListSettings>
+                                </TelerikDropDownList>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Cuenta de destino:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.EsCuentaDestino)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Cuenta tipo orden:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.EsCuentaOrden)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Cuenta vinculado a banco:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.EsCuentaVinculoBanco)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Cuenta balance de comprobación:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(CuentaContableEditar.CodigoCuentaBalance)" Size="sm" Width="100px" />
+                                    <Principal.CuentaBalanceCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaBalance)" />
+                                    <TelerikTextBox @bind-Value="@(CuentaContableObtener.NombreCuentaBalance)" Title="@(CuentaContableObtener.NombreCuentaBalance)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Cuenta casilla de comprobación:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(CuentaContableEditar.CodigoCasillaBalance)" Size="sm" Width="100px" />
+                                    <Principal.CasillaBalanceCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCasillaBalance)" />
+                                    <TelerikTextBox @bind-Value="@(CuentaContableObtener.NombreCasillaBalance)" Title="@(CuentaContableObtener.NombreCasillaBalance)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Cuenta detalle casilla de comprobación:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(CuentaContableEditar.CodigoCasillaBalanceDetalle)" Size="sm" Width="100px" />
+                                    <Principal.CasillaBalanceCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCasillaBalanceDetalle)" />
+                                    <TelerikTextBox @bind-Value="@(CuentaContableObtener.NombreCasillaBalanceDetalle)" Title="@(CuentaContableObtener.NombreCasillaBalanceDetalle)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                    </FormGroup>
+
+                    <FormItem Field="ExigeEntidadComprobante">
+                        <Template>
+                            <label>Entidad comprobante:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.ExigeEntidadComprobante)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="ExigeCentroCosto">
+                        <Template>
+                            <label>Centro de costo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.ExigeCentroCosto)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="ExigeMonedaExtranjera">
+                        <Template>
+                            <label>Moneda extranjera:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.ExigeMonedaExtranjera)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="ExigeCuentaExistencia">
+                        <Template>
+                            <label>Cuenta existencia:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(CuentaContableEditar.ExigeCuentaExistencia)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+
+                    <FormItem Field="GrdDetalle">
+                        <Template>
+                            <TelerikGrid Height="auto" Data="@(CuentaContableObtener.Detalles)" Pageable="false" Sortable="true" Resizable="false" Size="sm" @ref="GridDetalleRef" Class="edit-grid" OnRowRender="@OnRowDetalleRenderHandler">
+                                <GridToolBarTemplate>
+                                    <TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ir a agregar nuevo ítem" Size="sm" OnClick="@(MostrarAgregarDetalle)">Ir a agregar ítem</TelerikButton>
+                                </GridToolBarTemplate>
+                                <GridColumns>
+                                    <GridColumn Field="FlagRegistro" Width="80px" Title="Registro">
+                                        <Template>
+                                            <TelerikDropDownList @bind-Value="@((context as CuentaContableDetalleObtenerDto).FlagRegistro)" FillMode="solid" TextField="Nombre" ValueField="Codigo" Data="@DetalleRegistros" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="FlagTipo" Width="80px" Title="Tipo">
+                                        <Template>
+                                            <TelerikDropDownList @bind-Value="@((context as CuentaContableDetalleObtenerDto).FlagTipo)" FillMode="solid" TextField="Nombre" ValueField="Codigo" Data="@DetalleTipos" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="FlagTipoCambio" Width="80px" Title="Tipo de Cambio">
+                                        <Template>
+                                            <TelerikDropDownList @bind-Value="@((context as CuentaContableDetalleObtenerDto).FlagTipoCambio)" FillMode="solid" TextField="Nombre" ValueField="Codigo" Data="@DetalleTiposCambio" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="CodigoCuentaContableGanancia" Width="100px" Title="Cuenta Contable Ganancia">
+                                        <Template>
+                                            <TelerikTextBox @bind-Value="@((context as CuentaContableDetalleObtenerDto).CodigoCuentaContableGanancia)" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="CodigoCuentaContablePerdida" Width="100px" Title="Cuenta Contable Pérdida">
+                                        <Template>
+                                            <TelerikTextBox @bind-Value="@((context as CuentaContableDetalleObtenerDto).CodigoCuentaContablePerdida)" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Width="100px" Title="Acciones">
+                                        <Template>
+                                            @{
+                                                CuentaContableDetalleObtenerDto item = context as CuentaContableDetalleObtenerDto;
+                                            }
+                                            <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemDetalle(item))" />
+                                            <TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" Id="tbtn" Title="Ir a modificar ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarModificarDetalle(item))" />
+                                            <TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" Id="tbtn" Title="Quitar ítem" Class="b-delete" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarQuitarDetalle(item))" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>No existen ítems registrados</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+
+                    <FormItem Field="GrdDestinos">
+                        <Template>
+                            <TelerikGrid Height="auto" Data="@(CuentaContableObtener.Destinos)" Pageable="false" Sortable="true" Resizable="false" Size="sm" @ref="GridDestinoRef" Class="edit-grid" OnRowRender="@OnRowDestinosRenderHandler">
+                                <GridToolBarTemplate>
+                                    <TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ir a agregar nuevo ítem" Size="sm" OnClick="@(MostrarAgregarDestino)">Ir a agregar ítem</TelerikButton>
+                                </GridToolBarTemplate>
+                                <GridColumns>
+                                    <GridColumn Field="FlagTipo" Width="100px" Title="Tipo">
+                                        <Template>
+                                            <TelerikDropDownList @bind-Value="@((context as CuentaContableDestinoObtenerDto).FlagTipo)" FillMode="solid" TextField="Nombre" ValueField="Codigo" Data="@DestinoTipos" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="CodigoCuentaContableGenera" Width="100px" Title="Cuenta Contable Genera">
+                                        <Template>
+                                            <TelerikTextBox @bind-Value="@((context as CuentaContableDestinoObtenerDto).CodigoCuentaContableGenera)" Size="sm" Enabled="false" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Width="50px" Title="Acciones">
+                                        <Template>
+                                            @{
+                                                CuentaContableDestinoObtenerDto item = context as CuentaContableDestinoObtenerDto;
+                                            }
+                                            <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemDestino(item))" />
+                                            <TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" Id="tbtn" Title="Ir a modificar ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarModificarDestino(item))" />
+                                            <TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" Id="tbtn" Title="Quitar ítem" Class="b-delete" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarQuitarDestino(item))" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>No existen ítems registrados</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+
+                <FormItemsTemplate Context="formContext">
+                    @{
+                        List<IFormItemBase> formObjects = formContext.Items;
+                        List<IFormItem> items = [];
+                        List<IFormGroup> groups = [];
+                        foreach (IFormItemBase itemBase in formObjects)
+                        {
+                            if (itemBase is IFormGroup)
+                                groups.Add((IFormGroup) itemBase);
+                            else
+                                items.Add((IFormItem) itemBase);
+                        }
+                    }
+                    <TelerikTabStrip Height="535px" PersistTabContent="@(true)">
+                        <TabStripTab Title="Datos Principales">
+                            <TelerikFormGroupRenderer Group="@(groups[0])">
+                                <Template Context="groupContext">
+                                    @foreach (IFormItem itemGroup in groupContext.Items)
+                                    {
+                                        <TelerikFormItemRenderer Item="@itemGroup" />
+                                    }
+                                </Template>
+                            </TelerikFormGroupRenderer>
+                        </TabStripTab>
+
+                        <TabStripTab Title="Exigencias">
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "ExigeEntidadComprobante"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "ExigeCentroCosto"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "ExigeMonedaExtranjera"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "ExigeCuentaExistencia"))" />
+                        </TabStripTab>
+
+                        <TabStripTab Title="Diferencia de cambio - Traducción monetaria">
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "GrdDetalle"))" />
+                        </TabStripTab>
+
+                        <TabStripTab Title="Cuentas Destino">
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "GrdDestinos"))" />
+                        </TabStripTab>
+                    </TelerikTabStrip>
+                </FormItemsTemplate>
+
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikWindow Visible="@EsVisibleModalDetalle" ThemeColor="dark" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>@DescripcionAccionModal ítem de detalle</WindowTitle>
+                <WindowActions> 
+                    <WindowAction Name="Maximize" Title="Maximizar"/>
+                    <WindowAction Name="Close" Title="Cerrar" OnClick="@CerrarDetalle" />
+                </WindowActions>
+                <WindowContent> 
+                    <TelerikNotification @ref="@AlertDetalle" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                    @if(TipoAccionModal is "V")
+                    {
+                        <TelerikForm Model="@Detalle" Size="sm">
+                            <FormItems> 
+                                <FormItem>
+                                    <Template>
+                                        <label>Registro:</label>
+                                        <TelerikDropDownList @bind-Value="@(Detalle.FlagRegistro)" TextField="Nombre" ValueField="Codigo" Data="@DetalleRegistros" Enabled="@false" Size="sm"/>
+                                    </Template>
+                                </FormItem>
+                                <FormItem>
+                                    <Template>
+                                        <label>Tipo:</label>
+                                        <TelerikDropDownList @bind-Value="@(Detalle.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTipos" Enabled="@false" Size="sm"/>
+                                    </Template>
+                                </FormItem>
+                                <FormItem>
+                                    <Template>
+                                        <label>Tipo de cambio:</label>
+                                        <TelerikDropDownList @bind-Value="@(Detalle.FlagTipoCambio)" TextField="Nombre" ValueField="Codigo"  Enabled="@false" Data="@DetalleTiposCambio" Size="sm"/>
+                                    </Template>
+                                </FormItem>
+                                <FormItem>
+                                    <Template>
+                                        <label>Cuenta contable de Ganancia:</label>
+                                        <div class="item-group"> 
+                                            <TelerikTextBox @bind-Value="@(Detalle.CodigoCuentaContableGanancia)" Size="sm" Width="100px" Enabled="@false"/> 
+                                            <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContableGanancia)" Title="@(Detalle.NombreCuentaContableGanancia)" Size="sm" Enabled="@false"/>
+                                        </div>
+                                    </Template>
+                                </FormItem>
+                                <FormItem>
+                                    <Template>
+                                        <label>Cuenta contable de Pérdida:</label>
+                                        <div class="item-group">
+                                            <TelerikTextBox @bind-Value="@(Detalle.CodigoCuentaContablePerdida)" Size="sm" Width="100px" Enabled="@false"/> 
+                                            <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContablePerdida)" Title="@(Detalle.NombreCuentaContablePerdida)" Size="sm" Enabled="@false"/>
+                                        </div>
+                                    </Template>
+                                </FormItem>
+                            </FormItems>
+                            <FormButtons>
+                                <TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(() => MostrarModificarDetalle(Detalle))" >Ir a modificar</TelerikButton>
+                                <TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete" OnClick="@(() => MostrarQuitarDetalle(Detalle))">Quitar</TelerikButton>
+                            </FormButtons>
+                        </TelerikForm>   
+                    }
+                    else 
+                    { 
+                        @if(TipoAccionModal is "I" or "M")
+                        {
+                            <TelerikForm EditContext="@(DetalleInsertarContext)" Size="sm" OnValidSubmit="@(() => AccionarDetalle(TipoAccionModal))" >
+                                <FormValidation>
+                                    <FluentValidationValidator @ref="validator"/>  
+                                </FormValidation> 
+                                <FormItems> 
+                                    @if(TipoAccionModal is "I")
+                                    {
+                                        <FormItem>
+                                            <Template>
+                                                <label>Registro*:</label>
+                                                <TelerikDropDownList @bind-Value="@(DetalleInsertar.FlagRegistro)" TextField="Nombre" ValueField="Codigo" Data="@DetalleRegistros" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                                <TelerikValidationMessage For="@(() => DetalleInsertar.FlagRegistro)" />
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Tipo*:</label>
+                                                <TelerikDropDownList @bind-Value="@(DetalleInsertar.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTipos" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                                <TelerikValidationMessage For="@(() => DetalleInsertar.FlagTipo)" />
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Tipo de cambio*:</label>
+                                                <TelerikDropDownList @bind-Value="@(DetalleInsertar.FlagTipoCambio)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTiposCambio" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                                <TelerikValidationMessage For="@(() => DetalleInsertar.FlagTipoCambio)" />
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Cuenta contable de Ganancia:</label>
+                                                <div class="item-group"> 
+                                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DetalleInsertar.CodigoCuentaContableGanancia)" Size="sm" Width="100px"/>
+                                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContableGanancia)"/>
+                                                    <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContableGanancia)" Title="@(Detalle.NombreCuentaContableGanancia)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm"/>
+                                                </div>
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Cuenta contable de Pérdida:</label>
+                                                <div class="item-group">
+                                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DetalleInsertar.CodigoCuentaContablePerdida)" Size="sm" Width="100px"/>
+                                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContablePerdida)"/>
+                                                    <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContablePerdida)" Title="@(Detalle.NombreCuentaContablePerdida)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                                </div>
+                                            </Template>
+                                        </FormItem>
+                                    }
+                                    else 
+                                    {
+                                        <FormItem>
+                                            <Template>
+                                                <label>Registro:</label>
+                                                <TelerikDropDownList @bind-Value="@(DetalleInsertar.FlagRegistro)" TextField="Nombre" ValueField="Codigo" Data="@DetalleRegistros" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Tipo:</label>
+                                                <TelerikDropDownList @bind-Value="@(DetalleInsertar.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTipos" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Tipo de cambio:</label>
+                                                <TelerikDropDownList @bind-Value="@(DetalleInsertar.FlagTipoCambio)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTiposCambio" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Cuenta contable de Ganancia:</label>
+                                                <div class="item-group"> 
+                                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DetalleInsertar.CodigoCuentaContableGanancia)" Size="sm" Width="100px"/>
+                                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContableGanancia)"/>
+                                                    <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContableGanancia)" Title="@(Detalle.NombreCuentaContableGanancia)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm"/>
+                                                </div>
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Cuenta contable de Pérdida:</label>
+                                                <div class="item-group">
+                                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DetalleInsertar.CodigoCuentaContablePerdida)" Size="sm" Width="100px"/>
+                                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContablePerdida)"/>
+                                                    <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContablePerdida)" Title="@(Detalle.NombreCuentaContablePerdida)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                                </div>
+                                            </Template>
+                                        </FormItem>
+                                    }
+                                </FormItems>
+                                <FormButtons>
+                                    <TelerikButton Icon="@(IconoAccionModal)" Size="sm" ThemeColor="secondary">@VerboAccionModal</TelerikButton> 
+                                </FormButtons>
+                            </TelerikForm>  
+                        }
+                        else if(TipoAccionModal is "E")
+                        {
+                            <TelerikForm EditContext="@(DetalleEditarContext)" Size="sm" OnValidSubmit="@(() => AccionarDetalle(TipoAccionModal))" >
+                                <FormValidation>
+                                    <FluentValidationValidator @ref="validator"/>  
+                                </FormValidation> 
+                                <FormItems> 
+                                    <FormItem Enabled=@false>
+                                        <Template>
+                                            <label>Registro:</label>
+                                            <TelerikDropDownList @bind-Value="@(Detalle.FlagRegistro)" TextField="Nombre" ValueField="Codigo" Data="@DetalleRegistros" Size="sm"/>
+                                        </Template>
+                                    </FormItem>
+                                    <FormItem>
+                                        <Template>
+                                            <label>Tipo:</label>
+                                            <TelerikDropDownList @bind-Value="@(DetalleEditar.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTipos" Size="sm">
+                                                <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                            </TelerikDropDownList>
+                                        </Template>
+                                    </FormItem>
+                                    <FormItem>
+                                        <Template>
+                                            <label>Tipo de cambio:</label>
+                                            <TelerikDropDownList @bind-Value="@(DetalleEditar.FlagTipoCambio)" TextField="Nombre" ValueField="Codigo" Data="@DetalleTiposCambio" Size="sm">
+                                                <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                            </TelerikDropDownList>
+                                        </Template>
+                                    </FormItem>
+                                    <FormItem>
+                                        <Template>
+                                            <label>Cuenta contable de Ganancia:</label>
+                                            <div class="item-group"> 
+                                                <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DetalleEditar.CodigoCuentaContableGanancia)" Size="sm" Width="100px"/>
+                                                <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContableGanancia)"/>
+                                                <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContableGanancia)" Title="@(Detalle.NombreCuentaContableGanancia)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm"/>
+                                            </div>
+                                        </Template>
+                                    </FormItem>
+                                    <FormItem>
+                                        <Template>
+                                            <label>Cuenta contable de Pérdida:</label>
+                                            <div class="item-group">
+                                                <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DetalleEditar.CodigoCuentaContablePerdida)" Size="sm" Width="100px"/>
+                                                <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContablePerdida)"/>
+                                                <TelerikTextBox @bind-Value="@(Detalle.NombreCuentaContablePerdida)" Title="@(Detalle.NombreCuentaContablePerdida)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                            </div>
+                                        </Template>
+                                    </FormItem>
+                                </FormItems>
+                                <FormButtons>
+                                    <TelerikButton Icon="@(IconoAccionModal)" Size="sm" ThemeColor="secondary">@VerboAccionModal</TelerikButton>
+                                </FormButtons>
+                            </TelerikForm> 
+                        }
+                    }
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikWindow Visible="@EsVisibleModalDestino" ThemeColor="dark" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>@DescripcionAccionModal ítem de destino</WindowTitle>
+                <WindowActions> 
+                    <WindowAction Name="Maximize" Title="Maximizar"/> 
+                    <WindowAction Name="Close" Title="Cerrar" OnClick="@CerrarDestino" /> 
+                </WindowActions>
+                <WindowContent> 
+                    <TelerikNotification @ref="@AlertDestino" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                    @if(TipoAccionModal is "V")
+                    {
+                        <TelerikForm Model="@DestinoObtener" Size="sm">
+                            <FormItems>  
+                                <FormItem>
+                                    <Template>
+                                        <label>Tipo:</label>
+                                        <TelerikDropDownList @bind-Value="@(DestinoObtener.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DestinoTipos"  Enabled="@false" Size="sm"/>
+                                    </Template>
+                                </FormItem>
+                                <FormItem>
+                                    <Template>
+                                        <label>Cuenta contable que genera:</label>
+                                        <div class="item-group"> 
+                                            <TelerikTextBox @bind-Value="@(DestinoObtener.CodigoCuentaContableGenera)" Size="sm" Width="100px" Enabled="@false"/> 
+                                            <TelerikTextBox @bind-Value="@(DestinoObtener.NombreCuentaContableGenera)" Title="@(DestinoObtener.NombreCuentaContableGenera)" Size="sm" Enabled="@false"/>
+                                        </div>
+                                    </Template>
+                                </FormItem>
+                            </FormItems>
+                            <FormButtons>
+                                <TelerikButton Icon="@(SvgIcon.Pencil)" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(() => MostrarModificarDestino(DestinoObtener))" >Ir a modificar</TelerikButton>
+                                <TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete" OnClick="@(() => MostrarQuitarDestino(DestinoObtener))">Quitar</TelerikButton>
+                            </FormButtons>
+                        </TelerikForm>   
+                    }
+                    else 
+                    { 
+                        @if(TipoAccionModal is "I" or "M")
+                        {
+                            <TelerikForm EditContext="@(EditContextDestinoInsertar)" Size="sm" OnValidSubmit="@(() => AccionarDestino(TipoAccionModal))" >
+                                <FormValidation>
+                                    <FluentValidationValidator @ref="validator"/>  
+                                </FormValidation> 
+                                <FormItems>
+                                    @if(TipoAccionModal is "I")
+                                    {
+                                        <FormItem>
+                                            <Template>
+                                                <label>Tipo*:</label>
+                                                <TelerikDropDownList @bind-Value="@(DestinoInsertar.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DestinoTipos" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                                <TelerikValidationMessage For="@(() => DestinoInsertar.FlagTipo)" />
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Cuenta contable que genera*:</label>
+                                                <div class="item-group"> 
+                                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DestinoInsertar.CodigoCuentaContableGenera)" Size="sm" Width="100px"/> 
+                                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContableGenera)"/>
+                                                    <TelerikTextBox @bind-Value="@(DestinoObtener.NombreCuentaContableGenera)" Title="@(DestinoObtener.NombreCuentaContableGenera)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                                </div>
+                                                <TelerikValidationMessage For="@(() => DestinoInsertar.CodigoCuentaContableGenera)" />
+                                            </Template>
+                                        </FormItem>
+                                    }
+                                    else 
+                                    {
+                                        <FormItem>
+                                            <Template>
+                                                <label>Tipo:</label>
+                                                <TelerikDropDownList @bind-Value="@(DestinoInsertar.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DestinoTipos" Size="sm">
+                                                    <DropDownListSettings> <DropDownListPopupSettings Height="auto"/></DropDownListSettings>
+                                                </TelerikDropDownList>
+                                            </Template>
+                                        </FormItem>
+                                        <FormItem>
+                                            <Template>
+                                                <label>Cuenta contable que genera:</label>
+                                                <div class="item-group"> 
+                                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DestinoInsertar.CodigoCuentaContableGenera)" Size="sm" Width="100px"/> 
+                                                    <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContableGenera)"/>
+                                                    <TelerikTextBox @bind-Value="@(DestinoObtener.NombreCuentaContableGenera)" Title="@(DestinoObtener.NombreCuentaContableGenera)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm"/>
+                                                </div>
+                                            </Template>
+                                        </FormItem>
+                                    }
+                                </FormItems>
+                                <FormButtons>
+                                    <TelerikButton Icon="@(IconoAccionModal)" Size="sm" ThemeColor="secondary">@VerboAccionModal</TelerikButton>
+                                </FormButtons>
+                            </TelerikForm> 
+                        }
+                        else if(TipoAccionModal is "E")
+                        {
+                            <TelerikForm EditContext="@(EditContextDestinoEditar)" Size="sm" OnValidSubmit="@(() => AccionarDestino(TipoAccionModal))" >
+                                <FormValidation>
+                                    <FluentValidationValidator @ref="validator"/>  
+                                </FormValidation> 
+                                <FormItems>  
+                                    <FormItem>
+                                        <Template>
+                                            <label>Tipo:</label>
+                                            <TelerikDropDownList @bind-Value="@(DestinoObtener.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@DestinoTipos" Enabled="@false" Size="sm"/>
+                                        </Template>
+                                    </FormItem>
+                                    <FormItem>
+                                        <Template>
+                                            <label>Cuenta contable que genera:</label>
+                                            <div class="item-group">
+                                                <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(DestinoEditar.CodigoCuentaContableGenera)" Size="sm" Width="100px"/> 
+                                                <Principal.CuentaContableCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoCuentaContableGenera)"/>
+                                                <TelerikTextBox @bind-Value="@(DestinoObtener.NombreCuentaContableGenera)" Title="@(DestinoObtener.NombreCuentaContableGenera)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                            </div>
+                                        </Template>
+                                    </FormItem>
+                                </FormItems>
+                                <FormButtons>
+                                    <TelerikButton Icon="@(IconoAccionModal)" Size="sm" ThemeColor="secondary">@VerboAccionModal</TelerikButton> 
+                                </FormButtons>
+                            </TelerikForm> 
+                        }
+                    }
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogDetalle" Width="250px" ShowCloseButton="@(false)" ThemeColor="dark" CloseOnOverlayClick="@(false)" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle>Quitando ítem de detalle</DialogTitle>
+                <DialogContent> ¿Está seguro de quitar el ítem? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="secondary" OnClick="@(() => AccionarDetalle(TipoAccionDialog))" Size="sm">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(CerrarDialog)" Size="sm">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogDestino" Width="250px" ShowCloseButton="@(false)" ThemeColor="dark" CloseOnOverlayClick="@(false)" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle>Quitando ítem de destinos</DialogTitle>
+                <DialogContent> ¿Está seguro de quitar el ítem? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="secondary" OnClick="@(() => AccionarDestino(TipoAccionDialog))" Size="sm">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(CerrarDialog)" Size="sm">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

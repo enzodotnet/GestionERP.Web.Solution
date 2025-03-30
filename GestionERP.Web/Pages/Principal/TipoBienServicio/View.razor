@@ -1,0 +1,39 @@
+@page "/tipos-bien-servicio/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Bien y Servicio - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoBienServicioObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando bien y servicio" CodigoRegistro="@(TipoBienServicioObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@TipoBienServicioObtener" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoBienServicioObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox @bind-Value="@(TipoBienServicioObtener.Nombre)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

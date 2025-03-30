@@ -1,0 +1,77 @@
+@inject NavigationManager INavigation
+@inject IAuthentication IAuth
+@inject AuthenticationStateProvider IAuthState
+@using System.Security.Claims
+
+<AuthorizeView>
+    <Authorized> 
+        <TelerikSplitButton Title="@(NombreUsuario)" Icon="@(SvgIcon.User)" ThemeColor="base" Rounded="sm" Size="sm" FillMode="@(ThemeConstants.SplitButton.FillMode.Solid)">
+            <SplitButtonContent>@NickUsuario</SplitButtonContent>
+
+            <SplitButtonItems>
+                <SplitButtonItem OnClick="@(CerrarSesionUsuario)" Icon="@(SvgIcon.Logout)">Cerrar sesión</SplitButtonItem>
+                <SplitButtonItem Icon="@(SvgIcon.FileConfig)">Ajustes</SplitButtonItem>
+            </SplitButtonItems>
+
+            <SplitButtonSettings>
+                <SplitButtonPopupSettings Width="Auto"></SplitButtonPopupSettings>
+            </SplitButtonSettings>
+        </TelerikSplitButton>
+    </Authorized>
+    <NotAuthorized>
+        <TelerikSplitButton OnClick="@(IniciarSesion)" Icon="@(SvgIcon.Login)" ThemeColor="@(ThemeConstants.SplitButton.ThemeColor.Base)" Rounded="@(ThemeConstants.SplitButton.Rounded.Small)" Size="@(ThemeConstants.SplitButton.Size.Small)" FillMode="@(ThemeConstants.SplitButton.FillMode.Solid)">Iniciar Sesión</TelerikSplitButton>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    ClaimsPrincipal UserSesion { get; set; }
+    public string NombreUsuario { get; set; }
+    public string NickUsuario { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserSesion = (await IAuthState.GetAuthenticationStateAsync()).User;
+        if (UserSesion.Identity.IsAuthenticated)
+        {
+            NombreUsuario = UserSesion.FindFirst("name")?.Value;
+            NickUsuario = UserSesion.FindFirst("nameid")?.Value;
+        }
+    }
+
+    @* protected override void OnInitialized()
+    {
+        UserSesion = new();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        UserSesion = (await IAuthState.GetAuthenticationStateAsync()).User;
+        if (UserSesion.Identity.IsAuthenticated)
+        {
+            NombreUsuario = UserSesion.FindFirst("name")?.Value;
+            NickUsuario = UserSesion.FindFirst("nameid")?.Value;
+        }
+    } *@
+
+    private void CerrarSesionUsuario()
+    {
+        INavigation.NavigateTo("logout");
+    }
+
+    public void CargarNombreUsuario(string valor)
+    {
+        StateHasChanged();
+    }
+
+    private async Task IniciarSesion()
+    { 
+        await IAuth.CerrarSesionUsuario();
+        INavigation.NavigateTo("/");
+    }
+}
+
+<style>
+    .user-menu {
+        color: white;
+    }
+</style>

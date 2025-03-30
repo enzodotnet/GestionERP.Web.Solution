@@ -1,0 +1,57 @@
+@page "/tipos-tributo/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Tipo Tributo y Concepto - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoTributoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de tributo y concepto" CodigoRegistro="@(TipoTributoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@TipoTributoObtener" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoTributoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox @bind-Value="@(TipoTributoObtener.Nombre)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Código internacional:</label>
+                            <TelerikTextBox @bind-Value="@(TipoTributoObtener.InternationalCode)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre abreviado:</label>
+                            <TelerikTextBox @bind-Value="@(TipoTributoObtener.NombreAbreviado)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es predeterminado:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoTributoObtener.EsPredeterminado" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

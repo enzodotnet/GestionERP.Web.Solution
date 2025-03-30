@@ -1,0 +1,99 @@
+@page "/procesos-documento/{Id:guid}"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>Proceso Documento - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (ProcesoDocumentoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando proceso de documento" CodigoRegistro="@(ProcesoDocumentoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@ProcesoDocumentoObtener" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ProcesoDocumentoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox @bind-Value="@(ProcesoDocumentoObtener.Nombre)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de documento:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(ProcesoDocumentoObtener.CodigoTipoDocumento)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(ProcesoDocumentoObtener.NombreTipoDocumento)" Title="@(ProcesoDocumentoObtener.NombreTipoDocumento)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem> 
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de acción:</label>
+                            <TelerikDropDownList @bind-Value="@ProcesoDocumentoObtener.FlagTipoAccion" TextField="Nombre" ValueField="Codigo" Data="@TiposAccion" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+
+                    <FormItem>
+                        <Template>
+                            <label>Es agregable tipo de artículo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ProcesoDocumentoObtener.EsAgregableTipoArticulo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipos de artículo:</label>
+                            <TelerikGrid Height="160px" Data="@(ProcesoDocumentoObtener.TiposArticulo)" Pageable="false" Sortable="true" Resizable="false" Size="sm">
+                                <GridColumns>
+                                    <GridColumn Field="CodigoTipoArticulo" Width="100px" Title="Código" />
+                                    <GridColumn Field="NombreTipoArticulo" Width="150px" Title="Nombre" /> 
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>No existen ítems registrados</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+
+                    <FormItem>
+                        <Template>
+                            <label>Es proceso referencia:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ProcesoDocumentoObtener.EsProcesoReferencia" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Referencias:</label>
+                            <TelerikGrid Height="160px" Data="@(ProcesoDocumentoObtener.Referencias)" Pageable="false" Sortable="true" Resizable="false" Size="sm">
+                                <GridColumns>
+                                    <GridColumn Field="CodigoProcesoDocumentoAsociado" Width="100px" Title="Código" />
+                                    <GridColumn Field="NombreProcesoDocumentoAsociado" Width="150px" Title="Nombre del proceso documento asociado" /> 
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>No existen ítems registrados</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

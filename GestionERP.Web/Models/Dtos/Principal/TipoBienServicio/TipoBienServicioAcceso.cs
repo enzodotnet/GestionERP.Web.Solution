@@ -1,0 +1,6 @@
+namespace GestionERP.Web.Models.Dtos.Principal;
+
+public class TipoBienServicioAcceso
+{
+    public static string VerRegistros { get; } = "0929VIFORM";
+}

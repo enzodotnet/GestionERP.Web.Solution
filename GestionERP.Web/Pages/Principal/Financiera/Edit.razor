@@ -1,0 +1,77 @@
+@page "/financieras/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Financiera - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando financiera" CodigoRegistro="@(FinancieraObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(FinancieraEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(FinancieraEditar.Nombre)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => FinancieraEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Abreviación del nombre*:</label>
+                            <TelerikTextBox AutoComplete="off" Width="100px" @bind-Value="@(FinancieraEditar.AbreviacionNombre)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => FinancieraEditar.AbreviacionNombre)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Registro:</label>
+                            <TelerikDropDownList @bind-Value="@FinancieraObtener.FlagRegistro" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@Registros" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de financiera:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(FinancieraEditar.CodigoTipoFinanciera)" Size="sm" Width="100px" />
+                                <Principal.TipoFinancieraCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoTipoFinanciera)" />
+                                <TelerikTextBox @bind-Value="@(FinancieraObtener.NombreTipoFinanciera)" Title="@(FinancieraObtener.NombreTipoFinanciera)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

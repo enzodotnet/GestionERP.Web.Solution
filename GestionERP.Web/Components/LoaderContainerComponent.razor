@@ -1,0 +1,28 @@
+<div class="loader-container-component">
+    <TelerikLoaderContainer 
+        Size="@ThemeConstants.Loader.Size.Small"
+        ThemeColor="primary"
+        OverlayThemeColor="null"
+        LoaderPosition="@LoaderPosition.Start"
+        Text="Cargando registro(s)..."
+        LoaderType="@(LoaderType.ConvergingSpinner)">
+    </TelerikLoaderContainer>
+</div>
+
+<style>
+    .loader-container-component {
+        position: relative;
+        height: 250px;
+        width: 75%;
+        margin: 0 auto;
+    }
+
+    .loader-container-heading {
+        padding-top:25px;
+    }
+
+    .k-loader-container {
+        z-index: 0;
+        word-break: break-all;
+    }
+</style>

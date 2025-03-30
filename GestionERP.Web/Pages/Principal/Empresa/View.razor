@@ -1,0 +1,544 @@
+@page "/empresas/{Id:guid}"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+@implements IDisposable
+
+<PageTitle>Empresa - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && (IsSelectedFile | IsLoadingAction))" />
+
+<TooltipButtonComponent/>
+
+@if (EmpresaObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando empresa" CodigoRegistro="@(EmpresaObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm Model="@(EmpresaObtener)" Size="sm">
+                <FormItems>
+                    <FormItem Field="Activo">
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Activo)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Nombre">
+                        <Template>
+                            <label>Nombre o razón social:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Nombre)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="CodigoTipoIdentificacion">
+                        <Template>
+                            <label>Tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(EmpresaObtener.CodigoTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox @bind-Value="@(EmpresaObtener.NombreTipoIdentificacion)" Width="200px" Title="@(EmpresaObtener.NombreTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="NumeroTipoIdentificacion">
+                        <Template>
+                            <label>Número del tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Sigla del tipo de identificación" Enabled="@(false)" @bind-Value="@(EmpresaObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox Width="150px" AutoComplete="off" @bind-Value="@(EmpresaObtener.NumeroTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Código web:</label>
+                            <TelerikTextBox @bind-Value="@(EmpresaObtener.CodigoWeb)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Acronimo">
+                        <Template>
+                            <label>Acrónimo:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Acronimo)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Descripcion">
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Descripcion)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="FechaInicioSistema">
+                        <Template>
+                            <label>Fecha de inicio en el sistema:</label>
+                            <TelerikDateInput Width="150px" Enabled="@(false)" Size="sm" @bind-Value="@(EmpresaObtener.FechaInicioSistema)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Archivo">
+                        <Template>
+                            <label>Logo (se acepta archivos .jpeg, .jpg o .png de 5MB como máximo):</label>
+                            @if (!ItemFileSelectCargado)
+                            {
+                                <TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm"></TelerikLoader>
+                            }
+                            else
+                            {
+                                <div class="item-group">
+                                    @if (!IsUploadingFile)
+                                    {
+                                        @if (!ArchivoId.HasValue)
+                                        {
+                                            <div class="no-content-file">
+                                                <TelerikSvgIcon Icon="@(SvgIcon.CancelOutline)" /><label>No contiene archivo</label>
+                                            </div>
+                                            @if (AccesoActualizarLogo)
+                                            {
+                                                <TelerikButton Icon="@(SvgIcon.ImageAdd)" Class="b-primary" ButtonType="@ButtonType.Button" Id="tbtn" Title="Agregar nueva imagen" OnClick="@(() => IsUploadingFile = true)" Size="sm" />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <TelerikButton Icon="@(SvgIcon.Eye)" Class="b-primary" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ver imagen" OnClick="@(() => EsVisibleModalImagen = true)" Size="sm">Ver imagen grabada</TelerikButton>
+                                            @if (AccesoActualizarLogo)
+                                            {
+                                                <TelerikButton Icon="@(SvgIcon.ImageEdit)" Class="b-primary" ButtonType="@ButtonType.Button" Id="tbtn" Title="Modificar archivo subido al repositorio" OnClick="@(() => IsUploadingFile = true)" Size="sm" />
+                                                <TelerikButton Icon="@(SvgIcon.Trash)" ButtonType="@ButtonType.Button" Id="tbtn" Title="Eliminar archivo del repositorio" Class="b-primary" OnClick="@(() => EsVisibleDialogEliminarLogo = true)" Size="sm" />
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <TelerikFileSelect OnSelect="@(HandleSelectedFileLogo)" OnRemove="@(HandleRemoveFileLogo)" Multiple=@(false) Enabled="@(!IsLoadingAction)" AllowedExtensions="@AllowedExtensions" Accept=".png, .jpg, .jpeg" MinFileSize="@(1024)" MaxFileSize="@(5242880)" />
+                                        <TelerikButton Icon="@(SvgIcon.Eye)" Class="b-primary" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(IsSelectedFile)" OnClick="@(() => EsVisibleModalImagen = true)" Title="Vista previa de imagen" Size="sm" />
+                                        <TelerikButton Icon="@(SvgIcon.Undo)" ButtonType="@ButtonType.Button" Id="tbtn" Title="Deshacer acción" Visible="@(!IsLoadingAction)" OnClick="@(DeshacerUploadFile)" Class="b-primary" Size="sm" />
+                                        <TelerikButton Icon="@(SvgIcon.Upload)" ButtonType="@ButtonType.Button" Id="tbtn" Title="Subir archivo al repositorio" Size="sm" ThemeColor="primary" Visible="@(IsSelectedFile)" Enabled="@(!IsLoadingAction)" OnClick="@(SubirArchivo)">Subir imagen</TelerikButton>
+                                    }
+                                </div>
+                            }
+                        </Template>
+                    </FormItem>
+
+                    <FormGroup Class="formgroup intab" Columns="3" ColumnSpacing="10px">
+                        <FormItem>
+                            <Template>
+                                <label>Tipo de rubro:</label>
+                                <TelerikDropDownList @bind-Value="@EmpresaObtener.Atributo.FlagTipoRubro" Enabled="@(false)" TextField="Nombre" ValueField="Codigo" Data="@TiposRubro" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es transportista:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Atributo.EsTransportista)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Es agente retenedor:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Atributo.EsAgenteRetenedor)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Dirección fiscal:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.DireccionFiscal)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Dirección de depósito:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.DireccionDeposito)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem>
+                            <Template>
+                                <label>Teléfono corporativo:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.TelefonoCorporativo)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Teléfono ventas:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.TelefonoVenta)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Correo electrónico corporativo:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.EmailCorporativo)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem>
+                            <Template>
+                                <label>Correo electrónico ventas:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.EmailVenta)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Correo electrónico compras:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.EmailCompra)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Correo electrónico cobranza:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.EmailCobranza)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem>
+                            <Template>
+                                <label>Página web:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.PaginaWeb)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>En facturación portal:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Atributo.EnFacturacionSunatPortal)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>En facturación externa OSE:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Atributo.EnFacturacionExternoOse)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Cuenta contable de impuesto extorno (por defecto para transferencias gratuitas):</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Enabled="@(false)" @bind-Value="@(EmpresaObtener.Atributo.CodigoCuentaContableImpuestoExtorno)" Size="sm" Width="100px" />
+                                    <TelerikTextBox @bind-Value="@(EmpresaObtener.Atributo.NombreCuentaContableImpuestoExtorno)" Title="@(EmpresaObtener.Atributo.NombreCuentaContableImpuestoExtorno)" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Cuenta contable de orden deudor (por defecto para cierre/apertura anual contable) *:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(EmpresaObtener.Atributo.CodigoCuentaContableOrdenDeudor)" Size="sm" Width="100px" />
+                                    <TelerikTextBox @bind-Value="@(EmpresaObtener.Atributo.NombreCuentaContableOrdenDeudor)" Title="@(EmpresaObtener.Atributo.NombreCuentaContableOrdenDeudor)" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Cuenta contable de orden acreedor (por defecto para cierre/apertura anual contable) :</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(EmpresaObtener.Atributo.CodigoCuentaContableOrdenAcreedor)" Size="sm" Width="100px" />
+                                    <TelerikTextBox @bind-Value="@(EmpresaObtener.Atributo.NombreCuentaContableOrdenAcreedor)" Title="@(EmpresaObtener.Atributo.NombreCuentaContableOrdenAcreedor)" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+
+                        <FormItem>
+                            <Template>
+                                <label>Porcentaje de indicador para ventas:</label>
+                                <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(EmpresaObtener.Atributo.PorcentajeIndicadorVenta)" Enabled="@(false)" Min="0" Format="P" Decimals="4" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Días de plazo a facturas de venta vencida:</label>
+                                <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(EmpresaObtener.Atributo.CantidadDiasPlazoFacturaVencida)" Enabled="@(false)" Min="0" Size="sm" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>N° de cuenta corriente detracción:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Atributo.CuentaCorrienteDetraccion)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Es emisor de certificado de análisis:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Atributo.EsEmisorCertificadoAnalisis)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                    </FormGroup>
+
+                    <FormGroup Class="formgroup intab" Columns="3" ColumnSpacing="10px">
+                        <FormItem>
+                            <Template>
+                                <label>Ubicación del certificado digital (número):</label>
+                                <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(EmpresaObtener.Facturacion.UbicacionCertificado)" Enabled="@(false)" Min="0" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Número de la serie del certificado digital:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.NumeroSerieCertificado)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Usuario SOL:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.UsuarioSOL)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Clave SOL:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.ClaveSOL)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Usuario OSE:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.UsuarioOSE)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Clave OSE:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.ClaveOSE)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Número de resolución:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.NumeroResolucion)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Envía correo:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Facturacion.EnviaCorreo)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Dirección de IP SMTP (correo):</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.HostSMTP)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Número de puerto SMTP (correo):</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.PuertoSMTP)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Correo electrónico del usuario SMTP:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.EmailUsuarioSMTP)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Contraseña del usuario SMTP:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.PasswordSMTP)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Certificado SSL:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EmpresaObtener.Facturacion.CertificadoSSL)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Página web de consultas CDR:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.PaginaWebConsultaCDR)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Página web de descargas XML:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.PaginaWebDescargaXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Color principal del PDF:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.ColorPrincipalPDF)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Color secundario del PDF:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.ColorSecundarioPDF)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Color alterno del PDF:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.ColorAlternoPDF)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación logo del PDF:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaUbicacionLogoPDF)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de boletas:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaBoletaXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de facturas:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaFacturaXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de notas de crédito:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaNotaCreditoXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de notas de débito:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaNotaDebitoXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de resúmenes diarios:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaResumenDiarioXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de comunicaciones de baja:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaComunicacionBajaXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de retenciones:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaRetencionXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de resúmenes de reversión:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaResumenReversionXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de tickets:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaTicketXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem>
+                            <Template>
+                                <label>Ruta ubicación XML de guías de remisión:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EmpresaObtener.Facturacion.RutaGuiaRemisionXML)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                    </FormGroup>
+
+                </FormItems>
+
+                <FormItemsTemplate Context="formContext">
+                    @{
+                        List<IFormItemBase> formObjects = formContext.Items;
+                        List<IFormItem> items = [];//formContext.Items.Cast<IFormItem>().ToList();
+                        List<IFormGroup> groups = []; //formContext.Items.Cast<IFormGroup>().ToList();
+                        foreach (IFormItemBase itemBase in formObjects)
+                        {
+                            if (itemBase is IFormGroup)
+                                groups.Add((IFormGroup)itemBase);
+                            else
+                                items.Add((IFormItem)itemBase);
+                        }
+                    }
+                    <TelerikTabStrip Height="535px" PersistTabContent="@(true)">
+                        <TabStripTab Title="Datos Principales">
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Activo"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Nombre"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "CodigoTipoIdentificacion"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "NumeroTipoIdentificacion"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Acronimo"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Descripcion"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "FechaInicioSistema"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Archivo"))" />
+                        </TabStripTab>
+
+                        <TabStripTab Title="Atributos">
+                            <TelerikFormGroupRenderer Group="@(groups[0])">
+                                <Template Context="groupContext">
+                                    @foreach (IFormItem itemGroup in groupContext.Items)
+                                    {
+                                        <TelerikFormItemRenderer Item="@itemGroup" />
+                                    }
+                                </Template>
+                            </TelerikFormGroupRenderer>
+                        </TabStripTab>
+
+                        <TabStripTab Title="Facturación electrónica">
+                            <TelerikFormGroupRenderer Group="@(groups[1])">
+                                <Template Context="groupContext">
+                                    @foreach (IFormItem itemGroup in groupContext.Items)
+                                    {
+                                        <TelerikFormItemRenderer Item="@itemGroup" />
+                                    }
+                                </Template>
+                            </TelerikFormGroupRenderer>
+                        </TabStripTab>
+                    </TelerikTabStrip>
+                </FormItemsTemplate>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikWindow Visible="@EsVisibleModalImagen" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>Visualizando imagen</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar" />
+                    <WindowAction Name="Close" Title="Cerrar" OnClick="@(() => EsVisibleModalImagen = false)" />
+                </WindowActions>
+                <WindowContent> 
+                    <TelerikCard Width="auto">
+                        <CardImage Src="@(UriArchivoLogoView)"></CardImage>
+                    </TelerikCard> 
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando empresa</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminarLogo" Width="250px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando logo</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar la imagen del repositorio? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(EliminarArchivo)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminarLogo = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+
+        </CardBody>
+    </CardContainerComponent>
+}

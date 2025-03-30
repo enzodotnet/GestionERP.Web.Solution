@@ -1,0 +1,48 @@
+@page "/tipos-nota/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Tipo de Nota - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoNotaObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de nota" CodigoRegistro="@(TipoNotaObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoNotaObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoNotaObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoNotaObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo:</label>
+                            <div class="item-group"> 
+                                <TelerikTextBox Enabled="@(false)" Title="Código del tipo" @bind-Value="@(TipoNotaObtener.TipoCodigo)" Size="sm" Width="100px"/>
+                                <TelerikDropDownList Width="200px" @bind-Value="@(TipoNotaObtener.FlagTipo)" TextField="Nombre" ValueField="Codigo" Data="@Tipos" Enabled="@false" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

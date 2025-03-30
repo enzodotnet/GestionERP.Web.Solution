@@ -1,0 +1,73 @@
+@page "/paises/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>País - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (PaisObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando país" CodigoRegistro="@(PaisObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@PaisObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PaisObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(PaisObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem> 
+                    <FormItem>
+                        <Template>
+                            <label>Nombre en inglés:</label>
+                            <TelerikTextBox @bind-Value="@(PaisObtener.CountryName)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Código del puerto:</label>
+                            <TelerikTextBox @bind-Value="@(PaisObtener.CountryPortCode)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Código postal:</label>
+                            <TelerikTextBox @bind-Value="@(PaisObtener.PostalCode)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Código de convenio para evitar doble tributación:</label>
+                            <TelerikTextBox @bind-Value="@(PaisObtener.ConvenioTributoCode)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es predeterminado en el sistema:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PaisObtener.EsPredeterminado" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.HyperlinkOpen)" Id="tbtn" Title="Ir a ver lista de ubigeo de regiones por país" ButtonType="@ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoVerRegion)" Size="sm" OnClick="@(() => IrVerRegiones())">Ver regiones</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

@@ -1,0 +1,97 @@
+@page "/choferes/{Id:guid}"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+@implements IDisposable
+
+<PageTitle>Chofer - Ver</PageTitle>
+ 
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+@if (ChoferObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando chofer" CodigoRegistro="@(ChoferObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@(ChoferObtener)" Size="sm">
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(ChoferObtener.Activo)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferObtener.Nombre)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(ChoferObtener.CodigoTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox @bind-Value="@(ChoferObtener.NombreTipoIdentificacion)" Width="200px" Title="@(ChoferObtener.NombreTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Número del tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Sigla del tipo de identificación" Enabled="@(false)" @bind-Value="@(ChoferObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox Width="150px" AutoComplete="off" @bind-Value="@(ChoferObtener.NumeroTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de categoría:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferObtener.TipoCategoria)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Observación:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferObtener.Observacion)" Enabled="@(false)" Size="sm" /> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Fecha de expiración de licencia:</label>
+                            <TelerikDateInput Width="150px" Enabled="@(false)" Size="sm" @bind-Value="@(ChoferObtener.FechaExpiracionLicencia)" />
+                        </Template>
+                    </FormItem> 
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+          
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando chofer</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog> 
+
+        </CardBody>
+    </CardContainerComponent>  
+}

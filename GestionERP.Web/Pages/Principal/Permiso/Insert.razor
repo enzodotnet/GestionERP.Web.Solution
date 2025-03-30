@@ -1,0 +1,91 @@
+@page "/permisos/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Permiso - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando permiso" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@EditContext" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>  
+            </FormValidation> 
+            <FormItems>
+                 <FormItem>
+                     <Template>
+                         <label>Servicio*:</label>
+                         <div class="item-group">
+                             <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(PermisoInsertar.CodigoServicio)" Size="sm" Width="100px" />
+                             <Principal.ServicioCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoServicio)" />
+                             <TelerikTextBox @bind-Value="@(PermisoObtener.NombreServicio)" Title="@(PermisoObtener.NombreServicio)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                         </div>
+                         <TelerikValidationMessage For="@(() => PermisoInsertar.CodigoServicio)" />
+                     </Template>
+                 </FormItem>
+                 <FormItem>
+                     <Template>
+                         <label>Evento*:</label>
+                         <div class="item-group">
+                             <TelerikTextBox AutoComplete="off" Placeholder="Código" Enabled="@(false)" @bind-Value="@(PermisoInsertar.CodigoEvento)" Size="sm" Width="100px" />
+                             <Principal.EventoCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoEvento)" />
+                             <TelerikTextBox @bind-Value="@(PermisoObtener.NombreEvento)" Title="@(PermisoObtener.NombreEvento)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                         </div>
+                         <TelerikValidationMessage For="@(() => PermisoInsertar.CodigoEvento)" />
+                     </Template>
+                 </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Código*:</label>
+                        <div class="item-group">
+                            <TelerikButton Icon="@(SvgIcon.InfoCircle)" Id="tbtn" Title="Para poder ingresar el Código deberá primero seleccionar un servicio y evento" Size="sm" FillMode="flat" Rounded="full" ButtonType="@ButtonType.Button" ThemeColor="info" Visible="@(!EnabledCodigo)" />
+                             <TelerikMaskedTextBox @bind-Value="@(PermisoInsertar.Codigo)" Mask="@(MaskCodigo)" OnChange="@ValueCodigoUpperChanged" IncludeLiterals="@true" Enabled="@(EnabledCodigo)" Size="sm" />
+                        </div>
+                        <TelerikValidationMessage For="@(() => PermisoInsertar.Codigo)" />
+                    </Template>
+
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>Nombre*:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(PermisoInsertar.Nombre)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => PermisoInsertar.Nombre)" />
+                    </Template>
+                </FormItem>
+                 <FormItem>
+                     <Template>
+                         <label>Es opción en el menú del sistema:</label>
+                         <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PermisoInsertar.EsOpcionMenu" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                     </Template>
+                 </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Descripción:</label> 
+                        <TelerikTextBox AutoComplete="off" @bind-Value="@(PermisoInsertar.Descripcion)" Size="sm"/>  
+                        <TelerikValidationMessage For="@(() => PermisoInsertar.Descripcion)" />
+                    </Template>
+                </FormItem>
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+
+    </CardBody>
+</CardContainerComponent>  

@@ -1,0 +1,96 @@
+@page "/locales/insertar"
+
+@attribute [Authorize]
+
+<PageTitle>Local - Insertar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Insertando local" CodigoServicio="@(codigoServicio)">
+    <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+    <CardBody>
+        <TelerikForm EditContext="@(EditContext)" Size="sm">
+            <FormValidation>
+                <FluentValidationValidator @ref="validator"/>
+            </FormValidation> 
+            <FormItems>
+                <FormItem>
+                    <Template>
+                        <label>Código*:</label>
+                        <TelerikTextBox Width="100px" AutoComplete="off" @bind-Value="@(LocalInsertar.Codigo)" OnChange="@ValueCodigoUpperChanged" Size="sm" />
+                        <TelerikValidationMessage For="@(() => LocalInsertar.Codigo)" />
+                    </Template>
+                </FormItem>
+                <FormItem>
+                     <Template>
+                         <label>Nombre*:</label> 
+                         <TelerikTextBox AutoComplete="off" @bind-Value="@(LocalInsertar.Nombre)" Size="sm"/>  
+                         <TelerikValidationMessage For="@(() => LocalInsertar.Nombre)" />
+                     </Template>
+                </FormItem>
+                <FormItem>
+                     <Template>
+                         <label>Observación:</label>
+                         <TelerikTextBox AutoComplete="off" @bind-Value="@(LocalInsertar.Observacion)" Size="sm" />
+                         <TelerikValidationMessage For="@(() => LocalInsertar.Observacion)" />
+                     </Template>
+                 </FormItem> 
+                  <FormItem>
+                      <Template>
+                          <label>Dirección*:</label>
+                          <TelerikTextBox @bind-Value="@(LocalInsertar.Direccion)" Size="sm" />
+                          <TelerikValidationMessage For="@(() => LocalInsertar.Direccion)" />
+                      </Template>
+                  </FormItem>
+                  <FormItem ColSpan="3">
+                      <Template>
+                          <label>Región (departamento):</label>
+                          <div class="item-group">
+                             <TelerikTextBox Title="Código Ubigeo" Placeholder="Código" Enabled="@(false)" @bind-Value="@(LocalObtener.CodigoRegion)" Size="sm" Width="100px" />
+                             <Principal.RegionCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoRegion)" />
+                            <TelerikTextBox @bind-Value="@(LocalObtener.NombreRegion)" Placeholder="Nombre o Descripción" Title="@(LocalObtener.NombreRegion)" Enabled="@(false)" Size="sm" />
+                         </div>
+                     </Template>
+                 </FormItem>
+                 <FormItem ColSpan="3">
+                     <Template>
+                         <label>Provincia:</label>
+                         <div class="item-group">
+                             <TelerikTextBox Title="Código Ubigeo" Placeholder="Código" Enabled="@(false)" @bind-Value="@(LocalObtener.CodigoProvincia)" Size="sm" Width="100px" />
+                             <Principal.ProvinciaCatalogoPorRegionComponent CodigoFiltro="@(LocalObtener.CodigoRegion)" CargarItemSeleccionado="@(CargarItemCatalogoProvinciaPorRegion)" />
+                             <TelerikTextBox @bind-Value="@(LocalObtener.NombreProvincia)" Placeholder="Nombre o Descripción" Title="@(LocalObtener.NombreProvincia)" Enabled="@(false)" Size="sm" />
+                         </div>
+                     </Template>
+                 </FormItem>
+                 <FormItem ColSpan="3">
+                     <Template>
+                         <label>Distrito*:</label>
+                         <div class="item-group">
+                             <TelerikTextBox Title="Código Ubigeo" Placeholder="Código" Enabled="@(false)" @bind-Value="@(LocalInsertar.CodigoDistrito)" Size="sm" Width="100px" />
+                             <Principal.DistritoCatalogoPorProvinciaComponent CodigoFiltro="@(LocalObtener.CodigoProvincia)" CargarItemSeleccionado="@(CargarItemCatalogoDistritoPorProvincia)" />
+                             <TelerikTextBox @bind-Value="@(LocalObtener.NombreDistrito)" Placeholder="Nombre o Descripción" Title="@(LocalObtener.NombreDistrito)" Enabled="@(false)" Size="sm" />
+                         </div>
+                     </Template>
+                 </FormItem>
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar el registro" ButtonType="@ButtonType.Button" OnClick="@(Insertar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Guardar</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" Size="sm" ButtonType="@ButtonType.Button" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSpacer />
+            <ToolBarTemplateItem>
+                <span>* Campos obligatorios</span>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+
+    </CardBody>
+</CardContainerComponent>  

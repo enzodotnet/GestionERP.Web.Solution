@@ -1,0 +1,94 @@
+@page "/periodos/{Id:guid}"
+
+@attribute [Authorize]
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>Periodo - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (PeriodoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando periodo" CodigoRegistro="@(PeriodoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@PeriodoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PeriodoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label>
+                            <TelerikTextBox @bind-Value="@(PeriodoObtener.Nombre)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Número de mes:</label>
+                            <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(PeriodoObtener.NumeroMes)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Fecha inicio:</label>
+                            <TelerikDateInput Width="150px" Size="sm" @bind-Value="@(PeriodoObtener.FechaInicio)" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Fecha fin:</label>
+                            <TelerikDateInput Width="150px" Size="sm" @bind-Value="@(PeriodoObtener.FechaFin)" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Ejercicio:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(PeriodoObtener.CodigoEjercicio)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(PeriodoObtener.NombreEjercicio)" Title="@(PeriodoObtener.NombreEjercicio)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Inicia apertura del ejercicio:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PeriodoObtener.IniciaApertura" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+
+                    <FormItem>
+                        <Template>
+                            <label>Días del mes:</label>
+                            <TelerikGrid Height="160px" Data="@(PeriodoObtener.Dias)" Pageable="false" Sortable="true" Resizable="false" Size="sm">
+                                <GridColumns>
+                                    <GridColumn Field="Codigo" Width="100px" Title="Código"/>
+                                    <GridColumn DisplayFormat="{0:dd/MM/yyyy}" Field="Fecha" Width="150px" Title="Fecha" />
+                                    <GridColumn Field="Nombre" Width="150px" Title="Nombre" />
+                                    <GridColumn Field="NumeroMensual" Width="80px" Title="N° mensual" />
+                                    <GridColumn Field="NumeroAnual" Width="80px" Title="N° anual" />
+                                    <GridColumn Field="NumeroSemanalAnio" Width="80px" Title="N° semana anual" />
+                                    <GridColumn Field="NumeroTrimestral" Width="80px" Title="N° trimestral" />
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>No existen ítems registrados</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+         
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}
+

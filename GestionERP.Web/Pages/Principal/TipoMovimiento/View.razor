@@ -1,0 +1,75 @@
+@page "/tipos-movimiento/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Tipo de Movimiento - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoMovimientoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de movimiento" CodigoRegistro="@(TipoMovimientoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoMovimientoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoMovimientoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoMovimientoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de acción:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoMovimientoObtener.FlagTipoAccion)" TextField="Nombre" ValueField="Codigo" Data="@TiposAccion" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de entidad:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoMovimientoObtener.FlagTipoEntidad)" TextField="Nombre" ValueField="Codigo" Data="@TiposEntidad" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de proceso:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoMovimientoObtener.FlagTipoProceso)" TextField="Nombre" ValueField="Codigo" Data="@TiposProceso" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    @if(TipoMovimientoObtener.EsAsignableDestino)
+                    {
+                        <FormItem>
+                            <Template>
+                                <label>Tipo de movimiento destino:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" @bind-Value="@(TipoMovimientoObtener.CodigoTipoMovimientoDestino)" Size="sm" Width="100px" /> 
+                                    <TelerikTextBox @bind-Value="@(TipoMovimientoObtener.NombreTipoMovimientoDestino)" Title="@(TipoMovimientoObtener.NombreTipoMovimientoDestino)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                                </div> 
+                            </Template>
+                        </FormItem> 
+                    } 
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox @bind-Value="@(TipoMovimientoObtener.Descripcion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

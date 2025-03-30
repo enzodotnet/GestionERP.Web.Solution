@@ -1,0 +1,39 @@
+@inject NavigationManager INavigation
+
+<PageTitle>Página no encontrada</PageTitle>
+
+<div class="card-container">
+    <CardHeader>
+    <h3 class="card-title">Lo sentimos, no hay nada en esta dirección</h3> 
+    </CardHeader> 
+    <TelerikCard Width="300px"> 
+        <CardImage Src="img/default/notfound404.png"></CardImage>
+            <CardBody>
+                <CardTitle>Página no encontrada</CardTitle>
+                <CardSubTitle>Por favor hacer clic en el siguiente enlace:</CardSubTitle>
+                <CardActions Layout="@(CardActionsLayout.Center)">
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Size="sm" ThemeColor="primary" OnClick="@(IrInicio)" >Volver a página inicio</TelerikButton>
+                </CardActions>
+            </CardBody>
+    </TelerikCard> 
+</div>
+
+@code {
+    private void IrInicio()
+    {
+        INavigation.NavigateTo("inicio");
+    }
+}
+
+<style> 
+    .k-card {
+        display: inline-block;
+        border-style: none;
+        background-color: unset;
+    }
+    .card-container {
+        text-align: center;
+        background-color: unset;
+        box-shadow: unset;
+    }
+</style>

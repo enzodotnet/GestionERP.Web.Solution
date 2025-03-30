@@ -1,0 +1,85 @@
+@page "/tipos-impuesto/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+<PageTitle>Tipo de Impuesto - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando tipo de impuesto" CodigoRegistro="@(TipoImpuestoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoImpuestoEditar.Activo" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(TipoImpuestoEditar.Nombre)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => TipoImpuestoEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Monto de la tasa*:</label>
+                            <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(TipoImpuestoEditar.Porcentaje)" Min="0" Format="P" Decimals="3" Size="sm" />
+                            <TelerikValidationMessage For="@(() => TipoImpuestoEditar.Porcentaje)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Monto mínimo MN (Moneda Nacional) @MN.Simbolo *:</label>
+                            <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(TipoImpuestoEditar.MontoMinimoMN)" Min="1" Format="N2" Decimals="2" Size="sm" />
+                            <TelerikValidationMessage For="@(() => TipoImpuestoEditar.MontoMinimoMN)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es reservado en el sistema:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(TipoImpuestoObtener.EsReservado)" Size="sm" TrackRounded="md" ThumbRounded="md" Enabled="@(false)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es operación venta:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(TipoImpuestoEditar.EsOperacionVenta)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es predeterminado (en operaciones venta):</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(TipoImpuestoEditar.EsPredeterminado)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+        </CardBody>
+    </CardContainerComponent>
+}

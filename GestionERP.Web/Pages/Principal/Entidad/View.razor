@@ -1,0 +1,598 @@
+@page "/entidades/{Id:guid}"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+@implements IDisposable
+
+<PageTitle>Entidad - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+@if (EntidadObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando entidad" CodigoRegistro="@(EntidadObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <TelerikForm Model="@(EntidadObtener)" Size="sm">
+                <FormItems>
+                    <FormItem Field="Activo">
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.Activo)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="FlagTipoPersona">
+                        <Template>
+                            <label>Tipo de persona:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(EntidadObtener.FlagTipoPersona)" TextField="Nombre" ValueField="Codigo" Data="@TiposPersona" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="CodigoTipoIdentificacion">
+                        <Template>
+                            <label>Tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(EntidadObtener.CodigoTipoIdentificacion)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(EntidadObtener.NombreTipoIdentificacion)" Width="50%" Title="@(EntidadObtener.NombreTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Codigo">
+                        <Template>
+                            <label>Código (número del tipo de identificación):</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Sigla del tipo de identificación" Enabled="@(false)" @bind-Value="@(EntidadObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox Width="150px" AutoComplete="off" @bind-Value="@(EntidadObtener.Codigo)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Nombre">
+                        <Template>
+                            <label>Nombre o razón social:</label>
+                            <TelerikTextBox @bind-Value="@(EntidadObtener.Nombre)" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="EsSeguro">
+                        <Template>
+                            <label>Es seguro:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.EsSeguro)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="EsAFP">
+                        <Template>
+                            <label>Es AFP:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.EsAFP)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="EsBanco">
+                        <Template>
+                            <label>Es banco:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.EsBanco)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="EsTransportista">
+                        <Template>
+                            <label>Es transportista:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.EsTransportista)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="BtnVehiculos">
+                        <Template>
+                            <TelerikButton Icon="@(SvgIcon.Cart)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Visible=@EntidadObtener.EsTransportista Size="sm" OnClick="() => VisibleListaVehiculoChangedHandler(true)">Vehículos</TelerikButton>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="CodigoPais">
+                        <Template>
+                            <label>País:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Title="Código" Enabled="@(false)" @bind-Value="@(EntidadObtener.CodigoPais)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(EntidadObtener.NombrePais)" Width="50%" Title="@(EntidadObtener.NombrePais)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+
+                    <FormItem Field="BtnDirecciones">
+                        <Template>
+                            <TelerikButton Icon="@(SvgIcon.MapMarker)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Size="sm" OnClick="() => VisibleListaDireccionChangedHandler(true)">Direcciones</TelerikButton>
+                        </Template>
+                    </FormItem>
+                    <FormGroup LabelText="Dirección predeterminada:" Class="formgroup-legend intab">
+                        <FormItem>
+                            <Template>
+                                <div class="item-group-legend">
+                                    <label>Descripción:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código de dirección" Enabled="@(false)" @bind-Value="@(DireccionPredeterminadoObtener.CodigoEntidadDireccion)" Size="sm" Width="150px" />
+                                        <TelerikTextBox Enabled="@(false)" Title="@(DireccionPredeterminadoObtener.Nombre)" @bind-Value="@(DireccionPredeterminadoObtener.Nombre)" Size="sm" Width="100%" />
+                                    </div>
+                                    <label>Región:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código ubigeo región" Enabled="@(false)" @bind-Value="@(DireccionPredeterminadoObtener.CodigoRegion)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(DireccionPredeterminadoObtener.NombreRegion)" Width="50%" Title="@(DireccionPredeterminadoObtener.NombreRegion)" Enabled="@(false)" Size="sm" />
+                                    </div>   
+                                    <label>Provincia:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código ubigeo provincia" Enabled="@(false)" @bind-Value="@(DireccionPredeterminadoObtener.CodigoProvincia)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(DireccionPredeterminadoObtener.NombreProvincia)" Width="50%" Title="@(DireccionPredeterminadoObtener.NombreProvincia)" Enabled="@(false)" Size="sm" />
+                                    </div> 
+                                    <label>Distrito:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código ubigeo distrito" Enabled="@(false)" @bind-Value="@(DireccionPredeterminadoObtener.CodigoDistrito)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(DireccionPredeterminadoObtener.NombreDistrito)" Width="50%" Title="@(DireccionPredeterminadoObtener.NombreDistrito)" Enabled="@(false)" Size="sm" />
+                                    </div>    
+                                </div>
+                            </Template>
+                        </FormItem>
+                    </FormGroup>
+
+                    <FormItem Field="EsEmpresaGestionada">
+                        <Template>
+                            <label>Es empresa gestionada:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.EsEmpresaGestionada)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+
+                    <FormGroup Class="formgroup" Columns="3" ColumnSpacing="10px">
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Nombre comercial:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EntidadObtener.FichaSunat.NombreComercial)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Actividad Principal:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EntidadObtener.FichaSunat.ActividadPrincipal)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Actividad Secundaria N°1:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EntidadObtener.FichaSunat.ActividadSecundariaN1)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Actividad Secundaria N°2:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EntidadObtener.FichaSunat.ActividadSecundariaN2)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Descripción del tipo de contribuyente:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EntidadObtener.FichaSunat.DescripcionTipoContribuyente)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Estado del contribuyente:</label>
+                                <TelerikTextBox AutoComplete="off" @bind-Value="@(EntidadObtener.FichaSunat.EstadoContribuyente)" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Condición del contribuyente:</label>
+                                <TelerikDropDownList Width="200px" @bind-Value="@(EntidadObtener.FichaSunat.FlagCondicionContribuyente)" TextField="Nombre" ValueField="Codigo" Data="@CondicionesContribuyente" Enabled="@(false)" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Es afecto al nuevo RUS:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.FichaSunat.EsAfectoNuevoRus)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Es agente retenedor:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.FichaSunat.EsAgenteRetenedor)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Es emisor electrónico:</label>
+                                <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(EntidadObtener.FichaSunat.EsEmisorElectronico)" Enabled="@(false)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de inscripción:</label>
+                                <TelerikDateInput Size="sm" @bind-Value="@(EntidadObtener.FichaSunat.FechaInscripcion)" Enabled="@(false)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de inicio de actividad:</label>
+                                <TelerikDateInput Size="sm" @bind-Value="@(EntidadObtener.FichaSunat.FechaInicioActividad)" Enabled="@(false)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de condición no habido:</label>
+                                <TelerikDateInput Size="sm" @bind-Value="@(EntidadObtener.FichaSunat.FechaCondicionNohabido)" Enabled="@(false)" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="3">
+                            <Template>
+                                <label>Representantes:</label>
+                                <TelerikGrid Height="auto" Data="@(EntidadObtener.Representantes)" Pageable="false" Sortable="true" Resizable="false" Size="sm">
+                                    <GridColumns>
+                                        <GridColumn Field="SiglaTipoIdentificacion" Width="50px" Title="Sigla" />
+                                        <GridColumn Field="NumeroTipoIdentificacion" Width="100px" Title="Número de identidad" />
+                                        <GridColumn Field="Nombre" Width="300px" Title="Nombre completo" />
+                                        <GridColumn Field="Activo" Width="70px" Title="Activo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                            <Template>
+                                                <TelerikCheckBox @bind-Value="@((context as EntidadRepresentanteObtenerDto).Activo)" Size="sm" Enabled="false" />
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Width="100px" Title="Acciones" Locked="@(true)">
+                                            <Template>
+                                                @{
+                                                    EntidadRepresentanteObtenerDto item = context as EntidadRepresentanteObtenerDto;
+                                                }
+                                                <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemRepresentante(item))" />
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                    <NoDataTemplate>
+                                        <span>No existen ítems registrados</span>
+                                    </NoDataTemplate>
+                                </TelerikGrid>
+                            </Template>
+                        </FormItem>
+
+                    </FormGroup>
+                </FormItems>
+
+                <FormItemsTemplate Context="formContext">
+                    @{
+                        List<IFormItemBase> formObjects = formContext.Items;
+                        List<IFormItem> items = [];
+                        List<IFormGroup> groups = [];
+                        foreach (IFormItemBase itemBase in formObjects)
+                        {
+                            if (itemBase is IFormGroup)
+                                groups.Add((IFormGroup) itemBase);
+                            else
+                                items.Add((IFormItem) itemBase);
+                        }
+                    } 
+                    <TelerikTabStrip Height="535px">
+                        <TabStripTab Title="Datos Principales">
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Activo"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "FlagTipoPersona"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "CodigoTipoIdentificacion"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Codigo"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Nombre"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "EsSeguro"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "EsAFP"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "EsBanco"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "EsTransportista"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "BtnVehiculos"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "CodigoPais"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "BtnDirecciones"))" />
+
+                            <TelerikFormGroupRenderer Group="@(groups[0])">
+                                <Template Context="groupContext">
+                                    @foreach (IFormItem itemGroup in groupContext.Items)
+                                    {
+                                        <TelerikFormItemRenderer Item="@itemGroup" />
+                                    }
+                                </Template>
+                            </TelerikFormGroupRenderer>
+                            @if (EntidadObtener.EsEmpresaGestionada)
+                            {
+                                <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "EsEmpresaGestionada"))" />
+                            }
+                        </TabStripTab>
+
+                        <TabStripTab Title="Ficha" Visible="@EsVisibleTabFichaSunat">        
+                            <TelerikFormGroupRenderer Group="@(groups[1])">
+                                <Template Context="groupContext">
+                                    @foreach (IFormItem itemGroup in groupContext.Items)
+                                    {
+                                        <TelerikFormItemRenderer Item="@itemGroup" />
+                                    }
+                                </Template>
+                            </TelerikFormGroupRenderer>
+                        </TabStripTab>
+                    </TelerikTabStrip>
+                </FormItemsTemplate>
+            
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikWindow Visible="@EsVisibleModalRepresentante" VisibleChanged="@VisibleRepresentanteChangedHandler" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>Visualizando ítem de representante</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar" />
+                    <WindowAction Name="Close" Title="Cerrar" />
+                </WindowActions>
+                <WindowContent>
+                    <TelerikForm Model="@RepresentanteObtener" Size="sm">
+                        <FormItems>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Activo:</label>
+                                    <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(RepresentanteObtener.Activo)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Tipo de identificación:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código" Enabled="@(false)" @bind-Value="@(RepresentanteObtener.CodigoTipoIdentificacion)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(RepresentanteObtener.NombreTipoIdentificacion)" Title="@(RepresentanteObtener.NombreTipoIdentificacion)" Enabled="@(false)" Size="sm"/>
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Número del tipo de identificación:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Sigla del tipo de identificación" Enabled="@(false)" @bind-Value="@(RepresentanteObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                                        <TelerikTextBox Width="150px" @bind-Value="@(RepresentanteObtener.NumeroTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Nombre:</label>
+                                    <TelerikTextBox @bind-Value="@(RepresentanteObtener.Nombre)" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Descripción de cargo:</label>
+                                    <TelerikTextBox @bind-Value="@(RepresentanteObtener.DescripcionCargo)" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Fecha de inicio de cargo:</label>
+                                    <TelerikDateInput Size="sm" Enabled="@(false)" @bind-Value="@(RepresentanteObtener.FechaInicioCargo)" />
+                                </Template>
+                            </FormItem>
+                        </FormItems>
+                        <FormButtons/>
+                    </TelerikForm>
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikWindow Visible="@EsVisibleListaVehiculo" VisibleChanged="@VisibleListaVehiculoChangedHandler" Modal="true" Height="400px" Width="700px" CloseOnOverlayClick="false">
+                <WindowTitle>Lista de vehículos</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar"/>
+                    <WindowAction Name="Close" Title="Cerrar"/>
+                </WindowActions>
+                <WindowContent>
+                    <TelerikGrid Height="auto" Data="@(EntidadObtener.Vehiculos)" Pageable="false" Sortable="true" Resizable="@(true)" Size="sm">
+                        <GridColumns>
+                            <GridColumn Field="CodigoVehiculo" Width="100px" Title="Nº de Placa" />
+                            <GridColumn Field="MarcaVehiculo" Width="400px" Title="Marca" /> 
+                            <GridColumn Field="Activo" Width="70px" Title="Activo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                <Template>
+                                    <TelerikCheckBox @bind-Value="@((context as EntidadVehiculoObtenerDto).Activo)" Size="sm" Enabled="false" />
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="100px" Title="Acciones" Locked="@(true)">
+                                <Template>
+                                    @{
+                                        EntidadVehiculoObtenerDto item = context as EntidadVehiculoObtenerDto;
+                                    }
+                                    <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemVehiculo(item))" />
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                        <NoDataTemplate>
+                            <span>No existen ítems registrados</span>
+                        </NoDataTemplate>
+                    </TelerikGrid>
+                </WindowContent>
+            </TelerikWindow>
+            <TelerikWindow Visible="@EsVisibleModalVehiculo" VisibleChanged="@VisibleVehiculoChangedHandler" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>Visualizando ítem de dirección</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar" />
+                    <WindowAction Name="Close" Title="Cerrar" />
+                </WindowActions>
+                <WindowContent>
+                    <TelerikForm Model="@VehiculoObtener" Size="sm">
+                        <FormItems>
+                            <FormItem ColSpan="1">
+                                <Template>
+                                    <label>Activo:</label>
+                                    <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(VehiculoObtener.Activo)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Vehículo:</label>
+                                    <div class="item-group">
+                                        <TelerikTextBox Title="Código (número de placa)" Enabled="@(false)" @bind-Value="@(VehiculoObtener.CodigoVehiculo)" Size="sm" Width="100px" />
+                                        <TelerikTextBox @bind-Value="@(VehiculoObtener.MarcaVehiculo)" Title="@(VehiculoObtener.MarcaVehiculo)" Enabled="@(false)" Size="sm"/>
+                                    </div>
+                                </Template>
+                            </FormItem>
+                            <FormItem>
+                                <Template>
+                                    <label>Descripción:</label>
+                                    <TelerikTextBox @bind-Value="@(VehiculoObtener.Descripcion)" Enabled="@(false)" Size="sm" />
+                                </Template>
+                            </FormItem>
+                        </FormItems>
+                        <FormButtons/>
+                    </TelerikForm>
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikWindow Visible="@EsVisibleListaDireccion" VisibleChanged="@VisibleListaDireccionChangedHandler" Modal="true" Height="400px" Width="700px" CloseOnOverlayClick="false">
+                <WindowTitle>Lista de direcciones</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar"/>
+                    <WindowAction Name="Close" Title="Cerrar"/>
+                </WindowActions>
+                <WindowContent>
+                    <TelerikGrid Height="auto" Data="@(EntidadObtener.Direcciones)" Pageable="false" Sortable="true" Resizable="false" Size="sm">
+                        <GridColumns>
+                            <GridColumn Field="Codigo" Width="150px" Title="Código" />
+                            <GridColumn Field="NumeroItem" Width="80px" Title="Nº ítem" />
+                            <GridColumn Field="Nombre" Width="300px" Title="Nombre" />
+                            <GridColumn Field="CodigoDistrito" Width="150px" Title="Ubigeo distrito" />
+                            <GridColumn Field="NombreDistrito" Width="250px" Title="Nombre distrito" />
+                            <GridColumn Field="EsPredeterminado" Width="100px" Title="Predeterminado" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                <Template>
+                                    <TelerikCheckBox @bind-Value="@((context as EntidadDireccionObtenerDto).EsPredeterminado)" Size="sm" Enabled="false" />
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Activo" Width="70px" Title="Activo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                <Template>
+                                    <TelerikCheckBox @bind-Value="@((context as EntidadDireccionObtenerDto).Activo)" Size="sm" Enabled="false" />
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Width="100px" Title="Acciones" Locked="@(true)">
+                                <Template>
+                                    @{
+                                        EntidadDireccionObtenerDto item = context as EntidadDireccionObtenerDto;
+                                    }
+                                    <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver ítem" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerItemDireccion(item))" />
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                        <NoDataTemplate>
+                            <span>No existen ítems registrados</span>
+                        </NoDataTemplate>
+                    </TelerikGrid>
+                </WindowContent>
+            </TelerikWindow>
+            <TelerikWindow Visible="@EsVisibleModalDireccion" VisibleChanged="@VisibleDireccionChangedHandler" Modal="true" Height="auto" Width="500px" MinWidth="500px" CloseOnOverlayClick="false">
+                <WindowTitle>Visualizando ítem de dirección</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar" />
+                    <WindowAction Name="Close" Title="Cerrar" />
+                </WindowActions>
+                <WindowContent>
+                    <TelerikForm Model="@DireccionObtener" Size="sm">
+                        <FormItems>
+                            <FormGroup Class="formgroup" Columns="3" ColumnSpacing="10px">
+                                <FormItem ColSpan="3">
+                                    <Template>
+                                        <label>Activo:</label>
+                                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DireccionObtener.Activo)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="2">
+                                    <Template>
+                                        <label>Código:</label>
+                                        <TelerikTextBox Width="150px" @bind-Value="@(DireccionObtener.Codigo)" Size="sm" Enabled="@false" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Es predeterminado:</label>
+                                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DireccionObtener.EsPredeterminado)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="3">
+                                    <Template>
+                                        <label>Región (departamento):</label>
+                                        <div class="item-group">
+                                            <TelerikTextBox Title="Código Ubigeo" Enabled="@(false)" @bind-Value="@(DireccionObtener.CodigoRegion)" Size="sm" Width="100px" />
+                                            <TelerikTextBox @bind-Value="@(DireccionObtener.NombreRegion)" Placeholder="Nombre o Descripción" Title="@(DireccionObtener.NombreRegion)" Enabled="@(false)" Size="sm"/>
+                                        </div>
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="3">
+                                    <Template>
+                                        <label>Provincia:</label>
+                                        <div class="item-group">
+                                            <TelerikTextBox Title="Código Ubigeo" Enabled="@(false)" @bind-Value="@(DireccionObtener.CodigoProvincia)" Size="sm" Width="100px" />
+                                            <TelerikTextBox @bind-Value="@(DireccionObtener.NombreProvincia)" Placeholder="Nombre o Descripción" Title="@(DireccionObtener.NombreProvincia)" Enabled="@(false)" Size="sm"/>
+                                        </div>
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="3">
+                                    <Template>
+                                        <label>Distrito:</label>
+                                        <div class="item-group">
+                                            <TelerikTextBox Title="Código Ubigeo" Enabled="@(false)" @bind-Value="@(DireccionObtener.CodigoDistrito)" Size="sm" Width="100px" />
+                                            <TelerikTextBox @bind-Value="@(DireccionObtener.NombreDistrito)" Placeholder="Nombre o Descripción" Title="@(DireccionObtener.NombreDistrito)" Enabled="@(false)" Size="sm"/>
+                                        </div>
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="3">
+                                    <Template>
+                                        <label>Nombre:</label>
+                                        <TelerikTextBox @bind-Value="@(DireccionObtener.Nombre)" Size="sm" Enabled="@false" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="3">
+                                    <Template>
+                                        <label>Referencia:</label>
+                                        <TelerikTextBox @bind-Value="@(DireccionObtener.Referencia)" Size="sm" Enabled="@false" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Latitud:</label> 
+                                        <TelerikNumericTextBox Arrows="@(false)" @bind-Value="@(DireccionObtener.Latitud)" Format="N6" Decimals="6" Enabled="@(false)" Size="sm"/>   
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="2">
+                                    <Template>
+                                        <label>Longitud:</label> 
+                                        <TelerikNumericTextBox Arrows="@(false)" @bind-Value="@(DireccionObtener.Longitud)" Format="N6" Decimals="6" Enabled="@(false)" Size="sm"/>   
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Es de oficina:</label>
+                                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DireccionObtener.EsOficina)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Es punto de llegada:</label>
+                                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DireccionObtener.EsPuntoLlegada)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                    </Template>
+                                </FormItem>
+                                <FormItem ColSpan="1">
+                                    <Template>
+                                        <label>Es normal (otro):</label>
+                                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DireccionObtener.EsNormal)" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                                    </Template>
+                                </FormItem>
+                            </FormGroup>
+                        </FormItems>
+                        <FormButtons/>
+                    </TelerikForm>
+                </WindowContent>
+            </TelerikWindow>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando entidad</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent>  
+}

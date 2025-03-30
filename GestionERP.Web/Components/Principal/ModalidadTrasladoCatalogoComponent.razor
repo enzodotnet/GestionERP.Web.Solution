@@ -1,0 +1,97 @@
+@inject IPrincipalModalidadTraslado IModalidadTraslado
+@inject AuthenticationStateProvider IAuthState
+@using GestionERP.Web.Models.Dtos.Principal
+@using Telerik.Blazor.Services
+@implements IDisposable
+@using GestionERP.Web.Global
+@namespace Principal
+
+<TooltipButtonComponent/>
+
+<TelerikWindow Visible="@EsVisibleCatalogo" VisibleChanged="@VisibleChangedHandler" ThemeColor="dark" Modal="true" Resizable="false" Height="420px" Width="600px" CloseOnOverlayClick="false" FooterLayoutAlign="WindowFooterLayoutAlign.Start">
+    <WindowTitle>Catálogo de modalidades de traslado</WindowTitle>
+    <WindowActions> 
+        <WindowAction Name="Close" Title="Cerrar"/>
+    </WindowActions>
+    <WindowContent>  
+        <TelerikNotification @ref="@AlertInterno" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <TelerikGrid Data="@Catalogo" SelectionMode="@(GridSelectionMode.Single)" @bind-SelectedItems="@(ItemsSeleccionado)" Height="100%" Sortable="true" OnRowDoubleClick="@OnRowDoubleClickHandler" Resizable="true" Size="sm">
+            <GridToolBarTemplate> 
+                <GridSearchBox Size="md" Width="300px" DebounceDelay="100" Placeholder="Buscar en el catálogo..."/>
+            </GridToolBarTemplate>
+            <GridColumns> 
+                <GridCheckboxColumn SelectAll="@(false)" Width="32px" Locked="@(true)"/>
+                <GridColumn Field="CodigoModalidadTraslado" Width="100px" Title="Código"/>
+                <GridColumn Field="NombreModalidadTraslado" Width="250px" Title="Nombre"/>  
+            </GridColumns>
+            <NoDataTemplate>
+                <TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+            </NoDataTemplate> 
+        </TelerikGrid> 
+    </WindowContent>
+    <WindowFooter>
+        <TelerikButton Icon="@(SvgIcon.Download)" ThemeColor="secondary" ButtonType="@ButtonType.Button" OnClick="@(SeleccionarItem)" Size="sm">Seleccionar</TelerikButton>
+    </WindowFooter>
+</TelerikWindow>
+<TelerikNotification @ref="@AlertExterno" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+<CascadingValue Value=this IsFixed=true>
+    <TelerikButton Icon="@(SvgIcon.Search)" Class="b-primary" Id="tbtn" Title="Buscar código en catálogo" Size="sm" ButtonType="@ButtonType.Button" OnClick="(MostrarCatalogo)"/>
+    @ChildContent
+</CascadingValue> 
+
+@code {
+    public bool EsVisibleCatalogo { get; set; } = false;
+    public TelerikNotification AlertInterno { get; set; }
+    public TelerikNotification AlertExterno { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string CodigoExcluir { get; set; }
+    public IEnumerable<ModalidadTrasladoCatalogoDto> Catalogo { get; set; } 
+    public IEnumerable<ModalidadTrasladoCatalogoDto> ItemsSeleccionado { get; set; }
+    [Parameter] public EventCallback<ModalidadTrasladoCatalogoDto> CargarItemSeleccionado { get; set; }
+
+    private async Task OnRowDoubleClickHandler(GridRowClickEventArgs args) => await RetornarItemSeleccionado(args.Item as ModalidadTrasladoCatalogoDto);
+
+    private async Task RetornarItemSeleccionado(ModalidadTrasladoCatalogoDto itemModalidadTraslado)
+    {
+        EsVisibleCatalogo = false;
+        await CargarItemSeleccionado.InvokeAsync(itemModalidadTraslado);
+    }
+
+    public void VisibleChangedHandler(bool esVisible) => EsVisibleCatalogo = esVisible;
+
+    public async Task MostrarCatalogo()
+    {
+        try
+        {
+            ItemsSeleccionado = [];
+            if((await IAuthState.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated)
+            {
+                Catalogo = await IModalidadTraslado.Catalogo();
+                if (Catalogo is not null && !string.IsNullOrEmpty(CodigoExcluir))
+                    Catalogo = Catalogo.Where(x => x.CodigoModalidadTraslado.Trim() != CodigoExcluir);
+                EsVisibleCatalogo = true;
+            }
+            else 
+                Fnc.MostrarAlerta(AlertExterno, Cnf.MsgErrorNoAuthenticated, "error");
+        }
+        catch (Exception ex)
+        {
+            if (ex is HttpRequestException)
+                Fnc.MostrarAlerta(AlertExterno, Cnf.MsgErrorNotConnectApi, "error");
+            else if (ex is HttpResponseException)
+                Fnc.MostrarAlerta(AlertExterno, $"{((ex as HttpResponseException).Code == "NF" ? Cnf.MsgErrorNotFoundAPi : ex.Message)}", "error");
+            else 
+                Fnc.MostrarAlerta(AlertExterno, Cnf.MsgErrorFuncAppWeb, "error");
+        }
+    }
+
+    public async Task SeleccionarItem()
+    {
+        if (!ItemsSeleccionado.Any()) 
+            Fnc.MostrarAlerta(AlertInterno, "Es necesario que seleccione un ítem del catálogo", "warning"); 
+        else
+            await RetornarItemSeleccionado(ItemsSeleccionado.FirstOrDefault());
+    }
+    
+    public void Dispose() => GC.SuppressFinalize(this); 
+ }

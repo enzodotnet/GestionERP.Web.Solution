@@ -1,0 +1,66 @@
+@page "/regiones/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Región - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (RegionObtener is not null)
+{
+
+}
+
+<CardContainerComponent Titulo="Visualizando región" CodigoRegistro="@(RegionObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+    <CardBody> 
+        <TelerikForm Model="@RegionObtener" Size="sm"> 
+            <FormItems>
+                <FormItem>
+                    <Template>
+                        <label>Activo:</label>
+                        <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@RegionObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                    </Template>
+                </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Nombre:</label> 
+                        <TelerikTextBox @bind-Value="@(RegionObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                    </Template>
+                </FormItem> 
+                <FormItem>
+                    <Template>
+                        <label>País:</label>
+                        <div class="item-group">
+                            <TelerikTextBox Enabled="@(false)" @bind-Value="@(RegionObtener.CodigoPais)" Size="sm" Width="100px" />
+                            <TelerikTextBox @bind-Value="@(RegionObtener.NombrePais)" Title="@(RegionObtener.NombrePais)" Enabled="@(false)" Size="sm" />
+                        </div>
+                    </Template>
+                </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Latitud:</label>
+                        <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(RegionObtener.Latitud)" Format="N6" Decimals="6" Enabled="@(false)" Size="sm" />
+                    </Template>
+                </FormItem>
+                <FormItem>
+                    <Template>
+                        <label>Longitud:</label>
+                        <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(RegionObtener.Longitud)" Format="N6" Decimals="6" Enabled="@(false)" Size="sm" />
+                    </Template>
+                </FormItem>
+            </FormItems>
+            <FormButtons/>
+        </TelerikForm>
+
+        <TelerikToolBar Class="toolbar-mainform">
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+            </ToolBarTemplateItem>
+            <ToolBarSeparator />
+            <ToolBarTemplateItem>
+                <TelerikButton Icon="@(SvgIcon.HyperlinkOpen)" Id="tbtn" Title="Ir a ver lista de provincias por región" ButtonType="@ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoVerProvincia)" Size="sm" OnClick="@(() => IrVerProvincias())">Ver provincias</TelerikButton>
+            </ToolBarTemplateItem>
+        </TelerikToolBar>
+
+    </CardBody>
+</CardContainerComponent>

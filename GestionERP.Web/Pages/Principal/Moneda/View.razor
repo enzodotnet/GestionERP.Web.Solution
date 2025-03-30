@@ -1,0 +1,51 @@
+@page "/monedas/{Id:guid}"
+
+@attribute [Authorize]
+ 
+<PageTitle>Moneda - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (MonedaObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando moneda" CodigoRegistro="@(MonedaObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@MonedaObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@MonedaObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(MonedaObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Símbolo:</label>
+                            <TelerikTextBox Width="50px" @bind-Value="@(MonedaObtener.Simbolo)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo:</label>
+                            <TelerikDropDownList @bind-Value="@MonedaObtener.FlagTipo" TextField="Nombre" ValueField="Codigo" Data="@Tipos" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

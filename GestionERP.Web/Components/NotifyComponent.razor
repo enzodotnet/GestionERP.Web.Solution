@@ -1,0 +1,171 @@
+@using Microsoft.Extensions.Logging
+@inject ILogger<NotifyComponent> _logger 
+@using static Telerik.Blazor.ThemeConstants
+@using Global
+@inject IAuthentication IAuth
+@implements IDisposable 
+@inject NavigationManager INavigation
+
+<TelerikRootComponent>
+
+    <TelerikMediaQuery Media="(max-width: 640.98px)" OnChange="@((doesMatch) => IsSmallScreen = doesMatch)"></TelerikMediaQuery>
+    <TelerikMediaQuery Media="(min-width: 641px)" OnChange="@((doesMatch) => IsLargeScreen = doesMatch)"></TelerikMediaQuery>
+
+    <TelerikNotification
+        @ref                = "@NotificationUser" 
+        AnimationType       = "@(AnimationType.Fade)" 
+        HorizontalPosition  = "@NotificationHorizontalPosition.Center" 
+        VerticalPosition    = "@NotificationVerticalPosition.Top" 
+        Class               = "my-2 pt-5 general-knotification">
+    </TelerikNotification>
+
+    <TelerikDialog @bind-Visible="@EsVisibleAlertaAuth" Width="350px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+        <DialogTitle>
+            <TelerikSvgIcon ThemeColor="@(ThemeConstants.SvgIcon.ThemeColor.Error)" Size="@(ThemeConstants.SvgIcon.Size.Large)" Icon="@(Telerik.SvgIcons.SvgIcon.ExclamationCircle)" /><h3> Alerta - Sistema Gestión ERP</h3>
+        </DialogTitle>
+        <DialogContent>
+            @MensajeAlertaAuth
+        </DialogContent>
+        <DialogButtons>
+            <TelerikButton Class="ok-btn" Icon="@(Telerik.SvgIcons.SvgIcon.Login)" ThemeColor="primary" Size="sm" OnClick="@(IniciarSesion)" >Ir a iniciar sesión</TelerikButton>
+        </DialogButtons>
+    </TelerikDialog>
+
+    <TelerikDialog @bind-Visible="@EsVisibleAvisoSesion" Width="350px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+        <DialogTitle>
+            <TelerikSvgIcon ThemeColor="@(ThemeConstants.SvgIcon.ThemeColor.Info)" Size="@(ThemeConstants.SvgIcon.Size.Large)" Icon="@(Telerik.SvgIcons.SvgIcon.InfoCircle)" /><h3> Aviso - Sistema Gestión ERP</h3>
+        </DialogTitle>
+        <DialogContent>
+            @MensajeAvisoSesion
+        </DialogContent>
+        <DialogButtons>
+            <TelerikButton Class="ok-btn" Icon="@(Telerik.SvgIcons.SvgIcon.ArrowRotateCw)" ThemeColor="primary" Size="sm" OnClick="@(RefrescarPagina)">Refrescar página</TelerikButton>
+        </DialogButtons>
+    </TelerikDialog>
+
+    <TelerikLoaderContainer Size="sm" OverlayThemeColor="dark" ThemeColor="primary" Text="@(MensajeLoading)" LoaderPosition="@(LoaderPosition.Start)" LoaderType="@(LoaderType.Pulsing)" Visible="@EsVisibleLoading"/> 
+
+</TelerikRootComponent>
+
+<CascadingValue Value=this IsFixed=true>  
+    @ChildContent
+</CascadingValue>
+
+@code{
+    private bool IsSmallScreen { get; set; } 
+    private bool IsLargeScreen { get; set; }
+    private bool EsVisibleAlertaAuth { get; set; }
+    private bool EsVisibleAvisoSesion { get; set; }
+    private bool EsVisibleLoading { get; set; }
+    private string MensajeAlertaAuth { get; set; }
+    private string MensajeAvisoSesion { get; set; }
+    private string MensajeLoading { get; set; }
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    private TelerikNotification NotificationUser { get; set; } = new(); 
+
+    public void ShowError(string codigo, Exception ex = null, bool isClosable = false)
+    {    
+        switch (codigo)
+        {
+            case "TK": 
+                ShowAlertAuth(codigo);
+                break;
+            case "FA": 
+                Show(Cnf.MsgErrorFuncAppWeb, "error");
+                _logger.LogError(ex, ""); //Pendiente registrar error web al log mediante API
+                break;
+            case "NC":
+                Show(Cnf.MsgErrorNotConnectApi, "error" , isClosable);
+                break;
+            case "NF":
+                Show(Cnf.MsgErrorNotFoundAPi, "error");
+                break;
+            default: //otros códigos retornado por el servidor API (retornado desde el backend)
+                Show(ex.Message, "error");
+                break;
+        }
+    }
+
+    public void ShowAlertAuth(string codigo)
+    {     
+        switch (codigo)
+        {
+            case "NA":
+                MensajeAlertaAuth = Cnf.MsgErrorNoAuthenticated;
+                break;
+            case "TK": 
+                MensajeAlertaAuth = Cnf.MsgErrorExpiredToken;
+                break;
+        }
+        EsVisibleAlertaAuth = true;
+        StateHasChanged();
+    }
+
+    public void ShowAlertSession(string nombreUsuario)
+    {
+        MensajeAvisoSesion = Cnf.MsgErrorSesionAltered.Replace("{cu}",nombreUsuario);
+        EsVisibleAvisoSesion = true;
+        StateHasChanged();
+    }
+
+    public void ShowLoading(bool isVisible = true, string mensaje = "")
+    {     
+        MensajeLoading = mensaje;
+        EsVisibleLoading = isVisible;
+        StateHasChanged();
+    }
+     
+    protected override void OnInitialized()
+    {
+        EsVisibleAlertaAuth = false;
+        EsVisibleAvisoSesion = false;
+    }
+
+    public void Show(string mensaje, string tipo, bool isClosable = false)
+    {    
+        NotificationUser.Show(new NotificationModel()
+        {
+            Text = mensaje,
+            ThemeColor = tipo,
+            CloseAfter = isClosable ? 0 : 5000,
+            ShowIcon = true,
+            Closable = isClosable
+        });
+    }
+ 
+    private async Task IniciarSesion()
+    {
+        EsVisibleAlertaAuth = false;
+        await IAuth.CerrarSesionUsuario();
+        INavigation.NavigateTo("/");
+    }
+
+    private void RefrescarPagina()
+    {
+        EsVisibleAvisoSesion = false; 
+        INavigation.NavigateTo(INavigation.Uri.Replace(INavigation.BaseUri, ""), true);
+    }
+
+    private string GetMarginTopNotification()
+    {
+        string margin = "10%";
+        if (IsSmallScreen) margin = "10%";
+        if (IsLargeScreen) margin = "5%";
+        return margin;
+    }
+
+    public void Dispose()
+    {
+        NotificationUser.HideAll();
+        NotificationUser.Dispose();
+        EsVisibleAlertaAuth = false;       
+    }
+}
+
+<style>
+    .general-knotification .k-notification {
+        padding-block: 10px;
+        padding-inline: 10px;
+    } 
+</style>

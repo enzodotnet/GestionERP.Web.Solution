@@ -1,0 +1,50 @@
+@page "/tipos-adjunto-certificado/{Id:guid}"
+
+@attribute [Authorize] 
+<PageTitle>Tipo de Adjunto Certificado - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (TipoAdjuntoCertificadoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando tipo de adjunto de certificado" CodigoRegistro="@(TipoAdjuntoCertificadoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@TipoAdjuntoCertificadoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@TipoAdjuntoCertificadoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(TipoAdjuntoCertificadoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>  
+                    <FormItem>
+                        <Template>
+                            <label>Origen:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@(TipoAdjuntoCertificadoObtener.FlagOrigen)" TextField="Nombre" ValueField="Codigo" Data="@Origenes" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Número de prioridad:</label>
+                            <TelerikNumericTextBox AutoComplete="off" Arrows="@(false)" @bind-Value="@(TipoAdjuntoCertificadoObtener.NumeroPrioridad)" Enabled="@(false)" Min="0" Size="sm" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

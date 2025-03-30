@@ -1,0 +1,53 @@
+@page "/motivos-traslado"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+<PageTitle>Motivos de Traslado - Lista</PageTitle> 
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Lista de motivos de traslado" CodigoServicio="@(codigoServicio)"> 
+    <CardBody>
+
+        <TelerikGrid Data="@ListaMotivosTraslado" Pageable="true" PageSize="@(15)" Sortable="true" Resizable="true" Size="sm" Height="562px">
+            <GridToolBarTemplate>  
+                <GridSearchBox Size="md" Width="200px" DebounceDelay="100" Placeholder="Buscar en la lista..."/>
+            </GridToolBarTemplate>
+            
+            <GridSettings>
+                <GridPagerSettings InputType="@(PagerInputType.Input)" PageSizes="@([15, 25, 50, null])" Position="@(PagerPosition.Bottom)"/>
+            </GridSettings>
+
+            <GridColumns> 
+                <GridColumn Field="Codigo" Width="100px" Title="Código" Locked="@(true)"/>
+                <GridColumn Field="Nombre" Width="400px" Title="Nombre"/>
+                <GridColumn Field="Activo" Width="70px" Title="Activo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                    <Template>
+                        @{
+                            MotivoTrasladoListarDto item = context as MotivoTrasladoListarDto;
+                        }
+                        <TelerikCheckBox @bind-Value="@(item.Activo)" Size="sm" Enabled="false"/>
+                    </Template>
+                </GridColumn>
+                <GridColumn Width="100px" Title="Acciones" Locked="@(true)">
+                    <Template>
+                        @{
+                            MotivoTrasladoListarDto item = context as MotivoTrasladoListarDto;
+                        }
+                        <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ir a ver registro" Class="b-primary" OnClick="@(() => IrVer(item.Id))"/>
+                    </Template>
+                </GridColumn>  
+            </GridColumns>
+
+            <NoDataTemplate>
+                @if(IsInitGrid)
+                {
+                    <TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+                }
+            </NoDataTemplate> 
+        </TelerikGrid>
+
+    </CardBody>
+</CardContainerComponent> 

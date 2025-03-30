@@ -1,0 +1,63 @@
+@page "/modos-pago/{Id:guid}"
+
+@attribute [Authorize]
+ 
+<PageTitle>Modo de Pago - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (ModoPagoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando modo de pago" CodigoRegistro="@(ModoPagoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@ModoPagoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ModoPagoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(ModoPagoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label>
+                            <TelerikTextBox Width="200px" @bind-Value="@(ModoPagoObtener.Descripcion)" Size="sm" Enabled="@false" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Vínculo a modo:</label>
+                            <TelerikDropDownList @bind-Value="@ModoPagoObtener.FlagVinculoModo" TextField="Nombre" ValueField="Codigo" Data="@VinculosModo" Enabled="@false" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es configurable:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ModoPagoObtener.EsConfigurable" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es predeterminado:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ModoPagoObtener.EsPredeterminado" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

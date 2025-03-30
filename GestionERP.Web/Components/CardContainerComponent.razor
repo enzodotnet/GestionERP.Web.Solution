@@ -1,0 +1,58 @@
+@inject NavigationManager INavigation
+@inject AuthenticationStateProvider IAuthState
+@inject IPrincipalMenu IMenu
+@inject IPrincipalServicio IServicio
+@inject IPrincipalModulo IModulo
+@inject IPrincipalEmpresa IEmpresa
+@using GestionERP.Web.Models.Dtos.Principal
+
+<div class="card-container"> 
+    @{
+        if (!string.IsNullOrEmpty(Titulo))
+        {
+            <CardHeader>
+                @if (ItemsRutaMenu != null)
+                {
+                    <TelerikBreadcrumb Data="@ItemsRutaMenu" TextField="NombreItem" DisabledField="EsBloqueado"></TelerikBreadcrumb>
+                }
+                <span class="k-header-title">
+                    @Titulo
+                    @if (!string.IsNullOrEmpty(CodigoRegistro))
+                    {
+                        <span class="k-header-title k-text-code" title="Código">@CodigoRegistro</span>
+                    }
+                </span>
+            </CardHeader> 
+        }
+    }
+    @ChildContent 
+</div>
+
+@code {
+    [Parameter] public string Titulo { get; set; }
+    [Parameter] public string CodigoRegistro { get; set; }
+    [Parameter] public string CodigoServicio { get; set; } 
+    [Parameter] public RenderFragment ChildContent { get; set; } 
+    public IEnumerable<MenuObtenerItemRutaPorServicioDto> ItemsRutaMenu { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(CodigoServicio))
+            {
+                string codigoWebEmpresa = null;
+                if(((await IServicio.ConsultaPorCodigo(CodigoServicio)).FlagOrigenAcceso ?? "") is "PE")
+                {
+                    string[] url = INavigation.Uri.Replace(INavigation.BaseUri, "").Split("/");
+                    codigoWebEmpresa = url.Length > 0 ? url[0].Substring(0, Math.Min(url[0].Length, 15)) : null;
+                }
+                ItemsRutaMenu = await IMenu.ObtenerItemsRutaPorServicio(CodigoServicio, codigoWebEmpresa);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+} 

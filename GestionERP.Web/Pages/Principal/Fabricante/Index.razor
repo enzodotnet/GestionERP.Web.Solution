@@ -1,0 +1,68 @@
+@page "/fabricantes"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal
+
+<PageTitle>Fabricantes - Lista</PageTitle> 
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+<CardContainerComponent Titulo="Lista de fabricantes" CodigoServicio="@(codigoServicio)"> 
+    <CardBody>
+
+        <TelerikGrid Data="@ListaFabricantes" Pageable="true" PageSize="@(15)" Sortable="true" Resizable="true" Size="sm" Height="562px">
+            <GridToolBarTemplate> 
+                <TelerikButton Icon="@(SvgIcon.Plus)" ButtonType="@ButtonType.Button" Id="tbtn" Title="Ir a insertar nuevo registro" Size="sm" Class="b-primary btn-auth grid-toolbar" Enabled="@(EsAsignadoInsertar)" OnClick="@(IrInsertar)" >Insertar fabricante</TelerikButton>
+                <span class="k-toolbar-spacer"/>
+                <GridSearchBox Size="md" Width="200px" DebounceDelay="100" Placeholder="Buscar en la lista..."/>
+            </GridToolBarTemplate>
+            
+            <GridSettings>
+                <GridPagerSettings InputType="@(PagerInputType.Input)" PageSizes="@([15, 25, 50, null])" Position="@(PagerPosition.Bottom)"/>
+            </GridSettings>
+
+            <GridColumns> 
+                <GridColumn Field="Codigo" Width="100px" Title="Código" Locked="@(true)"/>
+                <GridColumn Field="Nombre" Width="400px" Title="Nombre"/> 
+                <GridColumn Field="Activo" Width="70px" Title="Activo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                    <Template>
+                        @{FabricanteListarDto item = context as FabricanteListarDto;}
+
+                        <TelerikCheckBox @bind-Value="@(item.Activo)" Size="sm" Enabled="false"/>
+                    </Template>
+                </GridColumn>
+                <GridColumn Width="100px" Title="Acciones" Locked="@(true)">
+                    <Template>
+                        @{
+                            FabricanteListarDto item = context as FabricanteListarDto;
+                        }
+
+                        <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ir a ver registro" Class="b-primary" OnClick="@(() => IrVer(item.Id))"/>
+                        <TelerikButton Icon="@(SvgIcon.Pencil)" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" Id="tbtn" Title="Ir a editar registro" OnClick="@(() => IrEditar(item.Id))" />
+                        <TelerikButton Icon="@(SvgIcon.Trash)" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" Id="tbtn" Title="Eliminar registro" OnClick="@(() => MostrarEliminar(true, item.Id))" />
+                    </Template>
+                </GridColumn>  
+            </GridColumns>
+
+            <NoDataTemplate>
+                @if(IsInitGrid)
+                {
+                    <TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+                }
+            </NoDataTemplate> 
+        </TelerikGrid>
+
+        <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+            <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando fabricante</DialogTitle>
+            <DialogContent> ¿Está seguro de eliminar al registro @CodigoRegistro? </DialogContent>
+            <DialogButtons>
+                <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(() => MostrarEliminar(false))" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton> 
+            </DialogButtons>
+        </TelerikDialog>
+
+    </CardBody>
+</CardContainerComponent>

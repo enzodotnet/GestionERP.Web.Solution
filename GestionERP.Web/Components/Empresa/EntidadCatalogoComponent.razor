@@ -1,0 +1,103 @@
+@inject IPrincipalEntidad IEntidad
+@inject AuthenticationStateProvider IAuthState
+@using GestionERP.Web.Models.Dtos.Principal 
+@implements IDisposable
+@using GestionERP.Web.Global
+@namespace Empresa
+
+<TooltipButtonComponent/>
+
+<TelerikWindow Visible="@EsVisibleCatalogo" VisibleChanged="@VisibleChangedHandler" ThemeColor="dark" Modal="true" Resizable="false" Height="455px" Width="600px" CloseOnOverlayClick="false" FooterLayoutAlign="WindowFooterLayoutAlign.Start">
+    <WindowTitle>Catálogo de entidades de la empresa</WindowTitle>
+    <WindowActions>
+        <WindowAction Name="Close" Title="Cerrar"/>
+    </WindowActions>    
+    <WindowContent> 
+        <TelerikNotification @ref="@AlertInterno" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <TelerikGrid Data="@Catalogo" SelectionMode="@(GridSelectionMode.Single)" @bind-SelectedItems="@(ItemsSeleccionado)" Height="100%" Pageable="true" PageSize="@(10)" Sortable="true" OnRowDoubleClick="@OnRowDoubleClickHandler" Resizable="true" Size="sm">
+            <GridToolBarTemplate> 
+                <GridSearchBox Size="md" Width="300px" DebounceDelay="100" Placeholder="Buscar en el catálogo..."/>
+            </GridToolBarTemplate>
+            <GridSettings>
+                <GridPagerSettings InputType="@(PagerInputType.Buttons)" ButtonCount="@(5)" Position="@(PagerPosition.Bottom)" />
+            </GridSettings>
+            <GridColumns> 
+                <GridCheckboxColumn SelectAll="@(false)" Width="32px" Locked="@(true)"/>
+                <GridColumn Field="CodigoEntidad" Width="100px" Title="N° de documento"/>
+                <GridColumn Field="NombreEntidad" Width="300px" Title="Nombre o razón social"/>  
+            </GridColumns>
+            <NoDataTemplate>
+                <TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+            </NoDataTemplate> 
+        </TelerikGrid> 
+    </WindowContent>
+    <WindowFooter>
+        <TelerikButton Icon="@(SvgIcon.Download)" ThemeColor="secondary" ButtonType="@ButtonType.Button" OnClick="@(SeleccionarItem)" Size="sm">Seleccionar</TelerikButton>
+    </WindowFooter>
+</TelerikWindow>
+
+<TelerikNotification @ref="@AlertExterno" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+
+<CascadingValue Value=this IsFixed=true>
+    <TelerikButton Icon="@(SvgIcon.Search)" Class="b-primary" Id="tbtn" Title="Buscar código en catálogo" Size="sm" ButtonType="@ButtonType.Button" OnClick="(MostrarCatalogo)"/>
+    @ChildContent
+</CascadingValue> 
+
+@code {
+    public bool EsVisibleCatalogo { get; set; } = false;
+    public TelerikNotification AlertInterno { get; set; }
+    public TelerikNotification AlertExterno { get; set; }
+    [Parameter] [EditorRequired] public string CodigoEmpresa { get; set; }
+    [Parameter] public string FlagTipo { get; set; } = null;
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string CodigoExcluir { get; set; }
+    public IEnumerable<EntidadCatalogoPorEmpresaDto> Catalogo { get; set; }
+    public IEnumerable<EntidadCatalogoPorEmpresaDto> ItemsSeleccionado { get; set; }
+    [Parameter] public EventCallback<EntidadCatalogoPorEmpresaDto> CargarItemSeleccionado { get; set; }
+
+    private async Task OnRowDoubleClickHandler(GridRowClickEventArgs args) => await RetornarItemSeleccionado(args.Item as EntidadCatalogoPorEmpresaDto);
+
+    private async Task RetornarItemSeleccionado(EntidadCatalogoPorEmpresaDto item)
+    {
+        EsVisibleCatalogo = false;
+        await CargarItemSeleccionado.InvokeAsync(item);
+    }
+
+    public void VisibleChangedHandler(bool esVisible) => EsVisibleCatalogo = esVisible;
+
+    public async Task MostrarCatalogo()
+    {
+        try
+        {
+            ItemsSeleccionado = [];
+            if((await IAuthState.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated)
+            {
+                Catalogo = await IEntidad.CatalogoPorEmpresa(CodigoEmpresa, FlagTipo);
+                if (Catalogo is not null && !string.IsNullOrEmpty(CodigoExcluir))
+                    Catalogo = Catalogo.Where(x => x.CodigoEntidad.Trim() != CodigoExcluir);
+                EsVisibleCatalogo = true; 
+            }
+            else 
+                Fnc.MostrarAlerta(AlertExterno, Cnf.MsgErrorNoAuthenticated, "error");
+        }
+        catch (Exception ex)
+        {
+            if (ex is HttpRequestException)
+                Fnc.MostrarAlerta(AlertExterno, Cnf.MsgErrorNotConnectApi, "error");
+            else if (ex is HttpResponseException)
+                Fnc.MostrarAlerta(AlertExterno, $"{((ex as HttpResponseException).Code == "NF" ? Cnf.MsgErrorNotFoundAPi : ex.Message)}", "error");
+            else 
+                Fnc.MostrarAlerta(AlertExterno, Cnf.MsgErrorFuncAppWeb, "error");
+        }
+    }
+
+    public async Task SeleccionarItem()
+    {
+        if (!ItemsSeleccionado.Any()) 
+            Fnc.MostrarAlerta(AlertInterno, "Es necesario que seleccione un ítem del catálogo", "warning"); 
+        else
+            await RetornarItemSeleccionado(ItemsSeleccionado.FirstOrDefault());
+    }
+    
+    public void Dispose() => GC.SuppressFinalize(this);
+}

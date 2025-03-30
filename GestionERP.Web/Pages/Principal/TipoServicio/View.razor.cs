@@ -1,0 +1,67 @@
+﻿using GestionERP.Web.Handlers;
+using GestionERP.Web.Models.Dtos.Principal;
+using GestionERP.Web.Models.Dtos.Principal.Types;
+using GestionERP.Web.Services.Interfaces;
+using GestionERP.Web.Components;
+using Microsoft.AspNetCore.Components;
+using GestionERP.Web.Services; 
+
+namespace GestionERP.Web.Pages.Principal.TipoServicio;
+
+public partial class View : IDisposable
+{
+    private const string codigoServicio = "S066";
+    public TipoServicioObtenerDto TipoServicioObtener { get; set; }
+    private IEnumerable<TipoServicioRegistroType> Registros { get; set; }
+    [Parameter] public Guid? Id { get; set; } 
+    [CascadingParameter] public NotifyComponent Notify { get; set; }
+
+    [Inject] public IPrincipalTipoServicio ITipoServicio { get; set; }
+    [Inject] public IPrincipalPermiso IPermiso { get; set; }
+    [Inject] public UserService IUser { get; set; }
+    [Inject] public NavigationManager INavigation { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Notify.ShowLoading(mensaje: "Obteniendo registro"); 
+            Registros = TipoServicioRegistroType.ObtenerTipos();
+
+			if (!(await IUser.VerificarAccesoEsValido(Notify, codigoServicio: codigoServicio)).esValido)
+				return;
+
+			if (!await IPermiso.ConsultaEsAsignadoPorSesion(TipoServicioAcceso.VerRegistros))
+            {
+                INavigation.NavigateTo("inicio");
+                Notify.Show("No tiene permiso para ver registros del servicio principal de [Tipos de servicio]", "error");
+                return;
+            }
+
+            TipoServicioObtener = await ITipoServicio.Obtener((Guid) Id);
+
+            if (TipoServicioObtener is null)
+            {
+                INavigation.NavigateTo("tipos-servicio");
+                Notify.Show("El registro del [Tipo de Servicio] consultado a visualizar no está disponible", "error");
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is HttpRequestException)
+                Notify.ShowError("NC");
+            else if (ex is HttpResponseException)
+                Notify.ShowError((ex as HttpResponseException).Code, ex);
+            else
+                Notify.ShowError("FA", ex);
+        }
+        finally
+        {
+            Notify.ShowLoading(false);
+        }
+    }
+
+    private void Volver() => INavigation.NavigateTo("tipos-servicio");
+
+    public void Dispose() => GC.SuppressFinalize(this);
+}

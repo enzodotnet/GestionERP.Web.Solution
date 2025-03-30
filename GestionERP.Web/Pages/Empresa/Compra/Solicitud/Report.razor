@@ -1,0 +1,36 @@
+﻿@page "/{CodigoWebEmpresa}/compra/solicitudes/{Id:guid}/reporte"
+
+@attribute [Authorize]
+@using GestionERP.Web.Global
+@using Telerik.SvgIcons
+
+<PageTitle>@Empresa?.Acronimo - Solicitud Compra - Reporte</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)"/>
+
+<TooltipButtonComponent />
+@if(Solicitud is not null)
+{
+    <CardContainerComponent Titulo="Reporte de solicitud de compra" CodigoRegistro="@(Solicitud.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <ReportViewer ServiceType="@ReportViewerServiceType.REST" ServiceUrl="@Cnf.ServerReportURI" @bind-ReportSource="@ReportSource" ScaleMode="@(ScaleMode.Specific)" Tools="@ToolsReport" Scale="@(1.0)" ViewMode="@(ViewMode.PrintPreview)" Height="535px"/>
+        </CardBody>
+
+        <CardActions Layout="@CardActionsLayout.Start">
+            <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+            <TelerikButton Icon="@(SvgIcon.Print)" Id="tbtn" Title="Imprimir de forma directa" ButtonType="@ButtonType.Button" Size="sm" OnClick="@(() => MostrarPrintDialog(true))" Visible="@(EsVisibleImprimirDirecto)" Class="b-primary btn-auth" Enabled="@(EsAsignadoImprimirDirecto & !IsLoadingAction)">Imprimir directo</TelerikButton>
+        </CardActions>
+
+        <TelerikDialog @bind-Visible="@EsVisiblePrintDialog" Width="450px" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+            <DialogTitle> <TelerikSvgIcon Size="md" Icon="@(SvgIcon.Print)" />Enviando a imprimir solicitud de compra</DialogTitle>
+            <DialogContent>
+                <TelerikNotification @ref="@AlertPrintDialog" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+                ¿Está seguro de enviar a imprimir de forma directa hacia la impresora <strong>@Numerador.NombreImpresora</strong> al registro @Solicitud.Codigo.TrimEnd()?
+            </DialogContent>
+            <DialogButtons>
+                <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(ImprimirDirecto)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => MostrarPrintDialog(false))" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+            </DialogButtons>
+        </TelerikDialog>
+    </CardContainerComponent>
+}

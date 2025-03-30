@@ -1,0 +1,79 @@
+@page "/diarios/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Diario - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando diario" CodigoRegistro="@(DiarioObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator"/>
+                </FormValidation> 
+                <FormItems>
+                     <FormItem>
+                         <Template>
+                             <label>Activo:</label>
+                             <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(DiarioEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Nombre*:</label>
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(DiarioEditar.Nombre)" Size="sm" />
+                             <TelerikValidationMessage For="@(() => DiarioEditar.Nombre)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Descripción:</label>
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(DiarioEditar.Descripcion)" Size="sm" />
+                             <TelerikValidationMessage For="@(() => DiarioEditar.Descripcion)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Tipo de cambio:</label>
+                             <TelerikDropDownList @bind-Value="@DiarioObtener.FlagTipoCambio" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@TiposCambio" Enabled="@false" Size="sm" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Tipo de registro:</label>
+                             <TelerikDropDownList @bind-Value="@DiarioObtener.FlagTipoRegistro" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@TiposRegistro" Enabled="@false" Size="sm" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Tipo de proceso:</label>
+                             <TelerikDropDownList @bind-Value="@DiarioObtener.FlagTipoProceso" Width="200px" TextField="Nombre" ValueField="Codigo" Data="@TiposProceso" Enabled="@false" Size="sm" />
+                         </Template>
+                     </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

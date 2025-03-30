@@ -1,0 +1,95 @@
+@page "/choferes/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+<PageTitle>Chofer - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando chofer" CodigoRegistro="@(ChoferObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator"/>
+                </FormValidation> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(ChoferEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferEditar.Nombre)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => ChoferEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Código" Placeholder="Código" Enabled="@(false)" @bind-Value="@(ChoferObtener.CodigoTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox @bind-Value="@(ChoferObtener.NombreTipoIdentificacion)" Width="200px" Title="@(ChoferObtener.NombreTipoIdentificacion)" Placeholder="Nombre o Descripción" Enabled="@(false)" Size="sm" />
+                            </div> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Número del tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Sigla del tipo de identificación" Placeholder="Sigla" Enabled="@(false)" @bind-Value="@(ChoferObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox Width="150px" AutoComplete="off" @bind-Value="@(ChoferObtener.NumeroTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Tipo de categoría*:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferEditar.TipoCategoria)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => ChoferEditar.TipoCategoria)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Observación:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ChoferEditar.Observacion)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => ChoferEditar.Observacion)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Fecha de expiración de licencia:</label>
+                            <TelerikDateInput Width="150px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" @bind-Value="@(ChoferEditar.FechaExpiracionLicencia)" />
+                            <TelerikValidationMessage For="@(() => ChoferEditar.FechaExpiracionLicencia)" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+         
+        </CardBody>
+    </CardContainerComponent> 
+}

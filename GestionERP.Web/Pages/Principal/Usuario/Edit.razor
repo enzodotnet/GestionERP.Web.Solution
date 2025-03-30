@@ -1,0 +1,204 @@
+@page "/usuarios/{Id:guid}/editar"
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Principal 
+
+<PageTitle>Usuario - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando usuario" CodigoRegistro="@(UsuarioObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />
+                </FormValidation>
+                <FormItems>
+                    <FormItem Field="Activo">
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@UsuarioEditar.Activo" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Nombre">
+                        <Template>
+                            <label>Nombres y apellidos*:</label>
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(UsuarioEditar.Nombre)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => UsuarioEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="Email">
+                        <Template>
+                            <label>Correo electrónico*:</label>
+                            <TelerikTextBox Width="300px" AutoComplete="off" @bind-Value="@(UsuarioEditar.Email)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => UsuarioEditar.Email)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="NickUser">
+                        <Template>
+                            <label>Siglas del nombre y apellido*:</label>
+                            <TelerikTextBox Width="50px" AutoComplete="off" @bind-Value="@(UsuarioEditar.NickUser)" Size="sm" />
+                            <TelerikValidationMessage For="@(() => UsuarioEditar.NickUser)" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="FlagTipoPerfil">
+                        <Template>
+                            <label>Tipo de perfil:</label>
+                            <TelerikDropDownList Width="200px" @bind-Value="@UsuarioObtener.FlagTipoPerfil" TextField="Nombre" ValueField="Codigo" Data="@TiposPerfil" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="CodigoTipoIdentificacion">
+                        <Template>
+                            <label>Tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Código" Enabled="@(false)" @bind-Value="@(UsuarioObtener.CodigoTipoIdentificacion)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(UsuarioObtener.NombreTipoIdentificacion)" Width="50%" Title="@(UsuarioObtener.NombreTipoIdentificacion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="NumeroTipoIdentificacion">
+                        <Template>
+                            <label>Número del tipo de identificación:</label>
+                            <div class="item-group">
+                                <TelerikTextBox AutoComplete="off" Title="Sigla del tipo de identificación" Enabled="@(false)" @bind-Value="@(UsuarioObtener.SiglaTipoIdentificacion)" Size="sm" Width="50px" />
+                                <TelerikTextBox Width="150px" AutoComplete="off" @bind-Value="@(UsuarioObtener.Codigo)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+
+                    <FormItem Field="GrdModulos">
+                        <Template>
+                            <TelerikGrid Height="400px" Data="@(UsuarioObtener.Modulos)" Pageable="false" Sortable="true" Resizable="false" Size="sm" Class="edit-grid" OnRowRender="@OnRowModulosRenderHandler">
+                                <GridToolBarTemplate>
+                                    <GridSearchBox Size="md" Width="200px" DebounceDelay="100" Placeholder="Buscar en la lista..." />
+                                    <span class="k-toolbar-spacer" />
+                                    <TelerikCheckBox Value="@SelectModulosAllValue" ValueChanged="@((bool value) => ValueModulosChanged(value))" Indeterminate="@SelectModulosIndeterminate" ValueExpression="@(() => UsuarioModuloObtener.EsAsignado)" /><label>Asignar todos</label>
+                                </GridToolBarTemplate>
+                                <GridColumns>
+                                    <GridColumn Field="CodigoModulo" Width="100px" Title="Código" />
+                                    <GridColumn Field="NombreModulo" Width="300px" Title="Nombre" />
+                                    <GridColumn Field="EsAsignado" Width="70px" Title="Asignar" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                        <Template>
+                                            <TelerikCheckBox @bind-Value="@((context as UsuarioModuloObtenerDto).EsAsignado)" Size="sm" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>Aún no hay ítems por seleccionar</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="GrdServicios">
+                        <Template>
+                            <TelerikGrid Height="400px" Data="@(UsuarioObtener.Servicios.Where(x => x.EsAsignadoModulo))" Groupable="true" OnStateInit="@((GridStateEventArgs<UsuarioServicioObtenerDto> args) => OnStateInitServiciosHandler(args))" Pageable="false" Sortable="true" FilterMode="@GridFilterMode.FilterMenu" FilterMenuType="@FilterMenuType.CheckBoxList" Resizable="false" Size="sm" Class="edit-grid" OnRowRender="@OnRowServiciosRenderHandler">
+                                <GridToolBarTemplate>
+                                    <GridSearchBox Size="md" Width="200px" DebounceDelay="100" Placeholder="Buscar en el catálogo..." />
+                                    <span class="k-toolbar-spacer" />
+                                    <TelerikCheckBox Value="@SelectServiciosAllValue" ValueChanged="@((bool value) => ValueServiciosChanged(value))" Indeterminate="@SelectServiciosIndeterminate" ValueExpression="@(() => UsuarioServicioObtener.EsAsignado)" /><label>Asignar todos</label>
+                                </GridToolBarTemplate>
+                                <GridColumns>
+                                    <GridColumn Field="CodigoServicio" Width="100px" Title="Código" Groupable="false" Filterable="false" />
+                                    <GridColumn Field="NombreServicio" Width="300px" Title="Nombre" Groupable="false" Filterable="false" />
+                                    <GridColumn Field="EsAsignado" Width="70px" Title="Asignar" Groupable="false" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                        <Template>
+                                            <TelerikCheckBox @bind-Value="@((context as UsuarioServicioObtenerDto).EsAsignado)" Size="sm" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="NombreModulo" Width="200px" Title="Módulo" />
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>Aún no hay ítems por seleccionar</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+                    <FormItem Field="GrdPermisos">
+                        <Template>
+                            <TelerikGrid Height="400px" Data="@(UsuarioObtener.Permisos.Where(x => x.EsAsignadoServicio))" Groupable="true" OnStateInit="@((GridStateEventArgs<UsuarioPermisoObtenerDto> args) => OnStateInitPermisosHandler(args))" Pageable="false" Sortable="true" FilterMode="@GridFilterMode.FilterMenu" FilterMenuType="@FilterMenuType.CheckBoxList" Resizable="false" Size="sm" Class="edit-grid" OnRowRender="@OnRowPermisosRenderHandler">
+                                <GridToolBarTemplate>
+                                    <GridSearchBox Size="md" Width="200px" DebounceDelay="100" Placeholder="Buscar en la lista..." />
+                                    <span class="k-toolbar-spacer" />
+                                    <TelerikCheckBox Value="@SelectPermisosAllValue" ValueChanged="@((bool value) => ValuePermisosChanged(value))" Indeterminate="@SelectPermisosIndeterminate" ValueExpression="@(() => UsuarioPermisoObtener.EsAsignado)" /><label>Asignar todos</label>
+                                </GridToolBarTemplate>
+                                <GridColumns>
+                                    <GridColumn Field="CodigoPermiso" Width="100px" Title="Código" Groupable="false" Filterable="false" />
+                                    <GridColumn Field="NombrePermiso" Width="400px" Title="Nombre" Groupable="false" Filterable="false" />
+                                    <GridColumn Field="EsAsignado" Width="100px" Title="Asignar" Groupable="false" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                                        <Template>
+                                            <TelerikCheckBox @bind-Value="@((context as UsuarioPermisoObtenerDto).EsAsignado)" Size="sm" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="NombreServicio" Width="300px" Title="Servicio" />
+                                    <GridColumn Field="NombreModulo" Width="200px" Title="Módulo" />
+                                </GridColumns>
+                                <NoDataTemplate>
+                                    <span>Aún no hay ítems por seleccionar</span>
+                                </NoDataTemplate>
+                            </TelerikGrid>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+
+                <FormItemsTemplate Context="formContext">
+                    @{
+                        List<IFormItemBase> formObjects = formContext.Items;
+                        List<IFormItem> items = [];
+                        foreach (IFormItemBase itemBase in formObjects)
+                        {
+                            items.Add((IFormItem)itemBase);
+                        }
+                    }
+                    <TelerikTabStrip Height="535px" PersistTabContent="@(true)">
+                        <TabStripTab Title="Datos Principales">
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Activo"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Nombre"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "Email"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "NickUser"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "FlagTipoPerfil"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "CodigoTipoIdentificacion"))" />
+                            <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "NumeroTipoIdentificacion"))" />
+                        </TabStripTab>
+                        <TabStripTab Title="Accesos central">
+                            <p class="form intab">Todo acceso que se le asigne al usuario solo abarcará el panel central del sistema, para realizarlo de forma detallada tendrá que hacerlo por empresa.</p>
+                            <TelerikTabStrip Height="460px" ActiveTabIndex="@(IndexTabAccesoActivo)" ActiveTabIndexChanged="@(TabChangedHandler)" PersistTabContent="@(false)">
+                                <TabStripTab Title="Módulos">
+                                    <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "GrdModulos"))" />
+                                </TabStripTab>
+                                <TabStripTab Title="Servicios">
+                                    <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "GrdServicios"))" />
+                                </TabStripTab>
+                                <TabStripTab Title="Permisos">
+                                    <TelerikFormItemRenderer Item="@(items.First(x => x.Field == "GrdPermisos"))" />
+                                </TabStripTab>
+                            </TelerikTabStrip>
+                        </TabStripTab>
+                    </TelerikTabStrip>
+                </FormItemsTemplate>
+
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

@@ -1,0 +1,82 @@
+@page "/servicios/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Servicio - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando servicio" CodigoRegistro="@(ServicioObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator" />  
+                </FormValidation>
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ServicioEditar.Activo" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre*:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ServicioEditar.Nombre)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => ServicioEditar.Nombre)" />
+                        </Template>
+                    </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Tipo de función:</label>
+                             <TelerikDropDownList @bind-Value="@ServicioObtener.FlagTipoFuncion" TextField="Nombre" ValueField="Codigo" Data="@TiposFuncion" Enabled="@(false)" Size="sm"/>
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Módulo:</label>
+                             <div class="item-group">
+                                 <TelerikTextBox Enabled="@(false)" @bind-Value="@(ServicioObtener.CodigoModulo)" Size="sm" Width="100px" />
+                                 <TelerikTextBox @bind-Value="@(ServicioObtener.NombreModulo)" Title="@(ServicioObtener.NombreModulo)" Enabled="@(false)" Size="sm" />
+                             </div>
+                         </Template>
+                     </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label> 
+                            <TelerikTextBox AutoComplete="off" @bind-Value="@(ServicioEditar.Descripcion)" Size="sm"/>  
+                            <TelerikValidationMessage For="@(() => ServicioEditar.Descripcion)" />
+                        </Template>
+                    </FormItem> 
+                     <FormItem>
+                         <Template>
+                             <label>Es adjuntable archivos:</label>
+                             <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@ServicioObtener.EsAdjuntableArchivo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                         </Template>
+                     </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent> 
+}

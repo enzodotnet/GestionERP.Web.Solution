@@ -1,0 +1,253 @@
+@page "/{CodigoWebEmpresa}/produccion/ordenes/{Id:guid}/editar" 
+
+@attribute [Authorize]
+
+@using GestionERP.Web.Models.Dtos.Produccion
+
+<PageTitle>@Empresa?.Acronimo - Orden Producción - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent />
+
+@if(IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando orden de producción" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@EditContext" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator Validator="@(Validator)" />
+                </FormValidation>
+                <FormItems>
+                    <FormGroup Class="formgroup" Columns="9" ColumnSpacing="6px">
+                        <FormItem ColSpan="5">
+                            <Template>
+                                <label>Documento:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox AutoComplete="off" Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(Orden.CodigoDocumento)" Size="sm" Width="70px" />
+                                    <TelerikTextBox AutoComplete="off" Title="Código de Serie" Class="t-main" ReadOnly="@true" @bind-Value="@(Orden.CodigoSerieDocumento)" Size="sm" Width="70px" />
+                                    <TelerikTextBox AutoComplete="off" Title="Número secuencia de la serie" Class="t-main" ReadOnly="@true" @bind-Value="@(Orden.NumeroSerieDocumento)" Size="sm" Width="120px" />
+                                    <TelerikTextBox @bind-Value="@(Orden.NombreSerieDocumento)" Title="@(Orden.NombreSerieDocumento)" Class="t-main" ReadOnly="@true" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Origen:</label>
+                                <TelerikDropDownList Data="@Origenes" @bind-Value="@Orden.FlagOrigen" Enabled="@(false)" TextField="Nombre" ValueField="Codigo" Width="85px" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Tipo de registro:</label>
+                                <TelerikDropDownList Data="@TiposRegistro" @bind-Value="@Orden.FlagTipoRegistro" Enabled="@(false)" TextField="Nombre" Width="120px" ValueField="Codigo" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Fecha de emisión:</label>
+                                <TelerikDateInput Width="110px" Size="sm" Enabled="@(false)" @bind-Value="@(Orden.FechaEmision)" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Estado:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Title="Código" Class="t-main" ReadOnly="@true" @bind-Value="@(Orden.CodigoEstado)" Size="sm" Width="38px" />
+                                    <TelerikTextBox Class="t-main" ReadOnly="@true" @bind-Value="@(Orden.NombreEstado)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Plan de producción:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(Orden.CodigoPlan)" Title="Código" Enabled="@(false)" Size="sm" Width="60px" />
+                                    <TelerikTextBox @bind-Value="@(Orden.NombrePlan)" Title="@(Orden.NombrePlan)" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Versión del plan de producción*:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Value="@(OrdenEditar.CodigoVersionPlan)" DebounceDelay="@(0)" ValueChanged="@ValueChangeVersionPlanHandler" ValueExpression="@(() => OrdenEditar.CodigoVersionPlan)" OnChange="@OnChangeVersionPlanHandler" Id="versionplan" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="150px" MaxLength="9" />
+                                    <Empresa.VersionPlanProduccionCatalogoComponent CodigoEmpresa="@Empresa.Codigo" EsFiltroPlan="@(true)" CodigoFiltroPlan="@(Orden.CodigoPlan)" CargarItemSeleccionado="@(CargarItemCatalogoVersionPan)" CodigoExcluir="@(OrdenEditar.CodigoVersionPlan)" />
+                                    <TelerikTextBox @bind-Value="@(Orden.NombreVersionPlan)" Title="@(Orden.NombreVersionPlan)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => OrdenEditar.CodigoVersionPlan)" TargetSelector="#versionplan" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Materiales:</label>
+                                <TelerikButton Icon="@(SvgIcon.ChartBubble)" Id="tbtn" Title="Mostrar lista de materiales empleadas por la orden de producción" Class="b-primary b-action" ButtonType="@ButtonType.Button" Size="sm" OnClick="() => VisibleListaMaterialChangedHandler(true)">Mostrar materiales</TelerikButton>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                @if (Orden.FlagOrigen == "S")
+                                {
+                                    <label>Solicitud de producción:</label>
+                                    <TelerikTextBox @bind-Value="@(Orden.CodigoSolicitudReferencia)" Title="Código" Enabled="@(false)" Size="sm" Width="150px" />
+                                }
+                                else
+                                {
+                                    <span />
+                                }
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="7">
+                            <Template>
+                                <label>Entidad*:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Value="@(OrdenEditar.CodigoEntidad)" DebounceDelay="@(0)" ValueChanged="@ValueChangeEntidadHandler" ValueExpression="@(() => OrdenEditar.CodigoEntidad)" OnChange="@OnChangeEntidadHandler" Id="codigoentidad" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(TipoProduccion.FlagTipoEncargo is "C" or "P" && Orden.FlagOrigen is "D")" Size="sm" MaxLength="11" Width="120px" />
+                                    @if (TipoProduccion.FlagTipoEncargo is "C" or "P" && Orden.FlagOrigen is "D")
+                                    {
+                                        <Empresa.EntidadCatalogoComponent CodigoEmpresa="@Empresa.Codigo" FlagTipo="@(TipoProduccion.FlagTipoEncargo)" CodigoExcluir="@(OrdenEditar.CodigoEntidad)" CargarItemSeleccionado="@(CargarItemCatalogoEntidad)" />
+                                    }
+                                    <TelerikTextBox @bind-Value="@(Orden.NombreEntidad)" Title="@(Orden.NombreEntidad)" Placeholder="Nombre o razón social del proveedor" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => OrdenEditar.CodigoEntidad)" TargetSelector="#codigoentidad" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Local de recepción:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox Value="@(OrdenEditar.CodigoLocalRecepcion)" DebounceDelay="@(0)" ValueChanged="@ValueChangeLocalHandler" ValueExpression="@(() => OrdenEditar.CodigoLocalRecepcion)" OnChange="@OnChangeLocalHandler" Id="local" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(string.IsNullOrEmpty(Numerador.CodigoLocal))" Size="sm" Width="60px" MaxLength="3" />
+                                    @if (string.IsNullOrEmpty(Numerador.CodigoLocal))
+                                    {
+                                        <Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(OrdenEditar.CodigoLocalRecepcion)" />
+                                    }
+                                    <TelerikTextBox @bind-Value="@(Orden.NombreLocalRecepcion)" Title="@(Orden.NombreLocalRecepcion)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => OrdenEditar.CodigoLocalRecepcion)" TargetSelector="#local" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Tipo de producción:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(Orden.CodigoTipoProduccion)" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" Size="sm" Width="60px" />
+                                    <TelerikTextBox @bind-Value="@(Orden.NombreTipoProduccion)" Title="@(Orden.NombreTipoProduccion)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Artículo terminado:</label>
+                                <div class="item-group">
+                                    <TelerikTextBox @bind-Value="@(Orden.CodigoArticuloTerminado)" Title="Código" Enabled="@false" Size="sm" Width="170px" />
+                                    <TelerikTextBox @bind-Value="@(Orden.NombreArticuloTerminado)" Title="@(Orden.NombreArticuloTerminado)" Enabled="@false" Size="sm" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="2">
+                            <Template>
+                                <label>Presentación del artículo:</label>
+                                <TelerikTextBox @bind-Value="@(Orden.PresentacionArticulo)" Title="@(Orden.PresentacionArticulo)" Enabled="@(false)" AutoComplete="off" Size="sm" />
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <label>Cantidad*:</label>
+                                <div class="item-group-adornment">
+                                    <TelerikTextBox @bind-Value="@(Orden.CodigoUnidadMedida)" AutoComplete="off" Enabled="@(false)" Class="adornment" Title="@(Orden.NombreUnidadMedida)" Size="sm" Width="54px" />
+                                    <TelerikNumericTextBox @bind-Value="@(OrdenEditar.Cantidad)" OnChange="@OnChangeCantidadHandler" Id="cantidad" AutoComplete="off" Arrows="@(false)" Min="0" Format="N3" Decimals="3" Size="sm" />
+                                </div>
+                                <TelerikValidationTooltip For="@(() => OrdenEditar.Cantidad)" TargetSelector="#cantidad" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="1">
+                            <Template>
+                                <div class="item-group-block">
+                                    <label>Fecha de inicio*:</label>
+                                    <TelerikDateInput @bind-Value="@(OrdenEditar.FechaInicio)" OnChange="@OnChangeFechaInicioHandler" Id="fecinicio" Width="110px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+                                    <TelerikValidationTooltip For="@(() => OrdenEditar.FechaInicio)" TargetSelector="#fecinicio" />
+                                    <span class="ig-space" />
+                                    <label>Fecha de término*:</label>
+                                    <TelerikDateInput @bind-Value="@(OrdenEditar.FechaTermino)" OnChange="@OnChangeFechaTerminoHandler" Id="fectermino" Width="110px" Size="sm" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+                                    <TelerikValidationTooltip For="@(() => OrdenEditar.FechaTermino)" TargetSelector="#fectermino" />
+                                </div>
+                            </Template>
+                        </FormItem>
+                        <FormItem ColSpan="4">
+                            <Template>
+                                <label>Motivo:</label>
+                                <TelerikTextArea @bind-Value="@(OrdenEditar.Motivo)" OnChange="@OnChangeMotivoHandler" Id="motivo" AutoComplete="off" Class="textarea-wrapper" Rows="3" Title="@(OrdenEditar.Motivo)" MaxLength="200" Size="sm" />
+                                <TelerikValidationTooltip For="@(() => OrdenEditar.Motivo)" TargetSelector="#motivo" />
+                            </Template>
+                        </FormItem>
+
+                        <FormItem ColSpan="6">
+                            <Template>
+                                <label>Observación:</label>
+                                <TelerikTextBox @bind-Value="@(OrdenEditar.Observacion)" OnChange="@OnChangeObservacionHandler" AutoComplete="off" Id="observacion" Title="@(OrdenEditar.Observacion)" MaxLength="100" Size="sm" />
+                                <TelerikValidationTooltip For="@(() => OrdenEditar.Observacion)" TargetSelector="#observacion" />
+                            </Template>
+                        </FormItem>
+                    </FormGroup>
+                </FormItems>
+
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+             
+            <TelerikWindow Visible="@EsVisibleListaMateriales" VisibleChanged="@VisibleListaMaterialChangedHandler" ThemeColor="dark" Modal="true" Height="560px" MinHeight="560px" Width="650px" MinWidth="650px" CloseOnOverlayClick="false">
+                <WindowTitle>Lista de materiales a emplear en la orden de producción</WindowTitle>
+                <WindowActions>
+                    <WindowAction Name="Maximize" Title="Maximizar" />
+                    <WindowAction Name="Close" Title="Cerrar" />
+                </WindowActions>
+                <WindowContent>
+                    <TelerikGrid Height="100%" Data="@(Orden.Materiales)" Pageable="false" Sortable="true" Resizable="true" Size="sm">
+                        <GridColumns>
+                            <GridColumn Field="FlagTipo" Width="95px" Title="Tipo" Filterable="@false">
+                                <Template>
+                                    <label>@(TiposMaterial.Where(x => x.Codigo == (context as OrdenMaterialObtenerDto).FlagTipo).Select(x => x.Nombre).FirstOrDefault())</label>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="FlagInsumo" Width="57px" Title="Insumo" Filterable="@false">
+                                <Template>
+                                    <label>@(InsumosMaterial.Where(x => x.Codigo == (context as OrdenMaterialObtenerDto).FlagInsumo).Select(x => x.Nombre).FirstOrDefault())</label>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CodigoArticulo" Width="121px" Title="Código artículo" />
+                            <GridColumn Field="NombreArticulo" Width="204px" Title="Nombre de artículo" /> 
+                            <GridColumn Field="CodigoUnidadMedida" Width="45px">
+                                <HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
+                                <Template>
+                                    <label title="@((context as OrdenMaterialObtenerDto).NombreUnidadMedida)">@((context as OrdenMaterialObtenerDto).CodigoUnidadMedida)</label>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Cantidad" Width="74px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" /> 
+                        </GridColumns>
+                        <NoDataTemplate>
+                            <span>No existen ítems</span>
+                        </NoDataTemplate>
+                    </TelerikGrid>
+                </WindowContent>
+            </TelerikWindow>
+
+        </CardBody>
+    </CardContainerComponent>
+}

@@ -1,0 +1,96 @@
+@page "/permisos/{Id:guid}"
+
+@attribute [Authorize]
+  
+<PageTitle>Permiso - Ver</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)" />
+
+<TooltipButtonComponent/>
+
+@if (PermisoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando permiso" CodigoRegistro="@(PermisoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@PermisoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PermisoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(PermisoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Evento:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(PermisoObtener.CodigoEvento)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(PermisoObtener.NombreEvento)" Title="@(PermisoObtener.NombreEvento)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Servicio:</label>
+                            <div class="item-group"> 
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(PermisoObtener.CodigoServicio)" Size="sm" Width="100px"/>
+                                <TelerikTextBox @bind-Value="@(PermisoObtener.NombreServicio)" Title="@(PermisoObtener.NombreServicio)" Enabled="@(false)" Size="sm"/>
+                            </div> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                         <Template>
+                             <label>Módulo:</label>
+                             <div class="item-group"> 
+                                 <TelerikTextBox Enabled="@(false)" @bind-Value="@(PermisoObtener.CodigoModulo)" Size="sm" Width="100px" />
+                                 <TelerikTextBox @bind-Value="@(PermisoObtener.NombreModulo)" Title="@(PermisoObtener.NombreModulo)" Enabled="@(false)" Size="sm" />
+                             </div>
+                         </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Es opción en menú:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@PermisoObtener.EsOpcionMenu" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Descripción:</label> 
+                            <TelerikTextBox @bind-Value="@(PermisoObtener.Descripcion)" Size="sm" Enabled="@false"/>
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Pencil)" Id="tbtn" Title="Ir a editar registro" ButtonType="ButtonType.Button" Class="b-primary btn-auth" Enabled="@(EsAsignadoEditar)" Size="sm" OnClick="@(IrEditar)">Editar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Trash)" Id="tbtn" Title="Eliminar registro" ButtonType="ButtonType.Button" Class="b-delete btn-auth" Enabled="@(EsAsignadoEliminar)" Size="sm" OnClick="@(() => EsVisibleDialogEliminar = true)">Eliminar</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+            <TelerikDialog @bind-Visible="@EsVisibleDialogEliminar" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="primary" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
+                <DialogTitle><TelerikSvgIcon Size="md" Icon="@(SvgIcon.Trash)" />Eliminando permiso</DialogTitle>
+                <DialogContent> ¿Está seguro de eliminar el registro? </DialogContent>
+                <DialogButtons>
+                    <TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="primary" OnClick="@(Eliminar)" Size="sm" Enabled="@(!IsLoadingAction)">Sí</TelerikButton>
+                    <TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" ButtonType="@ButtonType.Button" OnClick="@(() => { EsVisibleDialogEliminar = false; })" Size="sm" Visible="@(!IsLoadingAction)">No</TelerikButton>
+                </DialogButtons>
+            </TelerikDialog>
+
+        </CardBody>
+    </CardContainerComponent>
+}

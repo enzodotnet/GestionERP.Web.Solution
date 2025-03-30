@@ -1,0 +1,73 @@
+@page "/glosarios-analisis/{Id:guid}/editar"
+
+@attribute [Authorize] 
+
+<PageTitle>Glosario de Análisis - Editar</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsModified)"/>
+
+<TooltipButtonComponent/>
+
+@if (IsInitPage)
+{
+    <CardContainerComponent Titulo="Editando glosario de análisis" CodigoRegistro="@(GlosarioAnalisisObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <TelerikNotification @ref="@Alert" Class="k-alert-notification" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+        <CardBody>
+            <TelerikForm EditContext="@(EditContext)" Size="sm">
+                <FormValidation>
+                    <FluentValidationValidator @ref="validator"/>
+                </FormValidation> 
+                <FormItems>
+                     <FormItem>
+                         <Template>
+                             <label>Activo:</label>
+                             <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@(GlosarioAnalisisEditar.Activo)" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Registro:</label>
+                             <TelerikDropDownList @bind-Value="@GlosarioAnalisisObtener.FlagRegistro" TextField="Nombre" ValueField="Codigo" Data="@Registros" Enabled="@false" Size="sm" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Idioma original:</label>
+                             <TelerikDropDownList @bind-Value="@GlosarioAnalisisObtener.FlagIdiomaOriginal" TextField="Nombre" ValueField="Codigo" Data="@IdiomasOriginal" Enabled="@false" Size="sm" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Descripción*:</label>
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(GlosarioAnalisisEditar.Descripcion)" Size="sm" />
+                             <TelerikValidationMessage For="@(() => GlosarioAnalisisEditar.Descripcion)" />
+                         </Template>
+                     </FormItem>
+                     <FormItem>
+                         <Template>
+                             <label>Descripción traducida:</label>
+                             <TelerikTextBox AutoComplete="off" @bind-Value="@(GlosarioAnalisisEditar.DescripcionTraducida)" Size="sm" />
+                             <TelerikValidationMessage For="@(() => GlosarioAnalisisEditar.DescripcionTraducida)" />
+                         </Template>
+                     </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Save)" Id="tbtn" Title="Guardar cambios del registro" ButtonType="@ButtonType.Button" OnClick="@(Editar)" Size="sm" ThemeColor="primary" Enabled="@(!IsLoadingAction)">Actualizar</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSeparator />
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" Class="b-primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+                <ToolBarSpacer />
+                <ToolBarTemplateItem>
+                    <span>* Campos obligatorios</span>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}

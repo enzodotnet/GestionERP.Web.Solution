@@ -1,0 +1,78 @@
+@using GestionERP.Web.Models.Objects
+@implements IDisposable   
+
+<TooltipButtonComponent/>
+
+<TelerikWindow Visible="@EsVisibleAuditoria" VisibleChanged="@VisibleAuditoriaChangedHandler" ThemeColor="dark" Modal="true" MinHeight="300px" Height="300px" MinWidth="600px" Width="600px" CloseOnOverlayClick="false">
+    <WindowTitle>Visualizando auditoría del registro @CodigoRegistro</WindowTitle>
+    <WindowActions>
+        <WindowAction Name="Maximize" Title="Maximizar" />
+        <WindowAction Name="Close" Title="Cerrar" />
+    </WindowActions>
+    <WindowContent>
+        <TelerikGrid Data="@(Data)" Height="100%" Sortable="true" Resizable="true" Pageable="false" Size="sm">
+            <GridColumns>
+                <GridColumn Field="NombreEstado" Width="125px" Title="Acción" Locked="@(true)" />
+                <GridColumn Field="FechaHoraAccion" Width="160px" Title="Fecha y hora de la acción" DisplayFormat="{0:dd/MM/yyyy hh:mm:ss tt}" />
+                <GridColumn Width="208px" Title="Usuario responsable">
+                    <Template>
+                        @{
+                            AuditoriaObject item = context as AuditoriaObject;
+                        }
+                        <span>@(string.Concat(item.CodigoUsuario.Trim(), " - ", item.NombreUsuario.Trim()))</span>
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="Motivo" Width="55px" Title="Motivo" TextAlign="@ColumnTextAlign.Center" HeaderClass="k-justify-content-center">
+                    <Template>
+                        <TelerikButton Icon="@(SvgIcon.Eye)" Size="sm" Id="tbtn" Title="Ver motivo" Class="b-primary" ButtonType="@ButtonType.Button" OnClick="@(() => VerMotivoAuditoria((context as AuditoriaObject).Motivo))" />
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </TelerikGrid>
+    </WindowContent>
+</TelerikWindow>
+<TelerikDialog Visible="@EsVisibleMotivoDialog" Width="450px" ShowCloseButton="@(true)" CloseOnOverlayClick="@(true)" VisibleChanged="@VisibleMotivoAuditoriaDialogChangedHandler">
+    <DialogTitle>Visualizando motivo</DialogTitle>
+    <DialogContent>
+        <TelerikTextArea @bind-Value="@(MotivoAuditoriaDialog)" Class="textarea-vertical-motivo" Rows="4" Enabled="@(false)" Size="sm" />
+    </DialogContent>
+</TelerikDialog>
+            
+<CascadingValue Value=this IsFixed=true>
+    <TelerikButton Icon="@(SvgIcon.Connector)" Id="tbtn" Title="Ver auditoría del registro" ButtonType="ButtonType.Button" Size="sm" OnClick="@(() => VisibleAuditoriaChangedHandler(true))" Class="b-base btn-auth" Enabled="@(EsAsignadoVer)">Ver auditoría</TelerikButton>
+    @ChildContent
+</CascadingValue> 
+
+@code {
+    public bool EsVisibleAuditoria { get; set; }
+
+    [Parameter] 
+    [EditorRequired] 
+    public IEnumerable<AuditoriaObject> Data { get; set; }
+
+    [Parameter]
+    [EditorRequired] 
+    public string CodigoRegistro { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public bool EsAsignadoVer { get; set; }
+
+    [Parameter] 
+    public RenderFragment ChildContent { get; set; }    
+
+    private bool EsVisibleMotivoDialog { get; set; }
+    private string MotivoAuditoriaDialog { get; set; }
+
+    public void VisibleAuditoriaChangedHandler(bool esVisible) => EsVisibleAuditoria = esVisible;
+
+    private void VerMotivoAuditoria(string motivo)
+    {
+        MotivoAuditoriaDialog = motivo;
+        VisibleMotivoAuditoriaDialogChangedHandler(true);
+    }
+
+    private void VisibleMotivoAuditoriaDialogChangedHandler(bool esVisible) => EsVisibleMotivoDialog = esVisible;
+
+    public void Dispose() => GC.SuppressFinalize(this);
+}

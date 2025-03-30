@@ -1,0 +1,22 @@
+﻿@page "/{CodigoWebEmpresa}/produccion/solicitudes/{Id:guid}/reporte"
+
+@attribute [Authorize]
+@using GestionERP.Web.Global
+
+<PageTitle>@Empresa?.Acronimo - Solicitud Producción - Reporte</PageTitle>
+
+<NavigationLock OnBeforeInternalNavigation="@(Cerrar)" ConfirmExternalNavigation="@(IsAuthUser && IsLoadingAction)"/>
+
+<TooltipButtonComponent />
+@if (Solicitud is not null)
+{
+    <CardContainerComponent Titulo="Reporte de solicitud de producción" CodigoRegistro="@(Solicitud.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody>
+            <ReportViewer ServiceType="@ReportViewerServiceType.REST" ServiceUrl="@Cnf.ServerReportURI" @bind-ReportSource="@ReportSource" ScaleMode="@(ScaleMode.Specific)" Tools="@ToolsReport" Scale="@(1.0)" ViewMode="@(ViewMode.PrintPreview)" Height="535px"/>
+        </CardBody>
+
+        <CardActions Layout="@CardActionsLayout.Start">
+            <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista anterior" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)" Enabled="@(!IsLoadingAction)" Visible="@(EsVisibleVolver)">Volver</TelerikButton>
+        </CardActions>
+    </CardContainerComponent>
+}

@@ -1,0 +1,69 @@
+@page "/distritos/{Id:guid}"
+
+@attribute [Authorize] 
+
+<PageTitle>Distrito - Ver</PageTitle>
+
+<TooltipButtonComponent/>
+
+@if (DistritoObtener is not null)
+{
+    <CardContainerComponent Titulo="Visualizando distrito" CodigoRegistro="@(DistritoObtener.Codigo)" CodigoServicio="@(codigoServicio)">
+        <CardBody> 
+            <TelerikForm Model="@DistritoObtener" Size="sm"> 
+                <FormItems>
+                    <FormItem>
+                        <Template>
+                            <label>Activo:</label>
+                            <TelerikSwitch OnLabel="Sí" OffLabel="No" @bind-Value="@DistritoObtener.Activo" Enabled="@false" Size="sm" TrackRounded="md" ThumbRounded="md"/>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Nombre:</label> 
+                            <TelerikTextBox @bind-Value="@(DistritoObtener.Nombre)" Size="sm" Enabled="@false"/> 
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Provincia:</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(DistritoObtener.CodigoProvincia)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(DistritoObtener.NombreProvincia)" Title="@(DistritoObtener.NombreProvincia)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Región (departamento):</label>
+                            <div class="item-group">
+                                <TelerikTextBox Enabled="@(false)" @bind-Value="@(DistritoObtener.CodigoRegion)" Size="sm" Width="100px" />
+                                <TelerikTextBox @bind-Value="@(DistritoObtener.NombreRegion)" Title="@(DistritoObtener.NombreRegion)" Enabled="@(false)" Size="sm" />
+                            </div>
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Latitud:</label>
+                            <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(DistritoObtener.Latitud)" Format="N6" Decimals="6" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                    <FormItem>
+                        <Template>
+                            <label>Longitud:</label>
+                            <TelerikNumericTextBox Width="100px" Arrows="@(false)" @bind-Value="@(DistritoObtener.Longitud)" Format="N6" Decimals="6" Enabled="@(false)" Size="sm" />
+                        </Template>
+                    </FormItem>
+                </FormItems>
+                <FormButtons/>
+            </TelerikForm>
+
+            <TelerikToolBar Class="toolbar-mainform">
+                <ToolBarTemplateItem>
+                    <TelerikButton Icon="@(SvgIcon.Undo)" Id="tbtn" Title="Volver a la vista del listado" ButtonType="@ButtonType.Button" Size="sm" ThemeColor="primary" OnClick="@(Volver)">Volver</TelerikButton>
+                </ToolBarTemplateItem>
+            </TelerikToolBar>
+
+        </CardBody>
+    </CardContainerComponent>
+}
