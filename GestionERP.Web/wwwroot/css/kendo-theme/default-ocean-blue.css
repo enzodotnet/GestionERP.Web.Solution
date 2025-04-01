@@ -6399,7 +6399,7 @@ kendo-badge-container {
 
 .k-table-tbody .k-table-row.k-selected>.k-table-td,
 .k-table-list .k-table-row.k-selected {
-	background-color: color-mix(in srgb, var(--kendo-color-primary, #1274AC) 25%, transparent)
+	background-color: rgba(18, 116, 172, 0.25)
 }
 
 .k-virtual-scroller {
@@ -12482,7 +12482,7 @@ select.k-picker-lg {
 }
 
 .k-checkbox-wrap::before {
-	content: "​";
+	content: "\200b";
 	width: 0px;
 	overflow: hidden;
 	flex: none;
