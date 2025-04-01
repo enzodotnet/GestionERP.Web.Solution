@@ -27,10 +27,11 @@ public class MovimientoInsertarDto
 
 public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarDto>
 {
+    public bool EsRequeridoReferencia { get; set; }
     public string MsgErrorLocal { get; set; }
     public string MsgErrorEntidad { get; set; }
     public string MsgErrorCentroCosto { get; set; }
-
+    
     public MovimientoInsertarValidator()
     {
         RuleFor(p => p.CodigoOperacionLogistica).NotEmpty().WithMessage("Es necesario que seleccione la operación logística");
@@ -53,6 +54,8 @@ public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarD
 
         RuleFor(p => p.Observacion).MaximumLength(100).WithMessage("El campo {PropertyName} debe tener como máximo 100 caracteres");
 
+        RuleFor(p => p.DescripcionReferencia).MaximumLength(200).WithMessage("El campo {PropertyName} debe tener como máximo 200 caracteres");
+
         When(p => p.FlagTipoRegistro == "T", () => { 
             RuleFor(p => p.CodigoAlmacenDestino).NotEmpty().WithMessage("El campo {PropertyName} es requerido para generar la transferencia"); 
         });
@@ -61,5 +64,9 @@ public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarD
             .Cascade(CascadeMode.Stop)
             .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
             .Must(x => string.IsNullOrEmpty(MsgErrorCentroCosto)).WithMessage(x => MsgErrorCentroCosto);
+
+        When(p => EsRequeridoReferencia, () => {
+            RuleFor(p => p.CodigoDocumentoReferencia).NotEmpty().WithMessage("Es necesario el documento referencia") ;
+        });
     }
 }

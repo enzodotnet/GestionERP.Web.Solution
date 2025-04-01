@@ -1,6 +1,5 @@
 ﻿using GestionERP.Web.Models.Dtos.Compra;
-using GestionERP.Web.Services.Interfaces;
-using System.Net.Http.Json;
+using GestionERP.Web.Services.Interfaces; 
 using System.Net;
 using GestionERP.Web.Models.Responses;
 using GestionERP.Web.Handlers;
@@ -218,32 +217,5 @@ public class CompraOrdenApi(HttpClient httpClient) : ICompraOrden
         {
             throw new HttpRequestException();
         }
-    }
-
-    public async Task<IEnumerable<OrdenDetalleConsultaIngresarDto>> ConsultaDetallesIngresar(string codigoEmpresa, string codigoOrden)
-    {
-        try
-        {
-            Dictionary<string, string> query = new()
-            {
-                ["codigoOrden"] = codigoOrden ?? ""
-            }; 
-            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi.Replace("{ce}", codigoEmpresa)}/detalles/consulta/ingresar", query)); 
-            if (response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                    return default;
-                return await response.Content.ReadFromJsonAsync<IEnumerable<OrdenDetalleConsultaIngresarDto>>();
-            }
-            else
-            {
-                error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
-                throw new HttpResponseException(error.Message, error.Code);
-            }
-        }
-        catch (HttpRequestException)
-        {
-            throw new HttpRequestException();
-        }
-    }
+    } 
 }

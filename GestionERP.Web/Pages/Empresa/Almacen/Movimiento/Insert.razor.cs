@@ -14,6 +14,7 @@ using GestionERP.Web.Models.Dtos.Principal;
 using GestionERP.Web.Global;
 using GestionERP.Web.Services;
 using GestionERP.Web.Models.Dtos.Compra;
+using System.Runtime.CompilerServices;
 
 namespace GestionERP.Web.Pages.Empresa.Almacen.Movimiento;
 
@@ -38,9 +39,9 @@ public partial class Insert : IDisposable
     public MovimientoDetalleGridValidator GridDetalleValidator { get; set; }
     public MovimientoInsertarValidator Validator { get; set; }
     public MovimientoDetalleInsertarValidator DetalleValidator { get; set; }
+    public TipoMovimientoConsultaPorCodigoDto TipoMovimiento { get; set; }
     public bool IsInitPage { get; set; }
-    public bool IsEditingGridDetalle { get; set; }
-    public string CodigoLocalNumerador { get; set; }
+    public bool IsEditingGridDetalle { get; set; } 
     public string CodigoTipoMovimiento { get; set; }
     public List<DateTime> FechasCerradoOperacion { get; set; }
     public EmpresaEjercicioConsultaIntervaloFechaDto FechaIntervalo { get; set; }
@@ -50,11 +51,14 @@ public partial class Insert : IDisposable
     public string CodigoEjercicio { get; set; }  
     private IEnumerable<EmpresaEjercicioCatalogoDto> CatalogoEjercicios { get; set; }  
 	public bool EsVisibleBotonOperacion { get; set; }
-    public bool EsVisibleCatalogoOrdenes { get; set; } 
+    public bool EsVisibleCatalogoOrdenes { get; set; }
+    public bool EsRequeridoReferencia { get; set; }
+    public bool EsAgregableDetalle { get; set; }
     private bool IsAuthUser { get; set; }
     private bool IsLoadingAction { get; set; }
     private bool IsModified { get; set; }
     private bool IsModifiedDetalle { get; set; }
+    private bool IsLoadingCatalogoReferencia { get; set; }
     private bool IsLoadingCatalogoOrdenes { get; set; }
     public string VerboAccionModal { get; set; }
     public string DescripcionAccionModal { get; set; }
@@ -91,6 +95,7 @@ public partial class Insert : IDisposable
     [Inject] public IPrincipalEmpresa IEmpresa { get; set; }
     [Inject] public IPrincipalUsuario IUsuario { get; set; } 
     [Inject] public IPrincipalPermiso IPermiso { get; set; }
+    [Inject] public IPrincipalTipoMovimiento ITipoMovimiento { get; set; }
     [Inject] public UserService IUser { get; set; }
     [Inject] public UtilService IUtil { get; set; }
     [Inject] public NavigationManager INavigation { get; set; }
@@ -127,6 +132,7 @@ public partial class Insert : IDisposable
             DetalleInsertar = new();
             Detalle = new();
 
+            TipoMovimiento = new();
             FechasCerradoOperacion = []; 
             FechaIntervalo = new();
 
@@ -341,8 +347,34 @@ public partial class Insert : IDisposable
         StateHasChanged();
     }
 
-	#region CatalogoOrdenesIngresar
-	public async Task MostrarCatalogoOrdenes()
+    #region CatalogoReferencia
+    public async Task MostrarCatalogoReferencia()
+    {
+        if (AgregarItemDetalleEsValido())
+        {
+            IsLoadingCatalogoReferencia = true;
+
+            CatalogoEjercicios = await IEmpresa.CatalogoEjercicios(Empresa.Codigo) ?? [];
+            CodigoEjercicio = await IEmpresa.ConsultaEjercicioCodigoPorAnio(Empresa.Codigo, DateTime.Now.Year);
+
+            switch (CodigoTipoMovimiento)
+            {
+                case "M05": //Ingreso por orden de compra
+                    ItemsSelectedOrden = [];
+                    await CargarCatalogoOrdenes();
+                    EsVisibleCatalogoOrdenes = true;
+                    break;
+                default:
+                    IsLoadingCatalogoReferencia = false;
+                    break;
+            } 
+        }
+    }
+    #endregion
+
+
+    #region CatalogoOrdenesIngresar
+    public async Task MostrarCatalogoOrdenes()
 	{
         if (AgregarItemDetalleEsValido())
         {
@@ -740,13 +772,14 @@ public partial class Insert : IDisposable
     #endregion
 
     #region Catalogos
-    private void CargarItemCatalogoOperacionLogistica(OperacionLogisticaCatalogoPorEmpresaSesionDto item)
+    private async Task CargarItemCatalogoOperacionLogistica(OperacionLogisticaCatalogoPorEmpresaSesionDto item)
     {
         MovimientoInsertar.CodigoOperacionLogistica = item.CodigoOperacionLogistica;
         Movimiento.NombreOperacionLogistica = item.NombreOperacionLogistica;
         CodigoTipoMovimiento = item.CodigoTipoMovimiento;
 
 		EditContext.NotifyFieldChanged(EditContext.Field("CodigoOperacionLogistica"));
+        TipoMovimiento = await ITipoMovimiento.ConsultaPorCodigo(CodigoTipoMovimiento) ?? new();
         IsModified = EditContext.IsModified();
     }
 
