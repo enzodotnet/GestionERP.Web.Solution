@@ -42,10 +42,13 @@
 								<TelerikDropDownList Data="@TiposRegistro" @bind-Value="@MovimientoInsertar.FlagTipoRegistro" Enabled="@(false)" TextField="Nombre" ValueField="Codigo" Width="105px" Size="sm" />
 							</Template>
 						</FormItem>
-						<FormItem ColSpan="1">
+						<FormItem ColSpan="2">
 							<Template>
-								<label>Fecha de operación*:</label>
-								<TelerikDatePicker @bind-Value="@(MovimientoInsertar.FechaHoraOperacion)" OnChange="@OnChangeFechaHoraOperacionHandler" Id="fecoperacion" Width="110px" Size="sm" Min="@FechaIntervalo.FechaInicio" Max="@FechaIntervalo.FechaFin" DisabledDates="@FechasCerradoOperacion" AutoComplete="off" Placeholder="dd/MM/yyyy" />
+								<label>Fecha y hora de operación*:</label>
+								<div class="item-group">
+									<TelerikDatePicker @bind-Value="@(MovimientoInsertar.FechaHoraOperacion)" OnChange="@OnChangeFechaHoraOperacionHandler" OnClose="@OnFechaHoraOperacionPopupClose" Id="fecoperacion" Width="103px" Size="sm" Min="@FechaIntervalo.FechaInicio" Max="@FechaIntervalo.FechaFin" DisabledDates="@FechasCerradoOperacion" AutoComplete="off" Title="Fecha de operación" Placeholder="dd/MM/yyyy" />
+									<TelerikTimePicker @bind-Value="@(MovimientoInsertar.FechaHoraOperacion)" Format="hh:mm:ss tt" Enabled="@(false)" Size="sm" Width="115px" Id="timepicker" Title="Hora de operación" />
+								</div> 
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.FechaHoraOperacion)" TargetSelector="#fecoperacion" />
 							</Template>
 						</FormItem>
@@ -63,8 +66,11 @@
 							<Template>
 								<label>Entidad*:</label>
 								<div class="item-group">
-									<TelerikTextBox Value="@(MovimientoInsertar.CodigoEntidad)" DebounceDelay="@(0)" ValueChanged="@ValueChangeEntidadHandler" ValueExpression="@(() => MovimientoInsertar.CodigoEntidad)" OnChange="@OnChangeEntidadHandler" Id="codigoentidad" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="120px" MaxLength="11" />
-									<Empresa.EntidadProveedorCatalogoComponent CodigoEmpresa="@Empresa.Codigo" FlagAmbito="L" CargarItemSeleccionado="@(CargarItemCatalogoEntidad)" CodigoExcluir="@(MovimientoInsertar.CodigoEntidad)" />
+									<TelerikTextBox Value="@(MovimientoInsertar.CodigoEntidad)" DebounceDelay="@(0)" ValueChanged="@ValueChangeEntidadHandler" ValueExpression="@(() => MovimientoInsertar.CodigoEntidad)" OnChange="@OnChangeEntidadHandler" Id="codigoentidad" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="120px" Enabled="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" MaxLength="11" />
+									@if (!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)
+									{
+										 <Empresa.EntidadCatalogoComponent CodigoEmpresa="@Empresa.Codigo" FlagTipo="@(TipoMovimiento.FlagTipoEntidad)" CargarItemSeleccionado="@(CargarItemCatalogoEntidad)" CodigoExcluir="@(MovimientoInsertar.CodigoEntidad)" />
+									} 
 									<TelerikTextBox @bind-Value="@(Movimiento.NombreEntidad)" Title="@(Movimiento.NombreEntidad)" Placeholder="Nombre o razón social del proveedor" Enabled="@(false)" Size="sm" />
 								</div>
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoEntidad)" TargetSelector="#codigoentidad" />
@@ -82,7 +88,7 @@
 							</Template>
 						</FormItem>
 
-						<FormItem ColSpan="4">
+						<FormItem ColSpan="5">
 							<Template>
 								<div class="item-group-block"> 
 									<label>Local:</label>
@@ -105,11 +111,11 @@
 								</div>
 							</Template>
 						</FormItem>
-						<FormItem ColSpan="5">
+						<FormItem ColSpan="4">
 							<Template>
 								<label>Comentario:</label>
 								<div class="item-group">
-									<TelerikTextArea @bind-Value="@(MovimientoInsertar.Comentario)"  AutoComplete="off" Class="textarea-vertical-comentario" Rows="3" Size="sm" />
+									<TelerikTextArea @bind-Value="@(MovimientoInsertar.Comentario)" OnChange="@OnChangeComentarioHandler" AutoComplete="off" Class="textarea-vertical-comentario" Rows="3" Size="sm" />
 								</div>
 							</Template>
 						</FormItem>
@@ -128,7 +134,7 @@
 									}
 									else
 									{
-										<span /> //Aquí irá para cargar documento .
+										<span /> //Aquí irá el botón para cargar catalogo documentos según el tipo de entidad.
 									}
 									<TelerikTextBox @bind-Value="@(MovimientoInsertar.SerieDocumentoReferencia)" Placeholder="Serie" Title="Serie" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="60px" MaxLength="4" /> @* Pendiente habilitar para editar *@
 									<TelerikTextBox @bind-Value="@(MovimientoInsertar.NumeroDocumentoReferencia)" Placeholder="Número" Title="Número" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="100px" MaxLength="8" /> @* Pendiente habilitar para editar *@
@@ -166,10 +172,8 @@
 								</GridSettings>
 
 								<GridToolBarTemplate>
-									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(MovimientoInsertar.FlagTipoRegistro is "D")" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@(MostrarAgregarDetalle)">Ir a agregar ítem</TelerikButton>
-
-									
-
+									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@(MostrarAgregarDetalle)">Agregar ítem</TelerikButton>
+									 
 									<span class="k-toolbar-spacer" />
 									
 									<div class="group-amount">
@@ -248,10 +252,12 @@
 					<span>* Campos obligatorios</span>
 				</ToolBarTemplateItem>
 			</TelerikToolBar>
-			 
-			<TelerikWindow Visible="@EsVisibleCatalogoOrdenes" VisibleChanged="@VisibleCatalogoOrdenesChangedHandler" ThemeColor="dark" Modal="true" Resizable="false" Height="420px" Width="600px" CloseOnOverlayClick="false" FooterLayoutAlign="@WindowFooterLayoutAlign.Start">
-				<WindowTitle>Catálogo de solicitudes de compra pendientes de atención</WindowTitle>
+			  
+			@* -- INICIO SECCIÓN CATÁLOGOS INGRESO -- *@
+			<TelerikWindow Visible="@EsVisibleCatalogoOrdenes" VisibleChanged="@VisibleCatalogoOrdenesChangedHandler" ThemeColor="dark" Modal="true" Resizable="true" MinHeight="420px" Height="420px" MinWidth="800px" Width="800px" MaxWidth="100%" CloseOnOverlayClick="false" FooterLayoutAlign="@WindowFooterLayoutAlign.Start">
+				<WindowTitle>Catálogo de órdenes pendientes de ingresar</WindowTitle>
 				<WindowActions>
+					<WindowAction Name="Maximize" Title="Maximizar" />
 					<WindowAction Name="Close" Title="Cerrar" />
 				</WindowActions>
 				<WindowContent>
@@ -277,17 +283,18 @@
 						</GridSettings>
 						<GridColumns>
 							<GridCheckboxColumn Width="33px" Locked="@(true)" CheckBoxOnlySelection="@(true)" SelectAll="@(true)" Visible="@(EsSeleccionableCatalogoOrden)" />
-							<GridColumn Field="CodigoOrden" Width="130px" Title="Código de solicitud" />
+							<GridColumn Field="CodigoOrden" Width="130px" Title="Código de órden" />
+							<GridColumn Field="FechaEmision" Width="115px" Title="Fecha de emisión" DisplayFormat="{0:dd/MM/yyyy}" />
 							<GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" />
 							<GridColumn Field="NombreArticulo" Width="200px" Title="Nombre de artículo" />
 							<GridColumn Field="CodigoUnidadMedida" Width="45px" >
 								<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
 							</GridColumn>
 							<GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
-							<GridColumn Field="CodigoPeriodo" Width="60px" Title="Periodo" />
-							<GridColumn Field="NombreSerieDocumentoOrden" Width="190px" Title="Nombre numerador solicitud" />
+							<GridColumn Field="NombreSerieDocumento" Width="190px" Title="Nombre numerador de la orden" />
 							<GridColumn Field="NombreEntidad" Width="200px" Title="Nombre de entidad proveedor" />
 							<GridColumn Field="NombreLocal" Width="200px" Title="Nombre del local de recepción" />
+							<GridColumn Field="FechaEntrega" Width="115px" Title="Fecha de entrega" DisplayFormat="{0:dd/MM/yyyy}" />
 						</GridColumns>
 						<NoDataTemplate>
 							<TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
@@ -298,7 +305,7 @@
 					<TelerikButton Icon="@(SvgIcon.TableAdd)" ThemeColor="secondary" ButtonType="@ButtonType.Button" Size="sm" OnClick="@(AgregarItemsOrden)">Agregar ítem(s)</TelerikButton>
 				</WindowFooter>
 			</TelerikWindow>
-
+			@* -- FIN SECCIÓN CATÁLOGOS INGRESO -- *@
 
 
 			<TelerikDialog @bind-Visible="@EsVisibleDialogDetalle" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="dark" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">

@@ -14,7 +14,6 @@ using GestionERP.Web.Models.Dtos.Principal;
 using GestionERP.Web.Global;
 using GestionERP.Web.Services;
 using GestionERP.Web.Models.Dtos.Compra;
-using System.Runtime.CompilerServices;
 
 namespace GestionERP.Web.Pages.Empresa.Almacen.Movimiento;
 
@@ -51,15 +50,12 @@ public partial class Insert : IDisposable
     public string CodigoEjercicio { get; set; }  
     private IEnumerable<EmpresaEjercicioCatalogoDto> CatalogoEjercicios { get; set; }  
 	public bool EsVisibleBotonOperacion { get; set; }
-    public bool EsVisibleCatalogoOrdenes { get; set; }
-    public bool EsRequeridoReferencia { get; set; }
-    public bool EsAgregableDetalle { get; set; }
+    public bool EsVisibleCatalogoOrdenes { get; set; } 
     private bool IsAuthUser { get; set; }
     private bool IsLoadingAction { get; set; }
     private bool IsModified { get; set; }
     private bool IsModifiedDetalle { get; set; }
-    private bool IsLoadingCatalogoReferencia { get; set; }
-    private bool IsLoadingCatalogoOrdenes { get; set; }
+    private bool IsLoadingCatalogoReferencia { get; set; } 
     public string VerboAccionModal { get; set; }
     public string DescripcionAccionModal { get; set; }
     public string TipoAccionModal { get; set; }
@@ -164,10 +160,10 @@ public partial class Insert : IDisposable
 
             FechaIntervalo = await IEmpresa.ConsultaEjercicioIntervaloFecha(Empresa.Codigo);
             (await IEmpresa.ConsultaModuloPeriodoFechasEsCerradoOperacion(Empresa.Codigo, codigoModulo))?.ToList().ForEach(x => FechasCerradoOperacion.Add(x.Fecha));
-            MovimientoInsertar.FechaHoraOperacion = !FechasCerradoOperacion.Any(x => x == DateTime.Now.Date) ? DateTime.Now.Date : null;
+            MovimientoInsertar.FechaHoraOperacion = !FechasCerradoOperacion.Any(x => x == DateTime.Now.Date) ? DateTime.Now.Date : null; 
             if (MovimientoInsertar.FechaHoraOperacion.HasValue)
                 Movimiento.FechaHoraOperacion = (DateTime)MovimientoInsertar.FechaHoraOperacion; 
-
+                
             Validator = new();
             EditContext = new EditContext(MovimientoInsertar);
             IsInitPage = true;
@@ -192,6 +188,7 @@ public partial class Insert : IDisposable
         try
         {
             IsLoadingAction = true;
+            ActualizarHoraOperacion();
 
             IsAuthUser = (await IUser.VerificarAccesoEsValido(Notify, CodigoWebEmpresa, codigoModulo, codigoServicio, User.FindFirst("code").Value)).esValido;
             if (!IsAuthUser) return;
@@ -347,6 +344,8 @@ public partial class Insert : IDisposable
         StateHasChanged();
     }
 
+    private void ActualizarHoraOperacion() => MovimientoInsertar.FechaHoraOperacion = MovimientoInsertar.FechaHoraOperacion?.Date.Add(DateTime.Now.TimeOfDay);
+
     #region CatalogoReferencia
     public async Task MostrarCatalogoReferencia()
     {
@@ -370,61 +369,51 @@ public partial class Insert : IDisposable
             } 
         }
     }
-    #endregion
 
-
-    #region CatalogoOrdenesIngresar
-    public async Task MostrarCatalogoOrdenes()
-	{
-        if (AgregarItemDetalleEsValido())
+    private async Task OnComboEjercicioValueChanged(string value)
+    {
+        CodigoEjercicio = value;
+        if (!string.IsNullOrEmpty(CodigoEjercicio))
         {
-            IsLoadingCatalogoOrdenes = true;
+            switch (CodigoTipoMovimiento)
+            {
+                case "M05": //Ingreso por orden de compra 
+                    await CargarCatalogoOrdenes(); 
+                    break; 
+            }
+        } 
+    }
 
-			CatalogoEjercicios = await IEmpresa.CatalogoEjercicios(Empresa.Codigo) ?? [];
-			CodigoEjercicio = await IEmpresa.ConsultaEjercicioCodigoPorAnio(Empresa.Codigo, DateTime.Now.Year);
-			ItemsSelectedOrden = [];
-
-			await CargarCatalogoOrdenes(); 
-			EsVisibleCatalogoOrdenes = true; 
-		}
-	}
-
-	private async Task VisibleCatalogoOrdenesChangedHandler(bool esVisible)
-	{
-		if (!esVisible)
-		{
-            //if (ItemsSelectedOrden.Any() && !CatalogoOrdenesIngresar.Any(x => x.IsErrorSelected) && !await Dialog.ConfirmAsync("¿Está seguro de salir del catálogo y que los ítems seleccionados no se carguen?", "Saliendo de catálogo"))
-            //    return;
+    #region CatalogoOrdenesIngresar 
+    private async Task VisibleCatalogoOrdenesChangedHandler(bool esVisible)
+    {
+        if (!esVisible)
+        {
+            if (ItemsSelectedOrden.Any() && !CatalogoOrdenesIngresar.Any(x => x.IsErrorSelected) && !await Dialog.ConfirmAsync("¿Está seguro de salir del catálogo y que los ítems seleccionados no se carguen?", "Saliendo de catálogo"))
+                return;
 
             EsVisibleCatalogoOrdenes = false;
             CatalogoOrdenesIngresar = null;
-		}
-	}
+        }
+    }
 
-	private async Task OnComboEjercicioValueChanged(string value)
-	{
-		CodigoEjercicio = value;
-		if (!string.IsNullOrEmpty(CodigoEjercicio))
-			await CargarCatalogoOrdenes();
-	}
-
-	private async Task CargarCatalogoOrdenes()
-	{
-		try
-		{
+    private async Task CargarCatalogoOrdenes()
+    {
+        try
+        {
             IsAuthUser = (await IUser.VerificarAccesoEsValido(Notify, CodigoWebEmpresa, codigoModulo, codigoServicio, User.FindFirst("code").Value)).esValido;
             if (!IsAuthUser) return;
 
             ItemsSelectedOrden = [];
 
-			//CatalogoOrdenesIngresar = (List<SolicitudCatalogoAtenderDto>) await ISolicitud.CatalogoAtender(Empresa.Codigo, CodigoEjercicio, CodigoProcesoDocumento, CodigoLocalNumerador);
-			 
-			SelectionModeCatalogoOrden = CatalogoOrdenesIngresar is null ? GridSelectionMode.None : GridSelectionMode.Multiple;
-			EsSeleccionableCatalogoOrden = CatalogoOrdenesIngresar is not null;
-			GridCatalogoRef?.Rebind();
-		}
-		catch (HttpRequestException)
-        { 
+            CatalogoOrdenesIngresar = (List<OrdenCatalogoIngresarDto>)await IOrden.CatalogoIngresar(Empresa.Codigo, CodigoEjercicio);
+
+            SelectionModeCatalogoOrden = CatalogoOrdenesIngresar is null ? GridSelectionMode.None : GridSelectionMode.Multiple;
+            EsSeleccionableCatalogoOrden = CatalogoOrdenesIngresar is not null;
+            GridCatalogoRef?.Rebind();
+        }
+        catch (HttpRequestException)
+        {
             if (EsVisibleCatalogoOrdenes)
                 Fnc.MostrarAlerta(AlertCatalogoOrdenes, Cnf.MsgErrorNotConnectApi, "error");
             else
@@ -442,24 +431,24 @@ public partial class Insert : IDisposable
             if (EsVisibleCatalogoOrdenes)
                 Fnc.MostrarAlerta(AlertCatalogoOrdenes, Cnf.MsgErrorFuncAppWeb, "error");
             else
-                Notify.ShowError("FA", ex); 
+                Notify.ShowError("FA", ex);
         }
-		finally
-		{
-            IsLoadingCatalogoOrdenes = false;
-			Notify.ShowLoading(false);
-		}
-	}
+        finally
+        {
+            IsLoadingCatalogoReferencia = false;
+            Notify.ShowLoading(false);
+        }
+    }
 
-	public static void OnRowCatalogoOrdenRenderHandler(GridRowRenderEventArgs args) => args.Class = (args.Item as OrdenCatalogoIngresarDto).IsErrorSelected ? "row-error" : "";
+    public static void OnRowCatalogoOrdenRenderHandler(GridRowRenderEventArgs args) => args.Class = (args.Item as OrdenCatalogoIngresarDto).IsErrorSelected ? "row-error" : "";
 
-	protected void OnSelectCatalogoOrden(IEnumerable<OrdenCatalogoIngresarDto> itemsSeleccionado)
-	{
-		ItemsSelectedOrden = itemsSeleccionado;
-		//CatalogoOrdenesIngresar?.ForEach(x => { x.IsErrorSelected = false; });
-	}
+    protected void OnSelectCatalogoOrden(IEnumerable<OrdenCatalogoIngresarDto> itemsSeleccionado)
+    {
+        ItemsSelectedOrden = itemsSeleccionado;
+        CatalogoOrdenesIngresar?.ForEach(x => { x.IsErrorSelected = false; });
+    }
 
-	private async Task AgregarItemsOrden()
+    private async Task AgregarItemsOrden()
     {
         if (!ItemsSelectedOrden.Any())
         {
@@ -467,27 +456,27 @@ public partial class Insert : IDisposable
             return;
         }
 
-		bool isErrorSelectedCatalogo = false;
-		//foreach (SolicitudCatalogoAtenderDto item in ItemsSelectedOrden)
-		//{
-		//	if (GridDetalles.Any(x => x.CodigoArticulo == item.CodigoArticulo))
-		//	{
-		//		Fnc.MostrarAlerta(AlertCatalogoOrdenes, $"El ítem {item.CodigoArticulo} ya ha sido agregado en el detalle", "error");
-		//		item.IsErrorSelected = isErrorSelectedCatalogo = true;
-		//	}
-		//}
-		//List<IGrouping<string, SolicitudCatalogoAtenderDto>> elements = ItemsSelectedOrden.GroupBy(x => x.CodigoArticulo).Where(x => x.Count() > 1).ToList();
-		//if (elements.Count > 0)
-		//{
-		//	Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Existen ítems seleccionados de igual código", "error");
-		//	elements.ForEach(x => x.ToList().ForEach(x => x.IsErrorSelected = true));
-		//	isErrorSelectedCatalogo = true;
-		//}
+        bool isErrorSelectedCatalogo = false;
+        //foreach (SolicitudCatalogoAtenderDto item in ItemsSelectedOrden)
+        //{
+        //	if (GridDetalles.Any(x => x.CodigoArticulo == item.CodigoArticulo))
+        //	{
+        //		Fnc.MostrarAlerta(AlertCatalogoOrdenes, $"El ítem {item.CodigoArticulo} ya ha sido agregado en el detalle", "error");
+        //		item.IsErrorSelected = isErrorSelectedCatalogo = true;
+        //	}
+        //}
+        //List<IGrouping<string, SolicitudCatalogoAtenderDto>> elements = ItemsSelectedOrden.GroupBy(x => x.CodigoArticulo).Where(x => x.Count() > 1).ToList();
+        //if (elements.Count > 0)
+        //{
+        //	Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Existen ítems seleccionados de igual código", "error");
+        //	elements.ForEach(x => x.ToList().ForEach(x => x.IsErrorSelected = true));
+        //	isErrorSelectedCatalogo = true;
+        //}
 
-		if (isErrorSelectedCatalogo)
-			return;
+        if (isErrorSelectedCatalogo)
+            return;
 
-		
+
 
         //if (string.IsNullOrEmpty(CodigoLocalNumerador))
         //{
@@ -499,39 +488,44 @@ public partial class Insert : IDisposable
         //    }
         //}
 
-  //      string codigoEntidadProveedor = ItemsSelectedOrden.Where(x => !string.IsNullOrEmpty(x.CodigoEntidad)).Select(x => x.CodigoEntidad).FirstOrDefault();
-  //      if (string.IsNullOrEmpty(MovimientoInsertar.CodigoEntidad) && !string.IsNullOrEmpty(codigoEntidadProveedor) && !ItemsSelectedOrden.Where(x => !string.IsNullOrEmpty(x.CodigoEntidad)).Any(x => x.CodigoEntidad != codigoEntidadProveedor))
-		//{
-  //          SolicitudCatalogoAtenderDto itemCatalogo = ItemsSelectedOrden.Where(x => x.CodigoEntidad == codigoEntidadProveedor).First();
-  //          MovimientoInsertar.CodigoEntidad = Movimiento.CodigoEntidad = itemCatalogo.CodigoEntidad;
-  //          Movimiento.NombreEntidad = itemCatalogo.NombreEntidad;
-  //          Validator.MsgErrorEntidad = null;
-  //          EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
-  //      }
+        //      string codigoEntidadProveedor = ItemsSelectedOrden.Where(x => !string.IsNullOrEmpty(x.CodigoEntidad)).Select(x => x.CodigoEntidad).FirstOrDefault();
+        //      if (string.IsNullOrEmpty(MovimientoInsertar.CodigoEntidad) && !string.IsNullOrEmpty(codigoEntidadProveedor) && !ItemsSelectedOrden.Where(x => !string.IsNullOrEmpty(x.CodigoEntidad)).Any(x => x.CodigoEntidad != codigoEntidadProveedor))
+        //{
+        //          SolicitudCatalogoAtenderDto itemCatalogo = ItemsSelectedOrden.Where(x => x.CodigoEntidad == codigoEntidadProveedor).First();
+        //          MovimientoInsertar.CodigoEntidad = Movimiento.CodigoEntidad = itemCatalogo.CodigoEntidad;
+        //          Movimiento.NombreEntidad = itemCatalogo.NombreEntidad;
+        //          Validator.MsgErrorEntidad = null;
+        //          EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
+        //      }
 
-		GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         foreach (OrdenCatalogoIngresarDto itemCatalogo in ItemsSelectedOrden)
         {
-			DetalleInsertar = new();
+            DetalleInsertar = new();
             Detalle = new();
 
-			IMapper.Map(itemCatalogo, Detalle);
-			IMapper.Map(Detalle, DetalleInsertar);
+            IMapper.Map(itemCatalogo, Detalle);
+            IMapper.Map(Detalle, DetalleInsertar);
 
-			ItemGridDetalle = IMapper.Map<MovimientoDetalleGrid>(Detalle);
+            ItemGridDetalle = IMapper.Map<MovimientoDetalleGrid>(Detalle);
 
-			MovimientoInsertar.Detalles.Add(DetalleInsertar);
-			GridDetalles.Add(ItemGridDetalle);
-			detalleState.InsertedItem = ItemGridDetalle;
+            MovimientoInsertar.Detalles.Add(DetalleInsertar);
+            GridDetalles.Add(ItemGridDetalle);
+            detalleState.InsertedItem = ItemGridDetalle;
 
-			await GridDetalleRef.SetStateAsync(detalleState);
-		}
+            await GridDetalleRef.SetStateAsync(detalleState);
+        }
 
-        EsVisibleBotonOperacion = GridDetalles.Count == 0; 
+        EsVisibleBotonOperacion = GridDetalles.Count == 0;
         EsVisibleCatalogoOrdenes = false;
     }
 
     #endregion
+
+    #endregion
+
+
+
 
     #region Detalle
     public void InvalidarAccionDetalle(EditContext editContext) => Fnc.MostrarAlerta(AlertDetalle, Cnf.MsgErrorInvalidEditContext, "error");
@@ -780,6 +774,7 @@ public partial class Insert : IDisposable
 
 		EditContext.NotifyFieldChanged(EditContext.Field("CodigoOperacionLogistica"));
         TipoMovimiento = await ITipoMovimiento.ConsultaPorCodigo(CodigoTipoMovimiento) ?? new();
+        ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }
 
@@ -789,6 +784,7 @@ public partial class Insert : IDisposable
         Movimiento.NombreLocal = item.NombreLocal;
         Validator.MsgErrorLocal = null;
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
+        ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }
 
@@ -798,23 +794,26 @@ public partial class Insert : IDisposable
         Movimiento.NombreCentroCosto = item.NombreCentroCosto;
         Validator.MsgErrorCentroCosto = null;
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoCentroCosto"));
+        ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }
 
-    private void CargarItemCatalogoEntidad(EntidadProveedorCatalogoPorEmpresaDto item)
+    private void CargarItemCatalogoEntidad(EntidadCatalogoPorEmpresaDto item)
     {
         MovimientoInsertar.CodigoEntidad = Movimiento.CodigoEntidad = item.CodigoEntidad.Trim();
         Movimiento.NombreEntidad = item.NombreEntidad;
         Validator.MsgErrorEntidad = null;
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
+        ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }
 
     private void CargarItemCatalogoMoneda(MonedaCatalogoDto item)
     {
         MovimientoInsertar.CodigoMoneda = Movimiento.CodigoMoneda = item.CodigoMoneda;
-        Movimiento.NombreMoneda = item.CodigoMoneda;
+        Movimiento.NombreMoneda = item.NombreMoneda;
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoMoneda"));
+        ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }
     #endregion
@@ -834,7 +833,7 @@ public partial class Insert : IDisposable
 		if (EditContext.IsValid(EditContext.Field("CodigoEntidad")))
 		{ 
             if ((Movimiento.CodigoEntidad ?? "") == codigo) goto exit;
-			(EntidadProveedorObtenerPorCodigoEmpresaDto item, Validator.MsgErrorEntidad) = await IUtil.ObtenerProveedorPorCodigoEmpresa(Alert, codigo, Empresa.Codigo, "L");
+			(EntidadObtenerPorCodigoEmpresaDto item, Validator.MsgErrorEntidad) = await IUtil.ObtenerEntidadPorCodigoEmpresa(Alert, codigo, Empresa.Codigo, TipoMovimiento.FlagTipoEntidad);
             if (item is not null)
             {				
                 Movimiento.CodigoEntidad = item.CodigoEntidad.Trim();
@@ -847,6 +846,7 @@ public partial class Insert : IDisposable
         Movimiento.NombreEntidad = null;
         if (string.IsNullOrEmpty(codigo)) EditContext.MarkAsUnmodified(EditContext.Field("CodigoEntidad"));
 	exit:
+        ActualizarHoraOperacion(); 
         IsModified = EditContext.IsModified();
 	}
 
@@ -883,6 +883,7 @@ public partial class Insert : IDisposable
         Movimiento.CodigoCentroCosto = codigo;
         Movimiento.NombreCentroCosto = null;
     exit:
+        ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }
 
@@ -919,19 +920,31 @@ public partial class Insert : IDisposable
         Movimiento.CodigoLocal = codigo;
 		Movimiento.NombreLocal = null;
 	exit:
-		IsModified = EditContext.IsModified();
-	}
-
-	private void OnChangeObservacionHandler(object value) => IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "Observacion");
-
-    private void OnChangeDescripcionReferenciaHandler(object value) => IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "DescripcionReferencia");
-
-    private void OnChangeMotivoHandler(object value) => IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "Motivo");
-      
-    private void OnChangeFechaHoraOperacionHandler(object value)
-    {
-        IsModified = Fnc.VerifyContextIsChanged((value is null && Movimiento.FechaHoraOperacion.HasValue) || (!Movimiento.FechaHoraOperacion.HasValue && value is not null) || (Movimiento.FechaHoraOperacion.HasValue && value is not null && Movimiento.FechaHoraOperacion != (DateTime?)value), EditContext, "FechaHoraOperacion");
+        ActualizarHoraOperacion();
+        IsModified = EditContext.IsModified();
     }
+
+    private void OnChangeObservacionHandler(object value)
+    {
+        ActualizarHoraOperacion();
+        IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "Observacion");
+    }
+
+    private void OnChangeDescripcionReferenciaHandler(object value)
+    {
+        ActualizarHoraOperacion();
+        IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "DescripcionReferencia");
+    }
+
+    private void OnChangeComentarioHandler(object value)
+    {
+        ActualizarHoraOperacion();
+        IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "Comentario");
+    }
+
+    private void OnChangeFechaHoraOperacionHandler(object value) => IsModified = Fnc.VerifyContextIsChanged((value is null && Movimiento.FechaHoraOperacion.HasValue) || (!Movimiento.FechaHoraOperacion.HasValue && value is not null) || (Movimiento.FechaHoraOperacion.HasValue && value is not null && Movimiento.FechaHoraOperacion != (DateTime?)value), EditContext, "FechaHoraOperacion");
+
+    private void OnFechaHoraOperacionPopupClose(DatePickerCloseEventArgs _) => ActualizarHoraOperacion();
     #endregion
 
     public void Dispose() => GC.SuppressFinalize(this);

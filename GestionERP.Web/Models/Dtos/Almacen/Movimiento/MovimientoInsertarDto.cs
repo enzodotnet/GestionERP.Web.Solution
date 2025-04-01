@@ -3,10 +3,12 @@ using FluentValidation;
 namespace GestionERP.Web.Models.Dtos.Almacen;
 
 public class MovimientoInsertarDto
-{ 
+{
+    private DateTime? fechaHoraOperacion;
+
     public string FlagTipoRegistro { get; set; } 
     public string CodigoOperacionLogistica { get; set; }
-    public DateTime? FechaHoraOperacion { get; set; } 
+    public DateTime? FechaHoraOperacion { get => fechaHoraOperacion; set => fechaHoraOperacion = value?.Date.Add(DateTime.Now.TimeOfDay); }
     public string CodigoEntidad { get; set; }
     public string CodigoLocal { get; set; }
     public string CodigoAlmacenDestino { get; set; }
