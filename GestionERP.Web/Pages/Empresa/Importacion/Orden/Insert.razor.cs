@@ -544,16 +544,18 @@ public partial class Insert : IDisposable
         string codigoPaisOrigen = ItemsSelectedSolicitud.Select(x => x.CodigoPaisOrigen).First();
         if (string.IsNullOrEmpty(OrdenInsertar.CodigoPaisOrigen) && !ItemsSelectedSolicitud.Any(x => x.CodigoPaisOrigen != codigoPaisOrigen))
         {
-            OrdenInsertar.CodigoPaisOrigen = codigoPaisOrigen;
+            OrdenInsertar.CodigoPaisOrigen = Orden.CodigoPaisOrigen = codigoPaisOrigen;
             Orden.NombrePaisOrigen = ItemsSelectedSolicitud.Select(x => x.NombrePaisOrigen).First();
+            Validator.MsgErrorPaisOrigen = null;
             EditContext.NotifyFieldChanged(EditContext.Field("CodigoPaisOrigen"));
 		}
 
 		string codigoPaisProcedencia = ItemsSelectedSolicitud.Select(x => x.CodigoPaisProcedencia).First();
         if (string.IsNullOrEmpty(OrdenInsertar.CodigoPaisProcedencia) && !ItemsSelectedSolicitud.Any(x => x.CodigoPaisProcedencia != codigoPaisProcedencia))
         {
-            OrdenInsertar.CodigoPaisProcedencia = codigoPaisProcedencia;
+            OrdenInsertar.CodigoPaisProcedencia = Orden.CodigoPaisProcedencia = codigoPaisProcedencia;
             Orden.NombrePaisProcedencia = ItemsSelectedSolicitud.Select(x => x.NombrePaisProcedencia).First();
+            Validator.MsgErrorPaisProcedencia = null;
             EditContext.NotifyFieldChanged(EditContext.Field("CodigoPaisProcedencia"));
         }
 

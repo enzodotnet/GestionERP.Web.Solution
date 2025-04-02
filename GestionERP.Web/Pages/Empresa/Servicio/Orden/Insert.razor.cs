@@ -489,8 +489,10 @@ public partial class Insert : IDisposable
 		string codigoArea = ItemsSelectedSolicitud.Select(x => x.CodigoArea).First();
         if (string.IsNullOrEmpty(OrdenInsertar.CodigoArea) && !string.IsNullOrEmpty(codigoArea) && !ItemsSelectedSolicitud.Any(x => x.CodigoArea != codigoArea))
         {
-            OrdenInsertar.CodigoArea = codigoArea;
+            OrdenInsertar.CodigoArea = Orden.CodigoArea = codigoArea;
             Orden.NombreArea = ItemsSelectedSolicitud.Select(x => x.NombreArea).First();
+            Validator.MsgErrorArea = null;
+            EditContext.NotifyFieldChanged(EditContext.Field("CodigoArea"));
         }
 
         if (string.IsNullOrEmpty(CodigoLocalNumerador))
@@ -498,8 +500,10 @@ public partial class Insert : IDisposable
             string codigoLocalAtencion = ItemsSelectedSolicitud.Select(x => x.CodigoLocalAtencion).First();
             if (string.IsNullOrEmpty(OrdenInsertar.CodigoLocalAtencion) && !string.IsNullOrEmpty(codigoLocalAtencion) && !ItemsSelectedSolicitud.Any(x => x.CodigoLocalAtencion != codigoLocalAtencion))
             {
-                OrdenInsertar.CodigoLocalAtencion = codigoLocalAtencion;
+                OrdenInsertar.CodigoLocalAtencion = Orden.CodigoLocalAtencion = codigoLocalAtencion;
                 Orden.NombreLocalAtencion = ItemsSelectedSolicitud.Select(x => x.NombreLocalAtencion).First();
+                Validator.MsgErrorLocalAtencion = null;
+                EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocalAtencion"));
             }
         }
 

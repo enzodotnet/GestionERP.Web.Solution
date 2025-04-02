@@ -80,8 +80,11 @@
 							<Template>
 								<label>Moneda*:</label>
 								<div class="item-group">
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Class="t-main" Placeholder="Código" Title="Código" ReadOnly="@(true)" Size="sm" Width="60px" />
-									<Principal.MonedaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoMoneda)" CodigoExcluir="@(MovimientoInsertar.CodigoMoneda)" />
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Class="t-main" Placeholder="Código" Title="Código" ReadOnly="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="60px" />
+									@if (!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)
+									{
+										<Principal.MonedaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoMoneda)" CodigoExcluir="@(MovimientoInsertar.CodigoMoneda)" />
+									}
 									<TelerikTextBox @bind-Value="@(Movimiento.NombreMoneda)" Title="@(Movimiento.NombreMoneda)" Class="t-main" Placeholder="Nombre" ReadOnly="@(true)" Size="sm" />
 								</div>
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoMoneda)" TargetSelector="#codmoneda" />
@@ -254,10 +257,9 @@
 			</TelerikToolBar>
 			  
 			@* -- INICIO SECCIÓN CATÁLOGOS INGRESO -- *@
-			<TelerikWindow Visible="@EsVisibleCatalogoOrdenes" VisibleChanged="@VisibleCatalogoOrdenesChangedHandler" ThemeColor="dark" Modal="true" Resizable="true" MinHeight="420px" Height="420px" MinWidth="800px" Width="800px" MaxWidth="100%" CloseOnOverlayClick="false" FooterLayoutAlign="@WindowFooterLayoutAlign.Start">
+			<TelerikWindow Visible="@EsVisibleCatalogoOrdenes" VisibleChanged="@VisibleCatalogoOrdenesChangedHandler" ThemeColor="dark" Modal="true" Resizable="false" Height="420px" Width="800px" CloseOnOverlayClick="false" FooterLayoutAlign="@WindowFooterLayoutAlign.Start">
 				<WindowTitle>Catálogo de órdenes pendientes de ingresar</WindowTitle>
-				<WindowActions>
-					<WindowAction Name="Maximize" Title="Maximizar" />
+				<WindowActions> 
 					<WindowAction Name="Close" Title="Cerrar" />
 				</WindowActions>
 				<WindowContent>
@@ -266,7 +268,7 @@
 					<TelerikGrid Data="@CatalogoOrdenesIngresar" SelectionMode="@(SelectionModeCatalogoOrden)" Pageable="true" PageSize="@(10)" SelectedItemsChanged="@((IEnumerable<OrdenCatalogoIngresarDto> items) => OnSelectCatalogoOrden(items))" SelectedItems="@ItemsSelectedOrden" Height="100%" Sortable="true" Resizable="true" Size="sm" Class="list-grid" OnRowRender="@(OnRowCatalogoOrdenRenderHandler)" @ref="GridCatalogoRef">
 						<GridToolBarTemplate>
 							<span>Año:</span>
-							<TelerikDropDownList Data="@CatalogoEjercicios" Value="@CodigoEjercicio" ValueChanged="@((string value) => OnComboEjercicioValueChanged(value))" TextField="AnioEjercicio" ValueField="CodigoEjercicio" DefaultText="@(!string.IsNullOrEmpty(CodigoEjercicio) ? "" : " ")" Size="sm" Width="65px" FillMode="solid">
+							<TelerikDropDownList Data="@CatalogoEjercicios" Value="@CodigoEjercicioFiltro" ValueChanged="@((string value) => OnComboEjercicioValueChanged(value))" TextField="AnioEjercicio" ValueField="CodigoEjercicio" DefaultText="@(!string.IsNullOrEmpty(CodigoEjercicioFiltro) ? "" : " ")" Size="sm" Width="65px" FillMode="solid">
 								<ValueTemplate>
 									<span class="d-item-strong">@((context as EmpresaEjercicioCatalogoDto).AnioEjercicio)</span>
 								</ValueTemplate>
@@ -306,7 +308,6 @@
 				</WindowFooter>
 			</TelerikWindow>
 			@* -- FIN SECCIÓN CATÁLOGOS INGRESO -- *@
-
 
 			<TelerikDialog @bind-Visible="@EsVisibleDialogDetalle" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="dark" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
 				<DialogTitle> Quitando ítem del detalle </DialogTitle>

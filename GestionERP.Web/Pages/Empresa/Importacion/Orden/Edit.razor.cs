@@ -481,16 +481,18 @@ public partial class Edit : IDisposable
         string codigoPaisOrigen = ItemsSelectedSolicitud.Select(x => x.CodigoPaisOrigen).First();
         if (string.IsNullOrEmpty(OrdenEditar.CodigoPaisOrigen) && !ItemsSelectedSolicitud.Any(x => x.CodigoPaisOrigen != codigoPaisOrigen))
         {
-            OrdenEditar.CodigoPaisOrigen = codigoPaisOrigen;
+            OrdenEditar.CodigoPaisOrigen = Orden.CodigoPaisOrigen = codigoPaisOrigen;
             Orden.NombrePaisOrigen = ItemsSelectedSolicitud.Select(x => x.NombrePaisOrigen).First();
+            Validator.MsgErrorPaisOrigen = null;
             EditContext.NotifyFieldChanged(EditContext.Field("CodigoPaisOrigen"));
         }
 
         string codigoPaisProcedencia = ItemsSelectedSolicitud.Select(x => x.CodigoPaisProcedencia).First();
         if (string.IsNullOrEmpty(OrdenEditar.CodigoPaisProcedencia) && !ItemsSelectedSolicitud.Any(x => x.CodigoPaisProcedencia != codigoPaisProcedencia))
         {
-            OrdenEditar.CodigoPaisProcedencia = codigoPaisProcedencia;
+            OrdenEditar.CodigoPaisProcedencia = Orden.CodigoPaisProcedencia = codigoPaisProcedencia;
             Orden.NombrePaisProcedencia = ItemsSelectedSolicitud.Select(x => x.NombrePaisProcedencia).First();
+            Validator.MsgErrorPaisProcedencia = null;
             EditContext.NotifyFieldChanged(EditContext.Field("CodigoPaisProcedencia"));
         }
 

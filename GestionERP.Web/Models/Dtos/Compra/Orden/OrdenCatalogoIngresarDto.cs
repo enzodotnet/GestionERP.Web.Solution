@@ -15,8 +15,9 @@ public class OrdenCatalogoIngresarDto
     public string CodigoMoneda { get; set; }
     public string SimboloMoneda { get; set; }
     public string NombreMoneda { get; set; }
-    public string CodigoLocal { get; set; }
-    public string NombreLocal { get; set; }
+    public string CodigoLocalRecepcion { get; set; }
+    public string NombreLocalRecepcion { get; set; }
+    public string CodigoCentroCostoOrden { get; set; }
     public string CodigoTipoArticulo { get; set; }
     public string NombreTipoArticulo { get; set; }
     public string CodigoArticulo { get; set; }
