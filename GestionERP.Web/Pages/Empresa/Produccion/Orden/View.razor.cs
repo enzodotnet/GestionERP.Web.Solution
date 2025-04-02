@@ -93,8 +93,8 @@ public partial class View : IDisposable
     private IEnumerable<OrdenFlag> EstadosIngreso { get; set; }
     private IEnumerable<OrdenFlag> EstadosTransferencia { get; set; }
     private IEnumerable<OrdenFlag> EstadosConsumo { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
-    private MonedaObtenerPorTipoDto ME { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto ME { get; set; }
     [CascadingParameter] public DialogFactory Dialog { get; set; }
     public EmpresaConsultaPorCodigoWebDto Empresa { get; set; }
     [Parameter] public string CodigoWebEmpresa { get; set; } 
@@ -132,8 +132,8 @@ public partial class View : IDisposable
             Empresa = await IEmpresa.ConsultaPorCodigoWeb(CodigoWebEmpresa);
             rutaEmpresa = INavigation.Uri.Replace(INavigation.BaseUri, "").Split("?")[0].Replace(rutaServicio, "").Replace($"/{Id}", "");
 
-            ME = await IMoneda.ObtenerPorTipo("ME");
-            MN = await IMoneda.ObtenerPorTipo("MN");
+            ME = await IMoneda.ConsultaPorTipo("ME");
+            MN = await IMoneda.ConsultaPorTipo("MN");
 
             await ObtenerOrden();
             if (Orden is null)

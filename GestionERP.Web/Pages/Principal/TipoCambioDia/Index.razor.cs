@@ -30,8 +30,8 @@ public partial class Index : IDisposable
     private EditContext EditContextTipoCambioDiaActualizar { get; set; }
     private bool IsLoadingAction { get; set; }
     private bool IsAuthUser { get; set; }
-    private MonedaObtenerPorTipoDto MonedaTipoCambio { get; set; }
-    private MonedaObtenerPorTipoDto MonedaConversion { get; set; }
+    private MonedaConsultaPorTipoDto MonedaTipoCambio { get; set; }
+    private MonedaConsultaPorTipoDto MonedaConversion { get; set; }
     private string CodigoPeriodo { get; set; }
     private bool IsModifiedActualizar { get; set; }
     public SchedulerView VistaCalendar { get; set; }
@@ -79,8 +79,8 @@ public partial class Index : IDisposable
                 return;
             }
 
-            MonedaTipoCambio = await IMoneda.ObtenerPorTipo("ME");
-            MonedaConversion = await IMoneda.ObtenerPorTipo("MN");
+            MonedaTipoCambio = await IMoneda.ConsultaPorTipo("ME");
+            MonedaConversion = await IMoneda.ConsultaPorTipo("MN");
 
             CodigoPeriodo = await IPeriodo.ConsultaCodigoPorFecha(FechaInicio) ?? ""; 
 

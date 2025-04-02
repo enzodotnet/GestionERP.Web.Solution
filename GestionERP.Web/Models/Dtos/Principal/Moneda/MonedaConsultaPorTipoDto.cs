@@ -1,6 +1,6 @@
 namespace GestionERP.Web.Models.Dtos.Principal;
 
-public class MonedaObtenerPorTipoDto
+public class MonedaConsultaPorTipoDto
 {
     public string Codigo { get; set; }
     public string Nombre { get; set; }

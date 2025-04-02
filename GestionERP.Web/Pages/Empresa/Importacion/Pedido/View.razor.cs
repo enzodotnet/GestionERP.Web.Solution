@@ -56,8 +56,8 @@ public partial class View : IDisposable
 	private bool EsAsignadoVerReporte { get; set; } 
     private bool EsAsignadoVerAuditoria { get; set; }
     private string CodigoEstadoAccion { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
-    private MonedaObtenerPorTipoDto ME { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto ME { get; set; }
     public IEnumerable<PedidoFlag> TiposFinanciamiento { get; set; }
     public IEnumerable<PedidoFlag> ViasTransporte { get; set; }
     public IEnumerable<PedidoFlag> Canales { get; set; }
@@ -96,8 +96,8 @@ public partial class View : IDisposable
             Empresa = await IEmpresa.ConsultaPorCodigoWeb(CodigoWebEmpresa);
             rutaEmpresa = INavigation.Uri.Replace(INavigation.BaseUri, "").Split("?")[0].Replace(rutaServicio, "").Replace($"/{Id}", "");
 
-			ME = await IMoneda.ObtenerPorTipo("ME");
-			MN = await IMoneda.ObtenerPorTipo("MN");
+			ME = await IMoneda.ConsultaPorTipo("ME");
+			MN = await IMoneda.ConsultaPorTipo("MN");
 
 			await ObtenerPedido();
             if (Pedido is null)

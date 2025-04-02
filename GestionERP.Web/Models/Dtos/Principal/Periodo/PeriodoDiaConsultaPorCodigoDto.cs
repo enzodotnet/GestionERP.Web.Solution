@@ -1,6 +1,6 @@
 namespace GestionERP.Web.Models.Dtos.Principal;
 
-public class PeriodoDiaObtenerPorCodigoDto
+public class PeriodoDiaConsultaPorCodigoDto
 { 
     public DateTime Fecha { get; set; }
     public int NumeroAnual { get; set; } 

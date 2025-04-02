@@ -90,7 +90,8 @@ public partial class Insert : IDisposable
     [Inject] public IAlmacenMovimiento IMovimiento { get; set; }
 	[Inject] public ICompraOrden IOrden { get; set; } 
     [Inject] public IPrincipalEmpresa IEmpresa { get; set; }
-    [Inject] public IPrincipalUsuario IUsuario { get; set; } 
+    [Inject] public IPrincipalUsuario IUsuario { get; set; }
+    [Inject] public IPrincipalTipoCambioDia ITipoCambioDia { get; set; }
     [Inject] public IPrincipalPermiso IPermiso { get; set; }
     [Inject] public IPrincipalTipoMovimiento ITipoMovimiento { get; set; }
     [Inject] public UserService IUser { get; set; }
@@ -294,7 +295,15 @@ public partial class Insert : IDisposable
             context.PreventNavigation();
     }
 
-	private void IniciarAccionModal(string tipoAccion, string origenModal)
+    private async Task ConsultaTipoCambioDia()
+    {
+        DateTime? fechaTipoCambioDia = MovimientoInsertar.FechaHoraOperacion?.Date;
+        TipoCambioDiaConsultaPorFechaDto tipoCambioDia = fechaTipoCambioDia.HasValue ? await ITipoCambioDia.ConsultaPorFecha((DateTime)fechaTipoCambioDia, "V") : new();
+        MovimientoInsertar.CodigoTipoCambioDia = tipoCambioDia.Codigo;
+        MovimientoInsertar.MontoTipoCambioDia = tipoCambioDia.Monto;
+    }
+
+    private void IniciarAccionModal(string tipoAccion, string origenModal)
     {
         TipoAccionModal = tipoAccion;
         OrigenModal = origenModal;

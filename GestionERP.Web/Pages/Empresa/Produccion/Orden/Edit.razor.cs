@@ -52,8 +52,8 @@ public partial class Edit : IDisposable
     private IEnumerable<VersionPlanFlag> TiposMaterial { get; set; }
     private IEnumerable<VersionPlanFlag> InsumosMaterial { get; set; } 
     public IEnumerable<VersionPlanMaterialConsultaDto> Materiales { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
-    private MonedaObtenerPorTipoDto ME { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto ME { get; set; }
     [CascadingParameter] public DialogFactory Dialog { get; set; }
     [Parameter] public Guid? Id { get; set; }
     public EmpresaConsultaPorCodigoWebDto Empresa { get; set; }
@@ -118,8 +118,8 @@ public partial class Edit : IDisposable
             };
             EditContext = new EditContext(OrdenEditar);
            
-            ME = await IMoneda.ObtenerPorTipo("ME");
-            MN = await IMoneda.ObtenerPorTipo("MN");
+            ME = await IMoneda.ConsultaPorTipo("ME");
+            MN = await IMoneda.ConsultaPorTipo("MN");
             Numerador = await ISerieDocumento.ConsultaPorCodigoEmpresa(Orden.CodigoSerieDocumento, Orden.CodigoDocumento, Empresa.Codigo) ?? new();
             TipoProduccion = await ITipoProduccion.ConsultaPorCodigo(Orden.CodigoTipoProduccion);
             CantidadPlan = (await IPlan.ConsultaPorCodigo(Empresa.Codigo, Orden.CodigoPlan)).Cantidad;

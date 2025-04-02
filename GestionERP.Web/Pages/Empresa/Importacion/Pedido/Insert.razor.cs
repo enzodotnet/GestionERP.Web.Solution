@@ -39,8 +39,8 @@ public partial class Insert : IDisposable
     public PedidoDetalleGridValidator GridDetalleValidator { get; set; }
 	public PedidoInsertarValidator Validator { get; set; }
     public PedidoDetalleInsertarValidator DetalleValidator { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
-	private MonedaObtenerPorTipoDto ME { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
+	private MonedaConsultaPorTipoDto ME { get; set; }
 	public bool IsInitPage { get; set; }
     public bool IsEditingGridDetalle { get; set; }
     public bool EsVisibleBotonCatalogoOrdenes { get; set; }
@@ -157,10 +157,10 @@ public partial class Insert : IDisposable
             if (PedidoInsertar.FechaEmision.HasValue)
                 Pedido.FechaEmision = (DateTime)PedidoInsertar.FechaEmision;
 			
-            await ObtenerTipoCambioDia();
+            await ConsultaTipoCambioDia();
             
-            ME = await IMoneda.ObtenerPorTipo("ME");
-			MN = await IMoneda.ObtenerPorTipo("MN");
+            ME = await IMoneda.ConsultaPorTipo("ME");
+			MN = await IMoneda.ConsultaPorTipo("MN");
 
             Validator = new();
             EditContext = new EditContext(PedidoInsertar);
@@ -265,10 +265,10 @@ public partial class Insert : IDisposable
             context.PreventNavigation();
     } 
 
-	private async Task ObtenerTipoCambioDia()
+	private async Task ConsultaTipoCambioDia()
     { 
 		DateTime? fechaTipoCambioDia = PedidoInsertar.FechaCosto.HasValue ? PedidoInsertar.FechaCosto : PedidoInsertar.FechaEmision;
-        TipoCambioDiaObtenerPorFechaDto tipoCambioDia = fechaTipoCambioDia.HasValue ? await ITipoCambioDia.ObtenerPorFecha((DateTime) fechaTipoCambioDia, "V") : new();
+        TipoCambioDiaConsultaPorFechaDto tipoCambioDia = fechaTipoCambioDia.HasValue ? await ITipoCambioDia.ConsultaPorFecha((DateTime) fechaTipoCambioDia, "V") : new();
 		PedidoInsertar.CodigoTipoCambioDia = tipoCambioDia.Codigo;
 		PedidoInsertar.MontoTipoCambioDia = tipoCambioDia.Monto;
 	}
@@ -1302,14 +1302,14 @@ public partial class Insert : IDisposable
 	private async Task OnChangeFechaEmisionHandler(object value)
 	{
 		IsModified = Fnc.VerifyContextIsChanged((value is null && Pedido.FechaEmision.HasValue) || (!Pedido.FechaEmision.HasValue && value is not null) || (Pedido.FechaEmision.HasValue && value is not null && Pedido.FechaEmision != (DateTime?)value), EditContext, "FechaEmision");
-		await ObtenerTipoCambioDia();
+		await ConsultaTipoCambioDia();
 		ActualizarMontosPorTipoCambioDia();
 	}
 
 	private async Task OnChangeFechaCostoHandler(object value)
 	{
 		IsModified = Fnc.VerifyContextIsChanged(value is not null, EditContext, "FechaCosto");
-		await ObtenerTipoCambioDia();
+		await ConsultaTipoCambioDia();
 		ActualizarMontosPorTipoCambioDia();
 	}
 

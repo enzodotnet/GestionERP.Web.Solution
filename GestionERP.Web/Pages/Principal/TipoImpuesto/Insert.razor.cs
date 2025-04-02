@@ -26,7 +26,7 @@ public partial class Insert : IDisposable
     private bool IsModified { get; set; }
     private bool EsVisibleVolver { get; set; }
     private string CodigoMoneda { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
     public TelerikNotification Alert { get; set; }
     [CascadingParameter] public DialogFactory Dialog { get; set; }
     [Parameter][SupplyParameterFromQuery(Name = "returnpage")] public string ReturnPage { get; set; }
@@ -61,7 +61,7 @@ public partial class Insert : IDisposable
                 return;
             }
 
-            MN = await IMoneda.ObtenerPorTipo("MN");
+            MN = await IMoneda.ConsultaPorTipo("MN");
             if (string.IsNullOrEmpty(CodigoMoneda))
                 Fnc.MostrarAlerta(Alert, "Falta configurar la moneda nacional por defecto en el sistema", "error");
         }

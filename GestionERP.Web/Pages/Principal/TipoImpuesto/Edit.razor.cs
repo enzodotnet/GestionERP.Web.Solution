@@ -28,7 +28,7 @@ public partial class Edit : IDisposable
     private bool IsModified { get; set; }
     private bool EsVisibleVolver { get; set; }
     private bool IsInitPage { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
     public TelerikNotification Alert { get; set; }
     [CascadingParameter] public DialogFactory Dialog { get; set; }
     [Parameter] public Guid? Id { get; set; }
@@ -72,7 +72,7 @@ public partial class Edit : IDisposable
                 return;
             }
 
-            MN = await IMoneda.ObtenerPorTipo("MN");
+            MN = await IMoneda.ConsultaPorTipo("MN");
 
             TipoImpuestoEditar = IMapper.Map<TipoImpuestoEditarDto>(TipoImpuestoObtener);
             EditContext = new EditContext(TipoImpuestoEditar);

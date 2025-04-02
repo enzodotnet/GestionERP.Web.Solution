@@ -1,6 +1,5 @@
 ﻿using GestionERP.Web.Models.Dtos.Principal;
-using GestionERP.Web.Services.Interfaces;
-using System.Net.Http.Json; 
+using GestionERP.Web.Services.Interfaces; 
 using System.Net;
 using GestionERP.Web.Models.Responses;
 using GestionERP.Web.Handlers;
@@ -83,7 +82,7 @@ public class PrincipalTipoCambioDiaApi(HttpClient httpClient) : IPrincipalTipoCa
         } 
     }
 
-	public async Task<TipoCambioDiaObtenerPorFechaDto> ObtenerPorFecha(DateTime fecha, string flagTipo)
+	public async Task<TipoCambioDiaConsultaPorFechaDto> ConsultaPorFecha(DateTime fecha, string flagTipo)
 	{
 		try
 		{
@@ -91,13 +90,13 @@ public class PrincipalTipoCambioDiaApi(HttpClient httpClient) : IPrincipalTipoCa
 			{
 				["flagTipo"] = flagTipo
 			};
-			using HttpResponseMessage response = await _httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/fecha/{fecha.ToString("yyyy-MM-dd")}", query));
+			using HttpResponseMessage response = await _httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/consulta/fecha/{fecha:yyyy-MM-dd}", query));
 			if (response.IsSuccessStatusCode)
 			{
 				if (response.StatusCode == HttpStatusCode.NoContent)
 					return default;
 
-				return await response.Content.ReadFromJsonAsync<TipoCambioDiaObtenerPorFechaDto>();
+				return await response.Content.ReadFromJsonAsync<TipoCambioDiaConsultaPorFechaDto>();
 			}
 			else
 			{
@@ -109,58 +108,5 @@ public class PrincipalTipoCambioDiaApi(HttpClient httpClient) : IPrincipalTipoCa
 		{
 			throw new HttpRequestException();
 		}
-	}
-
-	public async Task<string> ObtenerCodigoPorFecha(DateTime fecha, string flagTipo)
-    {
-        try
-        {
-            Dictionary<string, string> query = new()
-            { 
-                ["flagTipo"] = flagTipo
-            };
-            using HttpResponseMessage response = await _httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/codigo/fecha/{fecha.ToString("yyyy-MM-dd")}", query));
-            if (response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                    return default;
-
-                return (await response.Content.ReadFromJsonAsync<TipoCambioDiaStruct>()).CodigoTipoCambioDia;
-            }
-            else
-            {
-                error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
-                throw new HttpResponseException(error.Message, error.Code);
-            }
-        }
-        catch (HttpRequestException)
-        {
-            throw new HttpRequestException();
-        }
-    }
-
-    public async Task<decimal?> ObtenerMonto(string codigoTipoCambioDia)
-    {
-        try
-        { 
-            using HttpResponseMessage response = await _httpClient.GetAsync($"{pathApi}/{codigoTipoCambioDia}/monto");
-            if (response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                    return default;
-
-                return (await response.Content.ReadFromJsonAsync<TipoCambioDiaStruct>()).MontoTipoCambioDia;
-            }
-            else
-            {
-                error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
-                throw new HttpResponseException(error.Message, error.Code);
-            }
-        }
-        catch (HttpRequestException)
-        {
-            throw new HttpRequestException();
-        }
-    }
+	} 
 }
- 

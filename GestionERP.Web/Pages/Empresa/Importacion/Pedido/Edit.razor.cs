@@ -41,8 +41,8 @@ public partial class Edit : IDisposable
     public PedidoEditarValidator Validator { get; set; }
     public PedidoDetalleInsertarValidator DetalleInsertarValidator { get; set; }
     public PedidoDetalleEditarValidator DetalleEditarValidator { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
-    private MonedaObtenerPorTipoDto ME { get; set; } 
+    private MonedaConsultaPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto ME { get; set; } 
 	public bool IsEditingGridDetalle { get; set; }
     private bool IsLoadingAction { get; set; }
     private bool IsAuthUser { get; set; }
@@ -155,10 +155,10 @@ public partial class Edit : IDisposable
                 return;
             }
 
-            MN = await IMoneda.ObtenerPorTipo("MN"); 
+            MN = await IMoneda.ConsultaPorTipo("MN"); 
 			IsEditAmountMN = Pedido.CodigoMoneda == MN.Codigo;
 
-			ME = await IMoneda.ObtenerPorTipo("ME");
+			ME = await IMoneda.ConsultaPorTipo("ME");
 			IsEditAmountME = Pedido.CodigoMoneda == ME.Codigo;
 
 			PedidoEditar = IMapper.Map<PedidoEditarDto>(Pedido);
@@ -235,10 +235,10 @@ public partial class Edit : IDisposable
     }
      
 
-    private async Task ObtenerTipoCambioDia()
+    private async Task ConsultaTipoCambioDia()
     {
         DateTime? fechaTipoCambioDia = PedidoEditar.FechaCosto.HasValue ? PedidoEditar.FechaCosto : Pedido.FechaEmision;
-        TipoCambioDiaObtenerPorFechaDto tipoCambioDia = fechaTipoCambioDia.HasValue ? await ITipoCambioDia.ObtenerPorFecha((DateTime)fechaTipoCambioDia, "V") : new();
+        TipoCambioDiaConsultaPorFechaDto tipoCambioDia = fechaTipoCambioDia.HasValue ? await ITipoCambioDia.ConsultaPorFecha((DateTime)fechaTipoCambioDia, "V") : new();
         PedidoEditar.CodigoTipoCambioDia = tipoCambioDia.Codigo;
         PedidoEditar.MontoTipoCambioDia = tipoCambioDia.Monto;
     }
@@ -1356,7 +1356,7 @@ public partial class Edit : IDisposable
 		NotifyChange(Fnc.VerifyContextIsChanged(isChanged, EditContext, "FechaCosto"));
         if (isChanged)
         {
-		    await ObtenerTipoCambioDia();
+		    await ConsultaTipoCambioDia();
 		    ActualizarMontosPorTipoCambioDia();
         }
 	}

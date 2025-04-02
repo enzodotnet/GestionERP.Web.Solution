@@ -7,5 +7,5 @@ public interface IPrincipalMoneda
     Task<IEnumerable<MonedaCatalogoDto>> Catalogo();
     Task<MonedaObtenerDto> Obtener(Guid id);
     Task<MonedaObtenerPorCodigoDto> ObtenerPorCodigo(string codigoMoneda);
-    Task<MonedaObtenerPorTipoDto> ObtenerPorTipo(string flagTipo);
+    Task<MonedaConsultaPorTipoDto> ConsultaPorTipo(string flagTipo);
 }

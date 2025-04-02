@@ -20,7 +20,7 @@ public partial class View : IDisposable
     private bool EsAsignadoEditar { get; set; }
     private bool IsLoadingAction { get; set; }
     private bool IsAuthUser { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
     public TelerikNotification Alert { get; set; }
     [Parameter] public Guid? Id { get; set; }
     private ClaimsPrincipal User { get; set; }
@@ -61,7 +61,7 @@ public partial class View : IDisposable
                 return;
             }
 
-            MN = await IMoneda.ObtenerPorTipo("MN"); 
+            MN = await IMoneda.ConsultaPorTipo("MN"); 
         }
         catch (Exception ex)
         {

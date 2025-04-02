@@ -1,6 +1,5 @@
 ﻿using GestionERP.Web.Models.Dtos.Principal;
 using GestionERP.Web.Services.Interfaces;
-using System.Net.Http.Json; 
 using System.Net;
 using GestionERP.Web.Models.Responses; 
 using GestionERP.Web.Handlers;
@@ -116,21 +115,17 @@ public class PrincipalPeriodoApi(HttpClient httpClient) : IPrincipalPeriodo
         }
     }
 
-    public async Task<PeriodoDiaObtenerPorCodigoDto> ObtenerDiaPorCodigo(string codigoPeriodoDia)
+    public async Task<PeriodoDiaConsultaPorCodigoDto> ConsultaDiaPorCodigo(string codigoPeriodoDia)
     {
         try
         {
-            Dictionary<string, string> query = new()
-            {
-                ["codigoPeriodoDia"] = codigoPeriodoDia
-            };
-            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/dias", query)); 
+            using HttpResponseMessage response = await httpClient.GetAsync($"{pathApi}/dias/consulta/codigo/{codigoPeriodoDia}"); 
             if (response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NoContent)
                     return default;
 
-                return await response.Content.ReadFromJsonAsync<PeriodoDiaObtenerPorCodigoDto>();
+                return await response.Content.ReadFromJsonAsync<PeriodoDiaConsultaPorCodigoDto>();
             }
             else
             {
@@ -172,15 +167,11 @@ public class PrincipalPeriodoApi(HttpClient httpClient) : IPrincipalPeriodo
         }
     }
 
-    public async Task<string> ObtenerDiaCodigoPorFecha(DateTime fecha)
+    public async Task<string> ConsultaDiaCodigoPorFecha(DateTime fecha)
     {
         try
         {
-            Dictionary<string, string> query = new()
-            {
-                ["fecha"] = fecha.ToString("yyyy-MM-dd")
-            };
-            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/dias/codigo", query));
+            using HttpResponseMessage response = await httpClient.GetAsync($"{pathApi}/dias/consulta/codigo/fecha/{fecha:yyyy-MM-dd}");
             if (response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NoContent)

@@ -186,7 +186,7 @@ public partial class Insert : IDisposable
             if (OrdenInsertar.FechaEmision.HasValue)
                 Orden.FechaEmision = (DateTime)OrdenInsertar.FechaEmision;
 
-            MonedaObtenerPorTipoDto ME = await IMoneda.ObtenerPorTipo("ME") ?? new();
+            MonedaConsultaPorTipoDto ME = await IMoneda.ConsultaPorTipo("ME") ?? new();
             OrdenInsertar.CodigoMoneda = ME.Codigo;
             Orden.NombreMoneda = ME.Nombre;
             Orden.SimboloMoneda = ME.Simbolo;

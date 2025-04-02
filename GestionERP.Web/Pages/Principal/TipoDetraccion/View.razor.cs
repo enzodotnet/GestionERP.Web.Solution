@@ -12,7 +12,7 @@ public partial class View : IDisposable
 {
     private const string codigoServicio = "S048";
     public TipoDetraccionObtenerDto TipoDetraccionObtener { get; set; }
-    private MonedaObtenerPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
     public TelerikNotification Alert { get; set; }
     [Parameter] public Guid? Id { get; set; } 
     [CascadingParameter] public NotifyComponent Notify { get; set; }
@@ -48,7 +48,7 @@ public partial class View : IDisposable
                 return;
             }
 
-            MN = await IMoneda.ObtenerPorTipo("MN");
+            MN = await IMoneda.ConsultaPorTipo("MN");
             if (MN is null)
                 Notify.Show("Falta configurar la moneda nacional por defecto en el sistema", "error"); 
         }

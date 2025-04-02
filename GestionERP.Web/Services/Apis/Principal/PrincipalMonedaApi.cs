@@ -91,7 +91,7 @@ public class PrincipalMonedaApi(HttpClient httpClient) : IPrincipalMoneda
         {
             using HttpResponseMessage response = await httpClient.GetAsync($"{pathApi}/codigo/{codigoMoneda}");
             if (response.IsSuccessStatusCode)
-            { 
+            {
                 return await response.Content.ReadFromJsonAsync<MonedaObtenerPorCodigoDto>();
             }
             else
@@ -106,22 +106,17 @@ public class PrincipalMonedaApi(HttpClient httpClient) : IPrincipalMoneda
         }
     }
 
-    public async Task<MonedaObtenerPorTipoDto> ObtenerPorTipo(string flagTipo)
+    public async Task<MonedaConsultaPorTipoDto> ConsultaPorTipo(string flagTipo)
     {
         try
-        {
-            Dictionary<string, string> query = new()
-            {
-                ["flagTipo"] = flagTipo
-            };
-
-            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/tipo",query));
+        { 
+            using HttpResponseMessage response = await httpClient.GetAsync($"{pathApi}/consulta/tipo/{flagTipo}");
             if (response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NoContent)
                     return default;
 
-                return await response.Content.ReadFromJsonAsync<MonedaObtenerPorTipoDto>();
+                return await response.Content.ReadFromJsonAsync<MonedaConsultaPorTipoDto>();
             }
             else
             {
