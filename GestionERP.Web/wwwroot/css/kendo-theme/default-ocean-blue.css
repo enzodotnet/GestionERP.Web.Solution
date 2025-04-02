@@ -8402,7 +8402,8 @@ kendo-badge-container {
 	flex-shrink: 0;
 	display: inline-flex;
 	align-content: center;
-	vertical-align: middle
+	vertical-align: middle;
+	user-select: none
 }
 
 .k-toolbar>*>label {
