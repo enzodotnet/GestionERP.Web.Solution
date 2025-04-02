@@ -10531,6 +10531,14 @@ kendo-label>.k-label {
 	row-gap: var(--kendo-spacing-hair, var(--kendo-spacing-1px, 1px)) !important
 }
 
+.k-rowspan-auto {
+    grid-row: auto;
+}
+
+.\!k-rowspan-auto {
+    grid-row: auto !important;
+}
+
 .k-grid-cols-1 {
 	grid-template-columns: repeat(1, minmax(0, 1fr))
 }
@@ -21150,6 +21158,38 @@ kendo-card-footer {
 	background-color: hsla(0, 0%, 100%, .2)
 }
 
+.k-grid-auto-cols-auto {
+    grid-auto-columns: auto;
+}
+
+.\!k-grid-auto-cols-auto {
+    grid-auto-columns: auto !important;
+}
+
+.k-grid-auto-cols-min {
+    grid-auto-columns: min-content;
+}
+
+.\!k-grid-auto-cols-min {
+    grid-auto-columns: min-content !important;
+}
+
+.k-grid-auto-cols-max {
+    grid-auto-columns: max-content;
+}
+
+.\!k-grid-auto-cols-max {
+    grid-auto-columns: max-content !important;
+}
+
+.k-grid-auto-cols-fr {
+    grid-auto-columns: minmax(0, 1fr);
+}
+
+.\!k-grid-auto-cols-fr {
+    grid-auto-columns: minmax(0, 1fr) !important;
+}
+
 .k-grid-flow-row {
 	grid-auto-flow: row
 }
@@ -21196,6 +21236,38 @@ kendo-card-footer {
 
 .\!k-grid-flow-unset {
 	grid-auto-flow: unset !important
+}
+
+.k-grid-auto-rows-auto {
+    grid-auto-rows: auto;
+}
+
+.\!k-grid-auto-rows-auto {
+    grid-auto-rows: auto !important;
+}
+
+.k-grid-auto-rows-min {
+    grid-auto-rows: min-content;
+}
+
+.\!k-grid-auto-rows-min {
+    grid-auto-rows: min-content !important;
+}
+
+.k-grid-auto-rows-max {
+    grid-auto-rows: max-content;
+}
+
+.\!k-grid-auto-rows-max {
+    grid-auto-rows: max-content !important;
+}
+
+.k-grid-auto-rows-fr {
+    grid-auto-rows: minmax(0, 1fr);
+}
+
+.\!k-grid-auto-rows-fr {
+    grid-auto-rows: minmax(0, 1fr) !important;
 }
 
 .k-dock-manager {
@@ -22775,6 +22847,12 @@ kendo-card-footer {
 	outline: none
 }
 
+.k-grid .k-table-th .k-placeholder-line,
+.k-grid td .k-placeholder-line,
+.k-grid .k-table-td .k-placeholder-line {
+    width: 80%;
+}
+
 .k-grid .k-table-th>.k-radio,
 .k-grid .k-table-th>.k-radio-wrap,
 .k-grid .k-table-th>.k-checkbox,
@@ -22994,7 +23072,7 @@ kendo-card-footer {
 
 .k-grid .k-hierarchy-cell>.k-font-icon,
 .k-grid .k-drag-cell>.k-font-icon {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
+	padding-block: 8px;
 	padding-inline: 0;
 	width: 100%;
 	height: 100%;
@@ -23710,8 +23788,8 @@ div.k-grid-norecords {
 .k-grid-sm .k-resizer-wrap {
 	display: block;
 	width: 100%;
-	padding-block-start: calc(var(--kendo-spacing-0\.5, 0.125rem) - var(--kendo-spacing-0\.5, 0.125rem));
-	padding-block-end: var(--kendo-spacing-0\.5, 0.125rem);
+	padding-block-start: 0px;
+	padding-block-end: 2px;
 	position: absolute;
 	background: none;
 	cursor: row-resize;
@@ -23720,36 +23798,36 @@ div.k-grid-norecords {
 
 .k-grid .k-grid-md .k-table-th,
 .k-grid-md .k-table-th {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-3, 0.75rem)
+	padding-block: 3px;
+	padding-inline: 8px
 }
 
 .k-grid .k-grid-md td,
 .k-grid .k-grid-md .k-table-td,
 .k-grid-md td,
 .k-grid-md .k-table-td {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-3, 0.75rem)
+	padding-block: 3px;
+	padding-inline: 8px
 }
 
 .k-grid .k-grid-md .k-grouping-header,
 .k-grid-md .k-grouping-header {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-2, 0.5rem);
-	gap: var(--kendo-spacing-2, 0.5rem)
+	padding-block: 8px;
+	padding-inline: 8px;
+	gap: 8px
 }
 
 .k-grid .k-grid-md .k-grouping-header::before,
 .k-grid-md .k-grouping-header::before {
-	margin-inline-start: calc(var(--kendo-spacing-2, 0.5rem)*-1)
+	margin-inline-start: -8px
 }
 
 .k-grid .k-grid-md .k-grid-header .k-table-th>.k-link,
 .k-grid-md .k-grid-header .k-table-th>.k-link {
-	margin-block: calc(var(--kendo-spacing-2, 0.5rem)*-1);
-	margin-inline: calc(var(--kendo-spacing-3, 0.75rem)*-1);
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-3, 0.75rem)
+	margin-block: -8px;
+	margin-inline: -12px;
+	padding-block: 8px;
+	padding-inline: 12px
 }
 
 .k-grid .k-grid-md .k-grid-header .k-grid-filter,
@@ -23758,32 +23836,32 @@ div.k-grid-norecords {
 .k-grid-md .k-grid-header .k-grid-filter,
 .k-grid-md .k-grid-header .k-header-column-menu,
 .k-grid-md .k-grid-header .k-grid-header-menu {
-	padding: var(--kendo-spacing-1, 0.25rem);
-	width: calc(var(--kendo-line-height, normal)*1em + var(--kendo-spacing-1, 0.25rem)*2 + 2px);
-	height: calc(var(--kendo-line-height, normal)*1em + var(--kendo-spacing-1, 0.25rem)*2 + 2px);
-	bottom: calc(var(--kendo-spacing-2, 0.5rem) + 0.7142857143em - var(--kendo-line-height, normal)*1em/2 - var(--kendo-spacing-1, 0.25rem)*2/2)
+	padding: 4px;
+    width: calc(1.4285714286em + 10px);
+    height: calc(1.4285714286em + 10px);
+    bottom: 4px
 }
 
 .k-grid .k-grid-md .k-table-th>.k-cell-inner,
 .k-grid-md .k-table-th>.k-cell-inner {
-	margin-block: calc(var(--kendo-spacing-2, 0.5rem)*-1);
-	margin-inline: calc(var(--kendo-spacing-3, 0.75rem)*-1)
+	margin-block: -8px;
+    margin-inline: -12px
 }
 
 .k-grid .k-grid-md .k-table-th>.k-cell-inner>.k-link,
 .k-grid-md .k-table-th>.k-cell-inner>.k-link {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-3, 0.75rem)
+	padding-block: 8px;
+    padding-inline: 12px
 }
 
 .k-grid .k-grid-md .k-grouping-row .k-icon,
 .k-grid-md .k-grouping-row .k-icon {
-	margin-inline-start: calc(8px - var(--kendo-spacing-3, 0.75rem))
+	margin-inline-start: -4px
 }
 
 .k-grid .k-grid-md .k-grouping-dropclue,
 .k-grid-md .k-grouping-dropclue {
-	height: calc(1em + var(--kendo-spacing-1, 0.25rem)*2 + 8px)
+	height: calc(1em + 16px)
 }
 
 .k-grid .k-grid-md .k-hierarchy-cell,
@@ -23797,7 +23875,7 @@ div.k-grid-norecords {
 .k-grid .k-grid-md .k-drag-cell>.k-icon,
 .k-grid-md .k-hierarchy-cell>.k-icon,
 .k-grid-md .k-drag-cell>.k-icon {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
+	padding-block: 8px;
 	padding-inline: 0
 }
 
@@ -23809,8 +23887,8 @@ div.k-grid-norecords {
 .k-grid-md .k-command-cell,
 .k-grid-md .k-grid-edit-row td,
 .k-grid-md .k-grid-edit-row .k-table-td {
-	padding-block: calc(var(--kendo-spacing-1\.5, 0.375rem)/2);
-	padding-inline: var(--kendo-spacing-3, 0.75rem)
+	padding-block: 3px;
+    padding-inline: 12px
 }
 
 .k-grid .k-grid-md .k-filter-row td,
@@ -23819,29 +23897,29 @@ div.k-grid-norecords {
 .k-grid-md .k-filter-row td,
 .k-grid-md .k-filter-row .k-table-td,
 .k-grid-md .k-filter-row .k-table-th {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-2, 0.5rem)
+	padding-block: 8px;
+    padding-inline: 8px
 }
 
 .k-grid .k-grid-md .k-filtercell>span,
 .k-grid .k-grid-md .k-filtercell .k-filtercell-wrapper,
 .k-grid-md .k-filtercell>span,
 .k-grid-md .k-filtercell .k-filtercell-wrapper {
-	gap: calc(var(--kendo-spacing-2, 0.5rem)/2)
+	gap: 4px
 }
 
 .k-grid .k-grid-md .k-selection-aggregates,
 .k-grid-md .k-selection-aggregates {
-	padding-block: var(--kendo-spacing-2, 0.5rem);
-	padding-inline: var(--kendo-spacing-2, 0.5rem)
+	padding-block: 8px;
+    padding-inline: 8px
 }
 
 .k-grid .k-grid-md .k-resizer-wrap,
 .k-grid-md .k-resizer-wrap {
 	display: block;
 	width: 100%;
-	padding-block-start: calc(var(--kendo-spacing-1\.5, 0.375rem)/2 - var(--kendo-spacing-0\.5, 0.125rem));
-	padding-block-end: calc(var(--kendo-spacing-1\.5, 0.375rem)/2);
+	padding-block-start: 1px;
+	padding-block-end: 3px;
 	position: absolute;
 	background: none;
 	cursor: row-resize;
@@ -24372,21 +24450,21 @@ col.k-sorted,
 }
 
 .k-grid-footer {
-	border-color: var(--kendo-color-border, rgba(0, 0, 0, 0.08));
-	color: var(--kendo-color-on-app-surface, #424242);
-	background-color: var(--kendo-color-surface, #fafafa)
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #424242;
+    background-color: #fafafa
 }
 
 .k-grid-footer .k-grid-footer-sticky {
-	border-left-color: rgba(0, 0, 0, .3);
-	border-right-color: rgba(0, 0, 0, .3);
-	background-color: var(--kendo-color-surface, #fafafa)
+    border-left-color: rgba(0, 0, 0, 0.3);
+    border-right-color: rgba(0, 0, 0, 0.3);
+    background-color: #fafafa
 }
 
 .k-selection-aggregates {
-	border-color: var(--kendo-color-border, rgba(0, 0, 0, 0.08));
-	color: var(--kendo-color-on-app-surface, #424242);
-	background-color: var(--kendo-color-surface, #fafafa)
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #424242;
+    background-color: #fafafa
 }
 
 .k-master-row .k-grid-content-sticky {
@@ -24475,19 +24553,102 @@ col.k-sorted,
 	background-color: color-mix(in srgb, var(--kendo-color-primary, #1274AC) 24%, transparent)
 }
 
+kendo-grid.k-grid .k-grid-content-sticky {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    border-left-color: rgba(0, 0, 0, 0.3);
+    border-right-color: rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+}
+
+kendo-grid.k-grid .k-grid-content-sticky:hover, kendo-grid.k-grid .k-grid-content-sticky.k-hover {
+    background-color: #ebebeb;
+}
+
+kendo-grid.k-grid .k-grid-row-sticky td,
+kendo-grid.k-grid .k-grid-row-sticky .k-table-td {
+    border-top-color: rgba(0, 0, 0, 0.3);
+    border-bottom-color: rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+}
+
+kendo-grid.k-grid .k-grid-row-sticky:hover td,
+kendo-grid.k-grid .k-grid-row-sticky.k-hover td,
+kendo-grid.k-grid .k-grid-row-sticky:hover .k-table-td,
+kendo-grid.k-grid .k-grid-row-sticky.k-hover .k-table-td {
+    background-color: #ebebeb;
+}
+
+kendo-grid.k-grid .k-table-alt-row .k-grid-content-sticky,
+kendo-grid.k-grid .k-grid-row-sticky.k-table-alt-row td,
+kendo-grid.k-grid .k-grid-row-sticky.k-table-alt-row .k-table-td {
+    background-color: #f6f6f6;
+}
+
+kendo-grid.k-grid .k-table-row.k-selected .k-grid-content-sticky,
+kendo-grid.k-grid .k-selected.k-grid-row-sticky td,
+kendo-grid.k-grid .k-grid-row-sticky td.k-selected,
+kendo-grid.k-grid .k-selected.k-grid-row-sticky .k-table-td,
+kendo-grid.k-grid .k-grid-row-sticky .k-table-td.k-selected,
+kendo-grid.k-grid .k-selected.k-grid-content-sticky {
+    background-color: #c4dcea;
+}
+
+kendo-grid.k-grid .k-table-row.k-selected.k-table-alt-row .k-grid-content-sticky,
+kendo-grid.k-grid .k-selected.k-table-alt-row.k-grid-row-sticky td,
+kendo-grid.k-grid .k-selected.k-table-alt-row.k-grid-row-sticky .k-table-td,
+kendo-grid.k-grid .k-table-alt-row .k-selected.k-grid-content-sticky {
+    background-color: #bed5e3;
+}
+
+kendo-grid.k-grid .k-table-row:hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-table-row.k-hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-grid-row-sticky:hover td,
+kendo-grid.k-grid .k-grid-row-sticky.k-hover td,
+kendo-grid.k-grid .k-grid-row-sticky.k-table-alt-row:hover td,
+kendo-grid.k-grid .k-grid-row-sticky.k-table-alt-row.k-hover td,
+kendo-grid.k-grid .k-grid-row-sticky:hover .k-table-td,
+kendo-grid.k-grid .k-grid-row-sticky.k-hover .k-table-td,
+kendo-grid.k-grid .k-grid-row-sticky.k-table-alt-row:hover .k-table-td,
+kendo-grid.k-grid .k-grid-row-sticky.k-table-alt-row.k-hover .k-table-td,
+kendo-grid.k-grid .k-table-alt-row:hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-table-alt-row.k-hover .k-grid-content-sticky {
+    background-color: #ebebeb;
+}
+
+kendo-grid.k-grid .k-table-row.k-selected:hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-table-row.k-selected.k-hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-selected.k-grid-row-sticky:hover td,
+kendo-grid.k-grid .k-selected.k-grid-row-sticky.k-hover td,
+kendo-grid.k-grid .k-selected.k-table-alt-row.k-grid-row-sticky:hover td,
+kendo-grid.k-grid .k-selected.k-table-alt-row.k-grid-row-sticky.k-hover td,
+kendo-grid.k-grid .k-selected.k-grid-row-sticky:hover .k-table-td,
+kendo-grid.k-grid .k-selected.k-grid-row-sticky.k-hover .k-table-td,
+kendo-grid.k-grid .k-selected.k-table-alt-row.k-grid-row-sticky:hover .k-table-td,
+kendo-grid.k-grid .k-selected.k-table-alt-row.k-grid-row-sticky.k-hover .k-table-td,
+kendo-grid.k-grid .k-table-row.k-selected.k-table-alt-row:hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-table-row.k-selected.k-table-alt-row.k-hover .k-grid-content-sticky,
+kendo-grid.k-grid .k-grid-row-sticky:hover td.k-selected,
+kendo-grid.k-grid .k-grid-row-sticky.k-hover td.k-selected,
+kendo-grid.k-grid .k-grid-row-sticky:hover .k-table-td.k-selected,
+kendo-grid.k-grid .k-grid-row-sticky.k-hover .k-table-td.k-selected,
+kendo-grid.k-grid .k-table-row:hover .k-grid-content-sticky.k-selected,
+kendo-grid.k-grid .k-table-row.k-hover .k-grid-content-sticky.k-selected {
+    background-color: #b9d0dd;
+} 
+
 .k-grouping-row .k-grid-content-sticky {
-	background-color: var(--kendo-color-surface, #fafafa)
+	background-color: #fafafa
 }
 
 .k-grouping-row:hover .k-grid-content-sticky,
 .k-grouping-row.k-hover .k-grid-content-sticky {
-	background-color: var(--kendo-color-base-hover, #ebebeb)
+	background-color: #ebebeb
 }
 
 .k-column-list-item:hover,
 .k-columnmenu-item:hover {
-	color: var(--kendo-color-on-app-surface, #424242);
-	background-color: var(--kendo-color-base-hover, #ebebeb)
+	color: #424242;
+    background-color: #ececec
 }
 
 .k-column-list-item:focus,
@@ -24498,25 +24659,25 @@ col.k-sorted,
 }
 
 .k-columnmenu-item.k-selected {
-	color: var(--kendo-color-on-primary, white);
-	background-color: var(--kendo-color-primary, #1274AC)
+	color: #ffffff;
+    background-color: #1274AC
 }
 
 .k-column-menu .k-menu:not(.k-context-menu) {
-	border-color: var(--kendo-color-border, rgba(0, 0, 0, 0.08));
-	color: var(--kendo-color-on-app-surface, #424242);
-	background-color: var(--kendo-color-surface-alt, #ffffff)
+	border-color: rgba(0, 0, 0, 0.08);
+    color: #424242;
+    background-color: #ffffff
 }
 
 .k-column-menu .k-menu:not(.k-context-menu) .k-item:hover,
 .k-column-menu .k-menu:not(.k-context-menu) .k-item.k-hover {
-	color: var(--kendo-color-on-app-surface, #424242);
-	background-color: var(--kendo-color-base-hover, #ebebeb)
+	color: #424242;
+    background-color: #ececec
 }
 
 .k-column-menu .k-menu:not(.k-context-menu) .k-item.k-selected {
-	color: var(--kendo-color-on-primary, white);
-	background-color: var(--kendo-color-primary, #1274AC)
+	color: #ffffff;
+    background-color: #1274AC
 }
 
 .k-column-menu .k-menu:not(.k-context-menu) .k-item:focus,
@@ -24525,29 +24686,29 @@ col.k-sorted,
 }
 
 .k-column-menu-tabbed {
-	background-color: var(--kendo-color-surface, #fafafa)
+	background-color: #fafafa
 }
 
 .k-column-menu-group-header-text {
-	border-color: var(--kendo-color-border, rgba(0, 0, 0, 0.08));
-	color: var(--kendo-color-on-app-surface, #424242)
+	border-color: rgba(0, 0, 0, 0.08);
+    color: #424242
 }
 
 .k-check-all-wrap {
-	border-color: var(--kendo-color-border, rgba(0, 0, 0, 0.08))
+	border-color: rgba(0, 0, 0, 0.08)
 }
 
 .k-grid-norecords-template {
-	background-color: var(--kendo-color-surface-alt, #ffffff);
-	border-color: var(--kendo-color-border, rgba(0, 0, 0, 0.08))
+	background-color: #ffffff;
+    border-color: rgba(0, 0, 0, 0.08)
 }
 
 .k-resizer-wrap.k-hover .k-row-resizer {
-	background-color: color-mix(in srgb, var(--kendo-color-on-base, #424242) 20%, transparent)
+	background-color: rgba(0, 0, 0, 0.12)
 }
 
 .k-resizer-wrap.k-active .k-row-resizer {
-	background-color: var(--kendo-color-primary, #1274AC)
+	background-color: #1274AC
 }
 
 .k-touch-action-none {
