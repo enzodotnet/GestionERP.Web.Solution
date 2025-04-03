@@ -181,10 +181,10 @@ public partial class Insert : IDisposable
 
             ME = await IMoneda.ConsultaPorTipo("ME");
             MN = await IMoneda.ConsultaPorTipo("MN");
-
-            Validator = new();
+             
             EditContext = new EditContext(MovimientoInsertar);
             IsInitPage = true;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
