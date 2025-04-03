@@ -61,12 +61,6 @@
 								</div>
 							</Template>
 						</FormItem>
-						<FormItem ColSpan="1">
-							<Template>
-								<label>Tipo de registro:</label>
-								<TelerikDropDownList Data="@TiposRegistro" @bind-Value="@MovimientoInsertar.FlagTipoRegistro" Enabled="@(false)" TextField="Nombre" ValueField="Codigo" Width="105px" Size="sm" />
-							</Template>
-						</FormItem>
 
 						<FormItem ColSpan="7">
 							<Template>
@@ -86,7 +80,7 @@
 							<Template>
 								<label>Moneda*:</label>
 								<div class="item-group">
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Class="t-main" Placeholder="Código" Title="Código" ReadOnly="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="60px" />
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Class="t-main" Placeholder="Código" Title="Código" ReadOnly="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="65px" />
 									@if (!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)
 									{
 										<Principal.MonedaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoMoneda)" CodigoExcluir="@(MovimientoInsertar.CodigoMoneda)" />
@@ -133,7 +127,7 @@
 							<Template> 
 								<label>Documento referencia @(TipoMovimiento.EsRequeridoReferencia ? "*" : ""):</label>
 								<div class="item-group">
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoDocumentoReferencia)" Id="coddocreferencia" Placeholder="Código" Title="Código" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="50px" MaxLength="4" />
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoDocumentoReferencia)" Id="coddocreferencia" Placeholder="Código" Title="Código" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="55px" MaxLength="4" />
 									@if (TipoMovimiento.EsRequeridoReferencia)
 									{
 										<TelerikButton Icon="@(SvgIcon.Search)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(EsVisibleBotonCatalogoReferencias)" Enabled="@(!IsLoadingCatalogoReferencia & !IsEditingGridDetalle)" Title="Abrir catálogo de referencia" Size="sm" OnClick="@(MostrarCatalogoReferencia)">
