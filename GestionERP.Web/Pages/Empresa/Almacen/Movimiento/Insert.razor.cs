@@ -39,6 +39,8 @@ public partial class Insert : IDisposable
     public MovimientoInsertarValidator Validator { get; set; }
     public MovimientoDetalleInsertarValidator DetalleValidator { get; set; }
     public TipoMovimientoConsultaPorCodigoDto TipoMovimiento { get; set; }
+    private MonedaConsultaPorTipoDto MN { get; set; }
+    private MonedaConsultaPorTipoDto ME { get; set; }
     public bool IsInitPage { get; set; }
     public bool IsEditingGridDetalle { get; set; } 
     public string CodigoTipoMovimiento { get; set; }
@@ -93,6 +95,7 @@ public partial class Insert : IDisposable
     [Inject] public IPrincipalUsuario IUsuario { get; set; }
     [Inject] public IPrincipalTipoCambioDia ITipoCambioDia { get; set; }
     [Inject] public IPrincipalPermiso IPermiso { get; set; }
+    [Inject] public IPrincipalMoneda IMoneda { get; set; }
     [Inject] public IPrincipalTipoMovimiento ITipoMovimiento { get; set; }
     [Inject] public UserService IUser { get; set; }
     [Inject] public UtilService IUtil { get; set; }
@@ -169,8 +172,13 @@ public partial class Insert : IDisposable
             if (MovimientoInsertar.FechaHoraOperacion.HasValue)
             {
                 Movimiento.FechaHoraOperacion = (DateTime)MovimientoInsertar.FechaHoraOperacion;
-            }   
-                
+            }
+
+            await ConsultaTipoCambioDia();
+
+            ME = await IMoneda.ConsultaPorTipo("ME");
+            MN = await IMoneda.ConsultaPorTipo("MN");
+
             Validator = new();
             EditContext = new EditContext(MovimientoInsertar);
             IsInitPage = true;
@@ -963,7 +971,12 @@ public partial class Insert : IDisposable
         IsModified = Fnc.VerifyContextIsChanged(!string.IsNullOrEmpty((string)value), EditContext, "Comentario");
     }
 
-    private void OnChangeFechaHoraOperacionHandler(object value) => IsModified = Fnc.VerifyContextIsChanged((value is null && Movimiento.FechaHoraOperacion.HasValue) || (!Movimiento.FechaHoraOperacion.HasValue && value is not null) || (Movimiento.FechaHoraOperacion.HasValue && value is not null && Movimiento.FechaHoraOperacion != (DateTime?)value), EditContext, "FechaHoraOperacion");
+    private async Task OnChangeFechaHoraOperacionHandler(object value)
+    {
+        IsModified = Fnc.VerifyContextIsChanged((value is null && Movimiento.FechaHoraOperacion.HasValue) || (!Movimiento.FechaHoraOperacion.HasValue && value is not null) || (Movimiento.FechaHoraOperacion.HasValue && value is not null && Movimiento.FechaHoraOperacion != (DateTime?)value), EditContext, "FechaHoraOperacion");
+        await ConsultaTipoCambioDia();
+        ActualizarMontosPorTipoCambioDia();
+    }
 
     private void OnFechaHoraOperacionPopupClose(DatePickerCloseEventArgs _) => ActualizarHoraOperacion();
     #endregion
