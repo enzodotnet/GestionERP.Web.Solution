@@ -530,6 +530,15 @@ public partial class Insert : IDisposable
             EditContext.NotifyFieldChanged(EditContext.Field("CodigoMoneda"));
         }
 
+        if(string.IsNullOrEmpty(Movimiento.DocumentoReferencia))
+        {
+            OrdenCatalogoIngresarDto itemReferencia = ItemsSelectedOrden.First();
+            Movimiento.DocumentoReferencia = itemReferencia.CodigoOrden;
+            MovimientoInsertar.CodigoDocumentoReferencia = Movimiento.CodigoDocumentoReferencia = itemReferencia.CodigoDocumento;
+            MovimientoInsertar.SerieDocumentoReferencia = Movimiento.SerieDocumentoReferencia = itemReferencia.CodigoSerieDocumento;
+            MovimientoInsertar.NumeroDocumentoReferencia = Movimiento.NumeroDocumentoReferencia = itemReferencia.NumeroSerieDocumento;
+        }
+
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         foreach (OrdenCatalogoIngresarDto itemCatalogo in ItemsSelectedOrden)
         {
@@ -975,7 +984,7 @@ public partial class Insert : IDisposable
     {
         IsModified = Fnc.VerifyContextIsChanged((value is null && Movimiento.FechaHoraOperacion.HasValue) || (!Movimiento.FechaHoraOperacion.HasValue && value is not null) || (Movimiento.FechaHoraOperacion.HasValue && value is not null && Movimiento.FechaHoraOperacion != (DateTime?)value), EditContext, "FechaHoraOperacion");
         await ConsultaTipoCambioDia();
-        ActualizarMontosPorTipoCambioDia();
+        //ActualizarMontosPorTipoCambioDia();
     }
 
     private void OnFechaHoraOperacionPopupClose(DatePickerCloseEventArgs _) => ActualizarHoraOperacion();

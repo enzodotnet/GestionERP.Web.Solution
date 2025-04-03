@@ -24,7 +24,7 @@ public class MovimientoInsertarDto
     public string CodigoCentroCosto { get; set; }
     public string Observacion { get; set; }
     public string Comentario { get; set; }
-    public List<MovimientoDetalleInsertarDto> Detalles { get; set; } 
+    public List<MovimientoDetalleInsertarDto> Detalles { get; set; } = [];
 }
 
 public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarDto>
