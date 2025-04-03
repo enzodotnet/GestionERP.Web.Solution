@@ -35,10 +35,10 @@
 						</FormItem> 
 						<FormItem ColSpan="1">
 							<Template>
-								<label>Tipo de cambio del día:</label>
+								<label>Tipo de cambio:</label>
 								<div class="item-group">
 									<TelerikTextBox @bind-Value="@(Pedido.CodigoTipoCambioDia)" Title="Código" ReadOnly="@(true)" Class="t-main" Size="sm" Width="80px" />
-									<TelerikNumericTextBox @bind-Value="@(Pedido.MontoTipoCambioDia)" Class="t-main" Arrows="@(false)" ReadOnly="@true" Width="50px" Format="N4" Decimals="4" Size="sm" />
+									<TelerikNumericTextBox @bind-Value="@(Pedido.MontoTipoCambioDia)" Class="t-main" Arrows="@(false)" ReadOnly="@true" Width="60px" Format="N4" Decimals="4" Size="sm" />
 								</div>
 							</Template>
 						</FormItem>

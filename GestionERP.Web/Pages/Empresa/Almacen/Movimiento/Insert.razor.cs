@@ -13,7 +13,7 @@ using AutoMapper;
 using GestionERP.Web.Models.Dtos.Principal;
 using GestionERP.Web.Global;
 using GestionERP.Web.Services;
-using GestionERP.Web.Models.Dtos.Compra;
+using GestionERP.Web.Models.Dtos.Compra; 
 
 namespace GestionERP.Web.Pages.Empresa.Almacen.Movimiento;
 
@@ -53,6 +53,9 @@ public partial class Insert : IDisposable
     public string CodigoEjercicioFiltro { get; set; }
     private IEnumerable<EmpresaEjercicioCatalogoDto> CatalogoEjercicios { get; set; }  
 	public bool EsVisibleBotonOperacion { get; set; }
+    public bool EsVisibleBotonCatalogoOrdenDetalles { get; set; }
+    public bool EsVisibleBotonCatalogoReferencias { get; set; }
+    public bool EsVisibleDialogReferencia { get; set; }
     public bool EsVisibleCatalogoOrdenes { get; set; } 
     private bool IsAuthUser { get; set; }
     private bool IsLoadingAction { get; set; }
@@ -406,18 +409,35 @@ public partial class Insert : IDisposable
         } 
     }
 
-    #region CatalogoOrdenesIngresar 
+    private void QuitarItemReferencia()
+    { 
+        switch (CodigoTipoMovimiento)
+        {
+            case "M05": //Ingreso por orden de compra 
+                OrdenCatalogoIngresarDto itemNuevo = new();
+                IMapper.Map(itemNuevo, Movimiento);
+                IMapper.Map(itemNuevo, MovimientoInsertar);
+                 
+                EsVisibleBotonCatalogoReferencias = EsVisibleBotonOperacion = true;
+                EsVisibleDialogReferencia = false;
+                break;
+        }
+    }
+
+    #region CatalogoOrdenesIngresar  
     private async Task VisibleCatalogoOrdenesChangedHandler(bool esVisible)
     {
         if (!esVisible)
         {
-            if (ItemsSelectedOrden.Any() && !CatalogoOrdenesIngresar.Any(x => x.IsErrorSelected) && !await Dialog.ConfirmAsync("¿Está seguro de salir del catálogo y que los ítems seleccionados no se carguen?", "Saliendo de catálogo"))
+            if (ItemsSelectedOrden.Any() && !await Dialog.ConfirmAsync("¿Está seguro de salir del catálogo y que la orden seleccionada no se cargue?", "Saliendo de catálogo"))
                 return;
 
             EsVisibleCatalogoOrdenes = false;
             CatalogoOrdenesIngresar = null;
         }
     }
+
+    private void OnRowDoubleClickCatalogoOrdenIngresarHandler(GridRowClickEventArgs args) => AgregarItemOrden(args.Item as OrdenCatalogoIngresarDto);
 
     private async Task CargarCatalogoOrdenes()
     {
@@ -427,12 +447,7 @@ public partial class Insert : IDisposable
             if (!IsAuthUser) return;
 
             ItemsSelectedOrden = [];
-
             CatalogoOrdenesIngresar = (List<OrdenCatalogoIngresarDto>)await IOrden.CatalogoIngresar(Empresa.Codigo, CodigoEjercicioFiltro);
-
-            SelectionModeCatalogoOrden = CatalogoOrdenesIngresar is null ? GridSelectionMode.None : GridSelectionMode.Multiple;
-            EsSeleccionableCatalogoOrden = CatalogoOrdenesIngresar is not null;
-            GridCatalogoRef?.Rebind();
         }
         catch (HttpRequestException)
         {
@@ -462,12 +477,40 @@ public partial class Insert : IDisposable
         }
     }
 
-    public static void OnRowCatalogoOrdenRenderHandler(GridRowRenderEventArgs args) => args.Class = (args.Item as OrdenCatalogoIngresarDto).IsErrorSelected ? "row-error" : "";
+    private void SeleccionarItemOrden()
+    {
+        if (!ItemsSelectedOrden.Any())
+        {
+            Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Es necesario que seleccione al menos un ítem del catálogo", "warning");
+            return;
+        }
+
+        AgregarItemOrden(ItemsSelectedOrden.First());
+    }
+
+    private void AgregarItemOrden(OrdenCatalogoIngresarDto item)
+    {
+        IMapper.Map(item, Movimiento);
+        IMapper.Map(item, MovimientoInsertar);
+
+        //IsEditAmountMN = item.CodigoMoneda == MN.Codigo;
+        //IsEditAmountME = item.CodigoMoneda == ME.Codigo;
+
+        EditContext.NotifyFieldChanged(EditContext.Field("CodigoDocumentoReferencia"));
+        EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
+        EditContext.NotifyFieldChanged(EditContext.Field("CodigoMoneda"));
+        EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
+         
+        EsVisibleBotonCatalogoOrdenDetalles = true;
+        EsVisibleCatalogoOrdenes = EsVisibleBotonCatalogoReferencias = EsVisibleBotonOperacion = false;
+    }
+     
+    //FIN
 
     protected void OnSelectCatalogoOrden(IEnumerable<OrdenCatalogoIngresarDto> itemsSeleccionado)
     {
         ItemsSelectedOrden = itemsSeleccionado;
-        CatalogoOrdenesIngresar?.ForEach(x => { x.IsErrorSelected = false; });
+        //CatalogoOrdenesIngresar?.ForEach(x => { x.IsErrorSelected = false; });
     }
 
     private async Task AgregarItemsOrden()
@@ -479,27 +522,27 @@ public partial class Insert : IDisposable
         }
 
         bool isErrorSelectedCatalogo = false;
-        foreach (OrdenCatalogoIngresarDto item in ItemsSelectedOrden)
-        {
-            if (GridDetalles.Any(x => x.CodigoArticulo == item.CodigoArticulo))
-            {
-                Fnc.MostrarAlerta(AlertCatalogoOrdenes, $"El ítem {item.CodigoArticulo} ya ha sido agregado en el detalle", "error");
-                item.IsErrorSelected = isErrorSelectedCatalogo = true;
-            }
-        }
-        List<IGrouping<string, OrdenCatalogoIngresarDto>> elements = [.. ItemsSelectedOrden.GroupBy(x => x.CodigoOrden)];
-        if (elements.Count > 1)
-        {
-            Fnc.MostrarAlerta(AlertCatalogoOrdenes, "No puede elegir ítems de distintas órdenes de compra", "error");
-            elements.ForEach(x => x.ToList().ForEach(x => x.IsErrorSelected = true));
-            isErrorSelectedCatalogo = true;
-        }
-        else if (!string.IsNullOrEmpty(Movimiento.DocumentoReferencia) && Movimiento.DocumentoReferencia.Trim() != ItemsSelectedOrden.Select(x => x.CodigoOrden).First()?.Trim())
-        {
-            Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Solo podrá elegir ítems de la misma orden de compra ya seleccionada", "error");
-            ItemsSelectedOrden.ToList().ForEach(x => x.IsErrorSelected = true);
-            isErrorSelectedCatalogo = true;
-        }
+        //foreach (OrdenCatalogoIngresarDto item in ItemsSelectedOrden)
+        //{
+        //    if (GridDetalles.Any(x => x.CodigoArticulo == item.CodigoArticulo))
+        //    {
+        //        Fnc.MostrarAlerta(AlertCatalogoOrdenes, $"El ítem {item.CodigoArticulo} ya ha sido agregado en el detalle", "error");
+        //        item.IsErrorSelected = isErrorSelectedCatalogo = true;
+        //    }
+        //}
+        //List<IGrouping<string, OrdenCatalogoIngresarDto>> elements = [.. ItemsSelectedOrden.GroupBy(x => x.CodigoOrden)];
+        //if (elements.Count > 1)
+        //{
+        //    Fnc.MostrarAlerta(AlertCatalogoOrdenes, "No puede elegir ítems de distintas órdenes de compra", "error");
+        //    elements.ForEach(x => x.ToList().ForEach(x => x.IsErrorSelected = true));
+        //    isErrorSelectedCatalogo = true;
+        //}
+        //else if (!string.IsNullOrEmpty(Movimiento.DocumentoReferencia) && Movimiento.DocumentoReferencia.Trim() != ItemsSelectedOrden.Select(x => x.CodigoOrden).First()?.Trim())
+        //{
+        //    Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Solo podrá elegir ítems de la misma orden de compra ya seleccionada", "error");
+        //    ItemsSelectedOrden.ToList().ForEach(x => x.IsErrorSelected = true);
+        //    isErrorSelectedCatalogo = true;
+        //}
 
         if (isErrorSelectedCatalogo)
             return;
@@ -809,9 +852,12 @@ public partial class Insert : IDisposable
         MovimientoInsertar.CodigoOperacionLogistica = item.CodigoOperacionLogistica;
         Movimiento.NombreOperacionLogistica = item.NombreOperacionLogistica;
         CodigoTipoMovimiento = item.CodigoTipoMovimiento;
-
+        
 		EditContext.NotifyFieldChanged(EditContext.Field("CodigoOperacionLogistica"));
         TipoMovimiento = await ITipoMovimiento.ConsultaPorCodigo(CodigoTipoMovimiento) ?? new();
+        Validator.EsRequeridoReferencia = TipoMovimiento.EsRequeridoReferencia;
+        EsVisibleBotonCatalogoReferencias = TipoMovimiento.EsRequeridoReferencia;
+
         ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
     }

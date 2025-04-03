@@ -121,12 +121,14 @@
                                 <div class="item-group-block">
                                     <label>Centro de costo:</label>
                                     <div class="item-group">
-                                        <TelerikTextBox Value="@(OrdenEditar.CodigoCentroCosto)" DebounceDelay="@(0)" ValueChanged="@ValueChangeCentroCostoHandler" ValueExpression="@(() => OrdenEditar.CodigoCentroCosto)" OnChange="@OnChangeCentroCostoHandler" Id="ccosto" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="140px" MaxLength="15" />
+                                        <TelerikTextBox Value="@(OrdenEditar.CodigoCentroCosto)" DebounceDelay="@(0)" ValueChanged="@ValueChangeCentroCostoHandler" ValueExpression="@(() => OrdenEditar.CodigoCentroCosto)" OnChange="@OnChangeCentroCostoHandler" Id="ccosto" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="185px" MaxLength="18" />
                                         <Principal.CentroCostoCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoCentroCosto)" CodigoExcluir="@(OrdenEditar.CodigoCentroCosto)" />
                                         <TelerikTextBox @bind-Value="@(Orden.NombreCentroCosto)" Title="@(Orden.NombreCentroCosto)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
                                     </div>
                                     <TelerikValidationTooltip For="@(() => OrdenEditar.CodigoCentroCosto)" TargetSelector="#ccosto" />
+
                                     <span class="ig-space" />
+
                                     <label>Área solicitante:</label>
                                     <div class="item-group">
                                         <TelerikTextBox @bind-Value="@(Orden.CodigoArea)" AutoComplete="off" Title="Código" Enabled="@(false)" Size="sm" Width="60px" />

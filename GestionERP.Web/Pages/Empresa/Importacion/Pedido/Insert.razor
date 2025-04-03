@@ -43,12 +43,12 @@
 								<TelerikValidationTooltip For="@(() => PedidoInsertar.FechaEmision)" TargetSelector="#fecemision" />
 							</Template>
 						</FormItem>
-						<FormItem ColSpan="2">
+						<FormItem ColSpan="1">
 							<Template>
-								<label>Tipo de cambio del día:</label>
+								<label>Tipo de cambio:</label>
 								<div class="item-group">
 									<TelerikTextBox @bind-Value="@(PedidoInsertar.CodigoTipoCambioDia)" AutoComplete="off" Placeholder="Código" Title="Código" ReadOnly="@(true)" Class="t-main" Size="sm" Width="80px" />
-									<TelerikNumericTextBox @bind-Value="@(PedidoInsertar.MontoTipoCambioDia)" Class="t-main" Arrows="@(false)" ReadOnly="@true" Width="50px" Min="0" Format="N4" Decimals="4" Size="sm" />
+									<TelerikNumericTextBox @bind-Value="@(PedidoInsertar.MontoTipoCambioDia)" Class="t-main" Arrows="@(false)" ReadOnly="@true" Width="60px" Min="0" Format="N4" Decimals="4" Size="sm" />
 								</div>
 							</Template>
 						</FormItem>

@@ -13,5 +13,6 @@ public interface ICompraOrden
     Task<IEnumerable<OrdenCatalogoActualizarEstadoDto>> CatalogoActualizarEstado(string codigoEmpresa, string codigoEstado);
     Task ActualizarEstado(string codigoEmpresa, EstadoActualizarRequest estadoActualizar);
     Task<IEnumerable<OrdenCatalogoIngresarDto>> CatalogoIngresar(string codigoEmpresa, string codigoEjercicio);
+    Task<IEnumerable<OrdenDetalleCatalogoIngresarDto>> CatalogoDetallesIngresar(string codigoEmpresa, string codigoOrden);
     Task<IEnumerable<OrdenCatalogoAnticiparDto>> CatalogoAnticipar(string codigoEmpresa); 
 }

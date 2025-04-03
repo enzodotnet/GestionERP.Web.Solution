@@ -178,6 +178,34 @@ public class CompraOrdenApi(HttpClient httpClient) : ICompraOrden
         }
     }
 
+    public async Task<IEnumerable<OrdenDetalleCatalogoIngresarDto>> CatalogoDetallesIngresar(string codigoEmpresa, string codigoOrden)
+    {
+        try
+        { 
+            Dictionary<string, string> query = new()
+            {  
+                ["codigoOrden"] = codigoOrden 
+            };
+            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi.Replace("{ce}", codigoEmpresa)}/detalle/catalogo/ingresar", query)); 
+            if (response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                    return default;
+
+                return await response.Content.ReadFromJsonAsync<IEnumerable<OrdenDetalleCatalogoIngresarDto>>();
+            }
+            else
+            {
+                error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
+                throw new HttpResponseException(error.Message, error.Code);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            throw new HttpRequestException();
+        }
+    }
+
     public async Task<IEnumerable<OrdenCatalogoAnticiparDto>> CatalogoAnticipar(string codigoEmpresa)
     {
         try

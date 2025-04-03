@@ -252,10 +252,10 @@
                                             <TelerikButton Icon="@FontIcon.Pencil" Id="tbtn" Title="Ir a actualizar fecha de costo" Class="b-primary b-patch" ButtonType="@ButtonType.Button" Size="sm" OnClick="() => VisibleListaLoteChangedHandler(true)" Visible="@(EsVisibleCostear)" />
                                         </div> 
                                         <span class="ig-space" />
-                                        <label>Tipo de cambio del día:</label>
+                                        <label>Tipo de cambio:</label>
                                         <div class="item-group">
                                             <TelerikTextBox @bind-Value="@(Orden.CodigoTipoCambioDia)" Title="Código" Size="sm" Width="80px" Enabled="@(false)" />
-                                            <TelerikNumericTextBox @bind-Value="@(Orden.MontoTipoCambioDia)" Arrows="@(false)" Width="50px" Format="N4" Decimals="4" Size="sm" Enabled="@(false)" />
+                                            <TelerikNumericTextBox @bind-Value="@(Orden.MontoTipoCambioDia)" Arrows="@(false)" Width="60px" Format="N4" Decimals="4" Size="sm" Enabled="@(false)" />
                                         </div>
                                     </div>
                                 </Template>

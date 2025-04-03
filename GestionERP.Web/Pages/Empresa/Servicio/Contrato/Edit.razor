@@ -250,7 +250,7 @@
                             <Template>
                                 <label>Centro de costo:</label>
                                 <div class="item-group">
-                                    <TelerikTextBox Value="@(ContratoEditar.CodigoCentroCosto)" DebounceDelay="@(0)" ValueChanged="@ValueChangeCentroCostoHandler" ValueExpression="@(() => ContratoEditar.CodigoCentroCosto)" OnChange="@OnChangeCentroCostoHandler" Id="ccosto" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="140px" MaxLength="15" />
+                                    <TelerikTextBox Value="@(ContratoEditar.CodigoCentroCosto)" DebounceDelay="@(0)" ValueChanged="@ValueChangeCentroCostoHandler" ValueExpression="@(() => ContratoEditar.CodigoCentroCosto)" OnChange="@OnChangeCentroCostoHandler" Id="ccosto" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="185px" MaxLength="18" />
                                     <Principal.CentroCostoCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoCentroCosto)" CodigoExcluir="@(ContratoEditar.CodigoCentroCosto)" />
                                     <TelerikTextBox @bind-Value="@(Contrato.NombreCentroCosto)" Title="@(Contrato.NombreCentroCosto)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
                                 </div>
