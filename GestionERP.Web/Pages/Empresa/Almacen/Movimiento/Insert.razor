@@ -134,6 +134,7 @@
 											Buscar
 											<TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm" ThemeColor="secondary" Visible="@IsLoadingCatalogoReferencia" />
 										</TelerikButton>
+										<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete b-action" Id="tbtn" Title="Quitar documento referencia" Visible="@(!EsVisibleBotonCatalogoReferencias)" OnClick="@(() => { EsVisibleDialogReferencia = true; })">Quitar</TelerikButton>
 									}
 									else
 									{
@@ -284,7 +285,7 @@
 							<GridPagerSettings InputType="@(PagerInputType.Buttons)" ButtonCount="@(5)" Position="@(PagerPosition.Bottom)" />
 						</GridSettings>
 						<GridColumns>
-							<GridCheckboxColumn Width="33px" Locked="@(true)" CheckBoxOnlySelection="@(true)" SelectAll="@(true)" Visible="@(EsSeleccionableCatalogoOrden)" />
+							<GridCheckboxColumn SelectAll="@(false)" Width="33px" Locked="@(true)" />
 							<GridColumn Field="CodigoOrden" Width="130px" Title="Código de órden" />
 							<GridColumn Field="FechaEmision" Width="115px" Title="Fecha de emisión" DisplayFormat="{0:dd/MM/yyyy}" />
 							<GridColumn Field="NombreEntidad" Width="200px" Title="Nombre de entidad proveedor" />
