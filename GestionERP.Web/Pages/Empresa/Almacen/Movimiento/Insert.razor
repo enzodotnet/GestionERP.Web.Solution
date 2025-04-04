@@ -103,9 +103,9 @@
 									<TelerikTextBox @bind-Value="@(MovimientoInsertar.NumeroDocumentoReferencia)" Placeholder="Número" Title="Número" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="80px" MaxLength="8" /> @* Pendiente habilitar para editar *@
 									@if (TipoMovimiento.EsRequeridoReferencia)
 									{
-										<TelerikButton Icon="@(SvgIcon.Search)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(EsVisibleBotonCatalogoReferencias)" Enabled="@(!IsLoadingCatalogoReferencia & !IsEditingGridDetalle)" Title="Abrir catálogo de referencia" Size="sm" OnClick="@(MostrarCatalogoReferencia)">
+										<TelerikButton Icon="@(SvgIcon.Search)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(EsVisibleBotonCatalogoReferencias)" Enabled="@(!IsLoadingCatalogoReferencias & !IsEditingGridDetalle)" Title="Abrir catálogo de referencia" Size="sm" OnClick="@(MostrarCatalogoReferencia)">
 											Buscar
-											<TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm" ThemeColor="secondary" Visible="@IsLoadingCatalogoReferencia" />
+											<TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm" ThemeColor="secondary" Visible="@IsLoadingCatalogoReferencias" />
 										</TelerikButton>
 										<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete b-action" Id="tbtn" Title="Quitar documento referencia" Visible="@(!EsVisibleBotonCatalogoReferencias)" OnClick="@(() => { EsVisibleDialogReferencia = true; })">Quitar</TelerikButton>
 									}
@@ -119,7 +119,7 @@
 							<Template> 
 								<label>Local:</label>
 								<div class="item-group">
-									<TelerikTextBox Value="@(MovimientoInsertar.CodigoLocal)" DebounceDelay="@(0)" ValueChanged="@ValueChangeLocalHandler" ValueExpression="@(() => MovimientoInsertar.CodigoLocal)" OnChange="@OnChangeLocalHandler" Id="local" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="60px" MaxLength="3" />
+									<TelerikTextBox Value="@(MovimientoInsertar.CodigoLocal)" DebounceDelay="@(0)" ValueChanged="@ValueChangeLocalHandler" ValueExpression="@(() => MovimientoInsertar.CodigoLocal)" OnChange="@OnChangeLocalHandler" Id="local" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="70px" MaxLength="3" />
 									<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
 									<TelerikTextBox @bind-Value="@(Movimiento.NombreLocal)" Title="@(Movimiento.NombreLocal)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
 								</div>
@@ -138,7 +138,7 @@
 							</Template>
 						</FormItem>
 
-						<FormItem ColSpan="5">
+						<FormItem ColSpan="4">
 							<Template>
 								<label>Observación:</label>
 								<TelerikTextBox @bind-Value="@(MovimientoInsertar.Observacion)" OnChange="@OnChangeObservacionHandler" Id="observacion" AutoComplete="off" Title="@(MovimientoInsertar.Observacion)" MaxLength="100" Size="sm" />
@@ -150,13 +150,9 @@
 						<FormItem ColSpan="9">
 							<Template>
 								<label>Comentario:</label>
-								<TelerikTextArea @bind-Value="@(MovimientoInsertar.Comentario)" OnChange="@OnChangeComentarioHandler" Rows="2" AutoComplete="off" Class="textarea-vertical" Title="@(MovimientoInsertar.Comentario)" Width="40%" Size="sm" />
+								<TelerikTextArea @bind-Value="@(MovimientoInsertar.Comentario)" OnChange="@OnChangeComentarioHandler" Rows="2" AutoComplete="off" Class="textarea-vertical" Title="@(MovimientoInsertar.Comentario)" Width="44.3%" Size="sm" />
 							</Template>
 						</FormItem>
-
-						
-
-						
 					</FormGroup>
 
 					<FormItem Field="Detalle">
@@ -173,7 +169,12 @@
 
 								<GridToolBarTemplate>
 									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@(MostrarAgregarDetalle)">Agregar ítem</TelerikButton>
-									 
+
+									<TelerikButton Icon="@(SvgIcon.ZoomIn)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(EsVisibleBotonCatalogoDetallesReferencia)" Enabled="@(!IsLoadingCatalogoDetallesReferencia & !IsEditingGridDetalle)" Title="Abrir catálogo de artículos de la orden por ingresar" Size="sm" OnClick="@(MostrarCatalogoDetallesReferencia)">
+										Abrir catálogo de artículos
+										<TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm" ThemeColor="secondary" Visible="@IsLoadingCatalogoDetallesReferencia" />
+									</TelerikButton>
+
 									<span class="k-toolbar-spacer" />
 									
 									<div class="group-amount">
@@ -298,6 +299,43 @@
 					<TelerikButton Icon="@(SvgIcon.Download)" ThemeColor="secondary" ButtonType="@ButtonType.Button" Size="sm" OnClick="@(SeleccionarItemOrden)">Seleccionar</TelerikButton>
 				</WindowFooter>
 			</TelerikWindow>
+
+			<TelerikWindow Visible="@EsVisibleCatalogoDetallesOrden" VisibleChanged="@VisibleCatalogoDetallesOrdenChangedHandler" ThemeColor="dark" Modal="true" Resizable="false" Height="420px" Width="600px" CloseOnOverlayClick="false" FooterLayoutAlign="@WindowFooterLayoutAlign.Start">
+				<WindowTitle>Catálogo de artículos de la orden de compra pendientes de agregar</WindowTitle>
+				<WindowActions>
+					<WindowAction Name="Close" Title="Cerrar" />
+				</WindowActions>
+				<WindowContent>
+					<TelerikNotification @ref="@AlertCatalogoDetallesOrden" Class="k-alert-notification-modal" VerticalPosition="@(NotificationVerticalPosition.Top)" HorizontalPosition="@(NotificationHorizontalPosition.Center)" />
+
+					<TelerikGrid Data="@CatalogoDetallesOrden" SelectionMode="@(SelectionModeCatalogoDetalleReferencia)" Pageable="true" PageSize="@(10)" SelectedItemsChanged="@((IEnumerable<OrdenDetalleCatalogoIngresarDto> items) => OnSelectCatalogoDetalle(items))" SelectedItems="@ItemsSelectedDetalleOrden" Height="100%" Sortable="true" Resizable="true" Size="sm" Class="list-grid" OnRowRender="@(OnRowCatalogoDetalleOrdenRenderHandler)" @ref="GridCatalogoDetalleOrdenRef">
+						<GridToolBarTemplate>
+							<GridSearchBox Size="md" Width="300px" DebounceDelay="100" Placeholder="Buscar en el catálogo..." />
+							<span class="k-toolbar-spacer" />
+							<TelerikButton Icon="@(SvgIcon.ArrowRotateCwSmall)" Class="b-secondary" ButtonType="@ButtonType.Button" Id="tbtn" Title="Refrescar catálogo" Size="sm" OnClick="@(CargarCatalogoDetalles)" />
+						</GridToolBarTemplate>
+						<GridSettings>
+							<GridPagerSettings InputType="@(PagerInputType.Buttons)" ButtonCount="@(5)" Position="@(PagerPosition.Bottom)" />
+						</GridSettings>
+						<GridColumns>
+							<GridCheckboxColumn Width="33px" Locked="@(true)" CheckBoxOnlySelection="@(true)" SelectAll="@(true)" Visible="@(EsSeleccionableCatalogoDetalleReferencia)" />
+							<GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" />
+							<GridColumn Field="NombreArticulo" Width="200px" Title="Nombre de artículo" />
+							<GridColumn Field="CodigoUnidadMedida" Width="45px">
+								<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
+							</GridColumn>
+							<GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+							<GridColumn Field="PrecioUnitario" Width="120px" Title="Precio unitario" DisplayFormat="{0:N6}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center" />
+						</GridColumns>
+						<NoDataTemplate>
+							<TelerikSvgIcon Icon="@SvgIcon.SortClear" ThemeColor="dark" Size="sm" /> <span>No hay registros disponibles</span>
+						</NoDataTemplate>
+					</TelerikGrid>
+				</WindowContent>
+				<WindowFooter>
+					<TelerikButton Icon="@(SvgIcon.TableAdd)" ThemeColor="secondary" ButtonType="@ButtonType.Button" Size="sm" OnClick="@(AgregarItemsDetalleOrden)">Agregar ítem(s)</TelerikButton>
+				</WindowFooter>
+			</TelerikWindow> 
 			@* -- FIN SECCIÓN CATÁLOGOS INGRESO -- *@
 
 			<TelerikDialog @bind-Visible="@EsVisibleDialogDetalle" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="dark" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">

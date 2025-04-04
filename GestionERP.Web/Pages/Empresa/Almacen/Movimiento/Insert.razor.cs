@@ -48,20 +48,24 @@ public partial class Insert : IDisposable
     public EmpresaEjercicioConsultaIntervaloFechaDto FechaIntervalo { get; set; }
 	private IEnumerable<MovimientoFlag> TiposRegistro { get; set; }  
     public List<OrdenCatalogoIngresarDto> CatalogoOrdenesIngresar { get; set; }
+    public List<OrdenDetalleCatalogoIngresarDto> CatalogoDetallesOrden { get; set; }
     public IEnumerable<OrdenCatalogoIngresarDto> ItemsSelectedOrden { get; set; }
+    public IEnumerable<OrdenDetalleCatalogoIngresarDto> ItemsSelectedDetalleOrden { get; set; }
     public string CodigoEjercicio { get; set; }
     public string CodigoEjercicioFiltro { get; set; }
     private IEnumerable<EmpresaEjercicioCatalogoDto> CatalogoEjercicios { get; set; }  
 	public bool EsVisibleBotonOperacion { get; set; }
-    public bool EsVisibleBotonCatalogoOrdenDetalles { get; set; }
+    public bool EsVisibleBotonCatalogoDetallesReferencia { get; set; }
     public bool EsVisibleBotonCatalogoReferencias { get; set; }
     public bool EsVisibleDialogReferencia { get; set; }
-    public bool EsVisibleCatalogoOrdenes { get; set; } 
+    public bool EsVisibleCatalogoOrdenes { get; set; }
+    public bool EsVisibleCatalogoDetallesOrden { get; set; }
     private bool IsAuthUser { get; set; }
     private bool IsLoadingAction { get; set; }
     private bool IsModified { get; set; }
     private bool IsModifiedDetalle { get; set; }
-    private bool IsLoadingCatalogoReferencia { get; set; } 
+    private bool IsLoadingCatalogoDetallesReferencia { get; set; }
+    private bool IsLoadingCatalogoReferencias { get; set; }
     public string VerboAccionModal { get; set; }
     public string DescripcionAccionModal { get; set; }
     public string TipoAccionModal { get; set; }
@@ -77,10 +81,11 @@ public partial class Insert : IDisposable
     public TelerikNotification AlertDetalle { get; set; }
     public TelerikNotification Alert { get; set; }
     public TelerikNotification AlertCatalogoOrdenes { get; set; }
-    private TelerikGrid<MovimientoDetalleGrid> GridDetalleRef { get; set; }
-    private TelerikGrid<OrdenCatalogoIngresarDto> GridCatalogoRef { get; set; }
-    public GridSelectionMode SelectionModeCatalogoOrden { get; set; }
-    private bool EsSeleccionableCatalogoOrden { get; set; }
+    public TelerikNotification AlertCatalogoDetallesOrden { get; set; }
+    private TelerikGrid<MovimientoDetalleGrid> GridDetalleRef { get; set; } 
+    private TelerikGrid<OrdenDetalleCatalogoIngresarDto> GridCatalogoDetalleOrdenRef { get; set; }
+    public GridSelectionMode SelectionModeCatalogoDetalleReferencia { get; set; }
+    private bool EsSeleccionableCatalogoDetalleReferencia { get; set; }
     [Parameter][SupplyParameterFromQuery(Name = "returnpage")] public string ReturnPage { get; set; } 
     public EmpresaConsultaPorCodigoWebDto Empresa { get; set; }
     private bool EsVisibleVolver { get; set; }
@@ -94,8 +99,7 @@ public partial class Insert : IDisposable
 
     [Inject] public IAlmacenMovimiento IMovimiento { get; set; }
 	[Inject] public ICompraOrden IOrden { get; set; } 
-    [Inject] public IPrincipalEmpresa IEmpresa { get; set; }
-    [Inject] public IPrincipalUsuario IUsuario { get; set; }
+    [Inject] public IPrincipalEmpresa IEmpresa { get; set; } 
     [Inject] public IPrincipalTipoCambioDia ITipoCambioDia { get; set; }
     [Inject] public IPrincipalPermiso IPermiso { get; set; }
     [Inject] public IPrincipalMoneda IMoneda { get; set; }
@@ -372,10 +376,8 @@ public partial class Insert : IDisposable
     {
         if (AgregarItemDetalleEsValido())
         {
-            IsLoadingCatalogoReferencia = true;
-
-            CodigoEjercicioFiltro = CodigoEjercicio;
-
+            IsLoadingCatalogoReferencias = true; 
+            CodigoEjercicioFiltro = CodigoEjercicio; 
             switch (CodigoTipoMovimiento)
             {
                 case "M05": //Ingreso por orden de compra
@@ -384,7 +386,7 @@ public partial class Insert : IDisposable
                     EsVisibleCatalogoOrdenes = true;
                     break;
                 default:
-                    IsLoadingCatalogoReferencia = false;
+                    IsLoadingCatalogoReferencias = false;
                     break;
             }
         }
@@ -415,6 +417,22 @@ public partial class Insert : IDisposable
                  
                 EsVisibleBotonCatalogoReferencias = EsVisibleBotonOperacion = true;
                 EsVisibleDialogReferencia = false;
+                break;
+        }
+    }
+
+    public async Task MostrarCatalogoDetallesReferencia()
+    {
+        IsLoadingCatalogoDetallesReferencia = true;
+        switch (CodigoTipoMovimiento)
+        {
+            case "M05": //Ingreso por orden de compra
+                ItemsSelectedDetalleOrden = [];
+                await CargarCatalogoDetalles();
+                EsVisibleCatalogoDetallesOrden = true;
+                break;
+            default:
+                IsLoadingCatalogoDetallesReferencia = false;
                 break;
         }
     }
@@ -467,7 +485,7 @@ public partial class Insert : IDisposable
         }
         finally
         {
-            IsLoadingCatalogoReferencia = false;
+            IsLoadingCatalogoReferencias = false;
             Notify.ShowLoading(false);
         }
     }
@@ -496,89 +514,111 @@ public partial class Insert : IDisposable
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoMoneda"));
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
          
-        EsVisibleBotonCatalogoOrdenDetalles = true;
+        EsVisibleBotonCatalogoDetallesReferencia = true;
         EsVisibleCatalogoOrdenes = EsVisibleBotonCatalogoReferencias = EsVisibleBotonOperacion = false;
     }
-     
-    //FIN
 
-    protected void OnSelectCatalogoOrden(IEnumerable<OrdenCatalogoIngresarDto> itemsSeleccionado)
+    private async Task VisibleCatalogoDetallesOrdenChangedHandler(bool esVisible)
     {
-        ItemsSelectedOrden = itemsSeleccionado;
-        //CatalogoOrdenesIngresar?.ForEach(x => { x.IsErrorSelected = false; });
+        if (!esVisible)
+        {
+            if (ItemsSelectedDetalleOrden.Any() && !CatalogoDetallesOrden.Any(x => x.IsErrorSelected) && !await Dialog.ConfirmAsync("¿Está seguro de salir del catálogo y que los ítems seleccionados no se carguen?", "Saliendo de catálogo"))
+                return;
+
+            EsVisibleCatalogoDetallesOrden = false;
+            CatalogoDetallesOrden = null;
+        }
     }
 
-    private async Task AgregarItemsOrden()
+    private async Task CargarCatalogoDetalles()
     {
-        if (!ItemsSelectedOrden.Any())
+        try
         {
-            Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Es necesario que seleccione al menos un ítem del catálogo", "warning");
+            IsAuthUser = (await IUser.VerificarAccesoEsValido(Notify, CodigoWebEmpresa, codigoModulo, codigoServicio, User.FindFirst("code").Value)).esValido;
+            if (!IsAuthUser) return;
+            ItemsSelectedDetalleOrden = [];
+
+            CatalogoDetallesOrden = (List<OrdenDetalleCatalogoIngresarDto>)await IOrden.CatalogoDetallesIngresar(Empresa.Codigo, Movimiento.DocumentoReferencia);
+
+            SelectionModeCatalogoDetalleReferencia = CatalogoDetallesOrden is null ? GridSelectionMode.None : GridSelectionMode.Multiple;
+            EsSeleccionableCatalogoDetalleReferencia = CatalogoDetallesOrden is not null;
+            GridCatalogoDetalleOrdenRef?.Rebind();
+        }
+        catch (HttpRequestException)
+        {
+            if (EsVisibleCatalogoDetallesOrden)
+                Fnc.MostrarAlerta(AlertCatalogoDetallesOrden, Cnf.MsgErrorNotConnectApi, "error");
+            else
+                Notify.ShowError("NC");
+        }
+        catch (HttpResponseException ex)
+        {
+            if (EsVisibleCatalogoDetallesOrden)
+                Fnc.MostrarAlerta(AlertCatalogoDetallesOrden, $"{(ex.Code == "NF" ? Cnf.MsgErrorNotFoundAPi : ex.Message)}", "error");
+            else
+                Notify.ShowError(ex.Code, ex);
+        }
+        catch (Exception ex)
+        {
+            if (EsVisibleCatalogoDetallesOrden)
+                Fnc.MostrarAlerta(AlertCatalogoDetallesOrden, Cnf.MsgErrorFuncAppWeb, "error");
+            else
+                Notify.ShowError("FA", ex);
+        }
+        finally
+        {
+            IsLoadingCatalogoDetallesReferencia = false;
+            Notify.ShowLoading(false);
+        }
+    }
+
+    public static void OnRowCatalogoDetalleOrdenRenderHandler(GridRowRenderEventArgs args) => args.Class = (args.Item as OrdenDetalleCatalogoIngresarDto).IsErrorSelected ? "row-error" : "";
+
+    protected void OnSelectCatalogoDetalle(IEnumerable<OrdenDetalleCatalogoIngresarDto> itemsSeleccionado)
+    {
+        ItemsSelectedDetalleOrden = itemsSeleccionado;
+
+        if (CatalogoDetallesOrden is not null)
+        {
+            if (ItemsSelectedDetalleOrden.Any())
+            {
+                foreach (OrdenDetalleCatalogoIngresarDto item in CatalogoDetallesOrden.Where(x => x.IsErrorSelected))
+                    item.IsErrorSelected = ItemsSelectedDetalleOrden.Any(i => i.CodigoArticulo == item.CodigoArticulo);
+            }
+            else
+            {
+                CatalogoDetallesOrden.ForEach(x => { x.IsErrorSelected = false; });
+            }
+        }
+    }
+
+    private async Task AgregarItemsDetalleOrden()
+    {
+        if (!ItemsSelectedDetalleOrden.Any())
+        {
+            Fnc.MostrarAlerta(AlertCatalogoDetallesOrden, "Es necesario que seleccione al menos un ítem del catálogo", "warning");
             return;
         }
 
-        bool isErrorSelectedCatalogo = false;
-        //foreach (OrdenCatalogoIngresarDto item in ItemsSelectedOrden)
-        //{
-        //    if (GridDetalles.Any(x => x.CodigoArticulo == item.CodigoArticulo))
-        //    {
-        //        Fnc.MostrarAlerta(AlertCatalogoOrdenes, $"El ítem {item.CodigoArticulo} ya ha sido agregado en el detalle", "error");
-        //        item.IsErrorSelected = isErrorSelectedCatalogo = true;
-        //    }
-        //}
-        //List<IGrouping<string, OrdenCatalogoIngresarDto>> elements = [.. ItemsSelectedOrden.GroupBy(x => x.CodigoOrden)];
-        //if (elements.Count > 1)
-        //{
-        //    Fnc.MostrarAlerta(AlertCatalogoOrdenes, "No puede elegir ítems de distintas órdenes de compra", "error");
-        //    elements.ForEach(x => x.ToList().ForEach(x => x.IsErrorSelected = true));
-        //    isErrorSelectedCatalogo = true;
-        //}
-        //else if (!string.IsNullOrEmpty(Movimiento.DocumentoReferencia) && Movimiento.DocumentoReferencia.Trim() != ItemsSelectedOrden.Select(x => x.CodigoOrden).First()?.Trim())
-        //{
-        //    Fnc.MostrarAlerta(AlertCatalogoOrdenes, "Solo podrá elegir ítems de la misma orden de compra ya seleccionada", "error");
-        //    ItemsSelectedOrden.ToList().ForEach(x => x.IsErrorSelected = true);
-        //    isErrorSelectedCatalogo = true;
-        //}
-
-        if (isErrorSelectedCatalogo)
-            return;
-
-        string codigoLocalRecepcion = ItemsSelectedOrden.Select(x => x.CodigoLocalRecepcion).FirstOrDefault();
-        if (string.IsNullOrEmpty(MovimientoInsertar.CodigoLocal) && !string.IsNullOrEmpty(codigoLocalRecepcion))
+        CatalogoDetallesOrden.ForEach(x => { x.IsErrorSelected = false; });
+        if (GridDetalles.Count > 0)
         {
-            MovimientoInsertar.CodigoLocal = Movimiento.CodigoLocal = codigoLocalRecepcion;
-            Movimiento.NombreLocal = ItemsSelectedOrden.Select(x => x.NombreLocalRecepcion).First();
-            Validator.MsgErrorLocal = null;
-            EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
-        }
-
-        string codigoEntidad = ItemsSelectedOrden.Select(x => x.CodigoEntidad).First();
-        if (string.IsNullOrEmpty(MovimientoInsertar.CodigoEntidad) && !string.IsNullOrEmpty(codigoEntidad))
-        { 
-            MovimientoInsertar.CodigoEntidad = Movimiento.CodigoEntidad = codigoEntidad;
-            Movimiento.NombreEntidad = ItemsSelectedOrden.Select(x => x.NombreEntidad).First();
-            Validator.MsgErrorEntidad = null;
-            EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
-        }
-        
-        string codigoMoneda = ItemsSelectedOrden.Select(x => x.CodigoMoneda).First();
-        if (string.IsNullOrEmpty(MovimientoInsertar.CodigoMoneda) && !string.IsNullOrEmpty(codigoMoneda))
-        {
-            MovimientoInsertar.CodigoMoneda = Movimiento.CodigoMoneda = codigoMoneda;
-            Movimiento.NombreMoneda = ItemsSelectedOrden.Select(x => x.NombreMoneda).First();
-            EditContext.NotifyFieldChanged(EditContext.Field("CodigoMoneda"));
-        }
-
-        if(string.IsNullOrEmpty(Movimiento.DocumentoReferencia))
-        {
-            OrdenCatalogoIngresarDto itemReferencia = ItemsSelectedOrden.First();
-            Movimiento.DocumentoReferencia = itemReferencia.CodigoOrden;
-            MovimientoInsertar.CodigoDocumentoReferencia = Movimiento.CodigoDocumentoReferencia = itemReferencia.CodigoDocumento;
-            MovimientoInsertar.SerieDocumentoReferencia = Movimiento.SerieDocumentoReferencia = itemReferencia.CodigoSerieDocumento;
-            MovimientoInsertar.NumeroDocumentoReferencia = Movimiento.NumeroDocumentoReferencia = itemReferencia.NumeroSerieDocumento;
+            bool esRepetidoItemsDetalle = false;
+            foreach (OrdenDetalleCatalogoIngresarDto item in ItemsSelectedDetalleOrden)
+            {
+                if (GridDetalles.Any(x => x.CodigoArticulo == item.CodigoArticulo))
+                {
+                    esRepetidoItemsDetalle = true;
+                    Fnc.MostrarAlerta(AlertCatalogoDetallesOrden, $"El artículo {item.CodigoArticulo} ya ha sido agregado en el detalle", "warning");
+                    CatalogoDetallesOrden[CatalogoDetallesOrden.FindIndex(i => i.CodigoArticulo == item.CodigoArticulo)].IsErrorSelected = true;
+                }
+            }
+            if (esRepetidoItemsDetalle)
+                return;
         }
 
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
-        foreach (OrdenCatalogoIngresarDto itemCatalogo in ItemsSelectedOrden)
+        foreach (OrdenDetalleCatalogoIngresarDto itemCatalogo in ItemsSelectedDetalleOrden)
         {
             DetalleInsertar = new();
             Detalle = new();
@@ -595,12 +635,10 @@ public partial class Insert : IDisposable
             await GridDetalleRef.SetStateAsync(detalleState);
         }
 
-        EsVisibleBotonOperacion = GridDetalles.Count == 0;
-        EsVisibleCatalogoOrdenes = false;
-    }
-
+        ModificarImportesTotales();
+        EsVisibleCatalogoDetallesOrden = false;
+    } 
     #endregion
-
     #endregion
      
     #region Detalle

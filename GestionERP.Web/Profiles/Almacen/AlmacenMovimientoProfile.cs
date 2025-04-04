@@ -23,7 +23,7 @@ public class AlmacenMovimientoProfile : Profile
             .ForMember(x => x.NombreLocal, opt => opt.MapFrom(y => y.NombreLocalRecepcion))
             .ForMember(x => x.DocumentoReferencia, opt => opt.MapFrom(y => y.CodigoOrden));
 
-        CreateMap<OrdenCatalogoIngresarDto, MovimientoDetalleObtenerDto>();
+        CreateMap<OrdenDetalleCatalogoIngresarDto, MovimientoDetalleObtenerDto>();
         CreateMap<MovimientoDetalleInsertarDto, MovimientoDetalleObtenerDto>().ReverseMap();
         CreateMap<MovimientoDetalleGrid, MovimientoDetalleObtenerDto>().ReverseMap();
     }

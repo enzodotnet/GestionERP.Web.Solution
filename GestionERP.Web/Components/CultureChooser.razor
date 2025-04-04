@@ -22,8 +22,7 @@ ValueField="@nameof(CultureData.Value)">
     </DropDownListSettings>
 </TelerikDropDownList>
 
-@code {
-
+@code { 
     const string DefaultCultureShort = "en-US";
 
     public class CultureData
@@ -51,15 +50,17 @@ ValueField="@nameof(CultureData.Value)">
     {
         if (CultureInfo.CurrentCulture.Name != culture)
         {
+
             // await LocalStorage.SetItemAsync("BlazorCulture", culture);
 
+            await Task.Delay(0);
             NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
         }
     }
 
     public async Task GetCulture()
     {
-
+        await Task.Delay(0);
         var value = ""; // await LocalStorage.GetItemAsStringAsync("BlazorCulture");
         var parsedValue = !string.IsNullOrEmpty(value) ? JsonSerializer.Deserialize<string>(value) : DefaultCultureShort;
 
