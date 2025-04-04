@@ -61,7 +61,10 @@ public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarD
 
         RuleFor(p => p.CodigoCentroCosto)
             .Cascade(CascadeMode.Stop)
-            .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            //.Matches("^[XY]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            //.Matches(@"^[""!@$%^&*(){}:;<>,.?/+_=|'~\\-]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            //.Matches("^[A-Za-z0-9-]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            .Matches(@"^[A-Za-z0-9-]+$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
             .Must(x => string.IsNullOrEmpty(MsgErrorCentroCosto)).WithMessage(x => MsgErrorCentroCosto);
 
         When(p => EsRequeridoReferencia, () => {
