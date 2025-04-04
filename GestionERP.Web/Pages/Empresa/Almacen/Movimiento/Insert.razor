@@ -107,7 +107,7 @@
 											Buscar
 											<TelerikLoader Type="@(LoaderType.Pulsing)" Size="sm" ThemeColor="secondary" Visible="@IsLoadingCatalogoReferencias" />
 										</TelerikButton>
-										<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete b-action" Id="tbtn" Title="Quitar documento referencia" Visible="@(!EsVisibleBotonCatalogoReferencias)" OnClick="@(() => { EsVisibleDialogReferencia = true; })">Quitar</TelerikButton>
+										<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete b-action" Id="tbtn" Title="Quitar documento referencia" Visible="@(EsVisibleBotonQuitarReferencia)" OnClick="@(() => { EsVisibleDialogReferencia = true; })">Quitar</TelerikButton>
 									}
 								</div>
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoDocumentoReferencia)" TargetSelector="#coddocreferencia" />

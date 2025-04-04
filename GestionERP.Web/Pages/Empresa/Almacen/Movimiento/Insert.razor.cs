@@ -57,6 +57,7 @@ public partial class Insert : IDisposable
 	public bool EsVisibleBotonOperacion { get; set; }
     public bool EsVisibleBotonCatalogoDetallesReferencia { get; set; }
     public bool EsVisibleBotonCatalogoReferencias { get; set; }
+    public bool EsVisibleBotonQuitarReferencia { get; set; }
     public bool EsVisibleDialogReferencia { get; set; }
     public bool EsVisibleCatalogoOrdenes { get; set; }
     public bool EsVisibleCatalogoDetallesOrden { get; set; }
@@ -510,11 +511,15 @@ public partial class Insert : IDisposable
         //IsEditAmountME = item.CodigoMoneda == ME.Codigo;
 
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoDocumentoReferencia"));
-        EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoMoneda"));
+        Validator.MsgErrorEntidad = null;
+        EditContext.NotifyFieldChanged(EditContext.Field("CodigoEntidad"));
+        Validator.MsgErrorCentroCosto = null;
+        EditContext.NotifyFieldChanged(EditContext.Field("CodigoCentroCosto"));
+        Validator.MsgErrorLocal = null;
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
          
-        EsVisibleBotonCatalogoDetallesReferencia = true;
+        EsVisibleBotonCatalogoDetallesReferencia = EsVisibleBotonQuitarReferencia = true;
         EsVisibleCatalogoOrdenes = EsVisibleBotonCatalogoReferencias = EsVisibleBotonOperacion = false;
     }
 
@@ -635,7 +640,8 @@ public partial class Insert : IDisposable
             await GridDetalleRef.SetStateAsync(detalleState);
         }
 
-        ModificarImportesTotales();
+        //ModificarImportesTotales();
+        EsVisibleBotonQuitarReferencia = GridDetalles.Count == 0;
         EsVisibleCatalogoDetallesOrden = false;
     } 
     #endregion
