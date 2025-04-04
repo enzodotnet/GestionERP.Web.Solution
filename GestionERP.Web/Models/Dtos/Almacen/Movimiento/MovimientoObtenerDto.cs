@@ -30,7 +30,6 @@ public class MovimientoObtenerDto
     public string SerieDocumentoReferencia { get; set; }
     public string NumeroDocumentoReferencia { get; set; }
     public string DocumentoReferencia { get; set; }
-    public string DescripcionReferencia { get; set; }
     public string CodigoCentroCosto { get; set; }
     public string NombreCentroCosto { get; set; }
     public string CodigoMovimientoReferencia { get; set; }

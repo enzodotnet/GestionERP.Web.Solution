@@ -62,7 +62,7 @@
 							</Template>
 						</FormItem>
 
-						<FormItem ColSpan="7">
+						<FormItem ColSpan="5">
 							<Template>
 								<label>Entidad*:</label>
 								<div class="item-group">
@@ -80,54 +80,27 @@
 							<Template>
 								<label>Moneda*:</label>
 								<div class="item-group">
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Class="t-main" Placeholder="Código" Title="Código" ReadOnly="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="65px" />
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Placeholder="Código" Title="Código" ReadOnly="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="65px" />
 									@if (!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)
 									{
 										<Principal.MonedaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoMoneda)" CodigoExcluir="@(MovimientoInsertar.CodigoMoneda)" />
 									}
-									<TelerikTextBox @bind-Value="@(Movimiento.NombreMoneda)" Title="@(Movimiento.NombreMoneda)" Class="t-main" Placeholder="Nombre" ReadOnly="@(true)" Size="sm" />
+									<TelerikTextBox @bind-Value="@(Movimiento.NombreMoneda)" Title="@(Movimiento.NombreMoneda)" Placeholder="Nombre" ReadOnly="@(true)" Size="sm" />
 								</div>
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoMoneda)" TargetSelector="#codmoneda" />
 							</Template>
 						</FormItem>
-
-						<FormItem ColSpan="5">
-							<Template>
-								<div class="item-group-block"> 
-									<label>Local:</label>
-									<div class="item-group">
-										<TelerikTextBox Value="@(MovimientoInsertar.CodigoLocal)" DebounceDelay="@(0)" ValueChanged="@ValueChangeLocalHandler" ValueExpression="@(() => MovimientoInsertar.CodigoLocal)" OnChange="@OnChangeLocalHandler" Id="local" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="60px" MaxLength="3" />
-										<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
-										<TelerikTextBox @bind-Value="@(Movimiento.NombreLocal)" Title="@(Movimiento.NombreLocal)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
-									</div>
-									<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoLocal)" TargetSelector="#local" /> 
-
-									<span class="ig-space" />
-
-									<label>Centro de costo:</label>
-									<div class="item-group">
-										<TelerikTextBox Value="@(MovimientoInsertar.CodigoCentroCosto)" DebounceDelay="@(0)" ValueChanged="@ValueChangeCentroCostoHandler" ValueExpression="@(() => MovimientoInsertar.CodigoCentroCosto)" OnChange="@OnChangeCentroCostoHandler" Id="ccosto" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="185px" MaxLength="18" />
-										<Principal.CentroCostoCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoCentroCosto)" CodigoExcluir="@(MovimientoInsertar.CodigoCentroCosto)" />
-										<TelerikTextBox @bind-Value="@(Movimiento.NombreCentroCosto)" Title="@(Movimiento.NombreCentroCosto)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
-									</div>
-									<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoCentroCosto)" TargetSelector="#ccosto" />
-								</div>
-							</Template>
-						</FormItem>
-						<FormItem ColSpan="4">
-							<Template>
-								<label>Comentario:</label>
-								<div class="item-group">
-									<TelerikTextArea @bind-Value="@(MovimientoInsertar.Comentario)" OnChange="@OnChangeComentarioHandler" AutoComplete="off" Class="textarea-vertical-comentario" Rows="3" Size="sm" />
-								</div>
-							</Template>
-						</FormItem>
-
 						<FormItem ColSpan="2">
-							<Template> 
+							<Template>
 								<label>Documento referencia @(TipoMovimiento.EsRequeridoReferencia ? "*" : ""):</label>
 								<div class="item-group">
 									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoDocumentoReferencia)" Id="coddocreferencia" Placeholder="Código" Title="Código" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="55px" MaxLength="4" />
+									@* @if (!TipoMovimiento.EsRequeridoReferencia)
+									{
+										<span /> //Aquí irá el botón para cargar catalogo documentos según el tipo de entidad.
+									} *@
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.SerieDocumentoReferencia)" Placeholder="Serie" Title="Serie" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="50px" MaxLength="4" /> @* Pendiente habilitar para editar *@
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.NumeroDocumentoReferencia)" Placeholder="Número" Title="Número" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="80px" MaxLength="8" /> @* Pendiente habilitar para editar *@
 									@if (TipoMovimiento.EsRequeridoReferencia)
 									{
 										<TelerikButton Icon="@(SvgIcon.Search)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(EsVisibleBotonCatalogoReferencias)" Enabled="@(!IsLoadingCatalogoReferencia & !IsEditingGridDetalle)" Title="Abrir catálogo de referencia" Size="sm" OnClick="@(MostrarCatalogoReferencia)">
@@ -136,21 +109,32 @@
 										</TelerikButton>
 										<TelerikButton Icon="@(SvgIcon.Minus)" Size="sm" ButtonType="@ButtonType.Button" Class="b-delete b-action" Id="tbtn" Title="Quitar documento referencia" Visible="@(!EsVisibleBotonCatalogoReferencias)" OnClick="@(() => { EsVisibleDialogReferencia = true; })">Quitar</TelerikButton>
 									}
-									else
-									{
-										<span /> //Aquí irá el botón para cargar catalogo documentos según el tipo de entidad.
-									}
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.SerieDocumentoReferencia)" Placeholder="Serie" Title="Serie" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="50px" MaxLength="4" /> @* Pendiente habilitar para editar *@
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.NumeroDocumentoReferencia)" Placeholder="Número" Title="Número" Class="t-main" ReadOnly="@(TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="80px" MaxLength="8" /> @* Pendiente habilitar para editar *@
 								</div>
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoDocumentoReferencia)" TargetSelector="#coddocreferencia" />
 							</Template>
 						</FormItem>
-						<FormItem ColSpan="7">
-							<Template>
-								<label>Descripción referencia:</label>
-								<TelerikTextBox @bind-Value="@(MovimientoInsertar.DescripcionReferencia)" OnChange="@OnChangeDescripcionReferenciaHandler" Id="descreferencia" AutoComplete="off" Title="@(MovimientoInsertar.DescripcionReferencia)" MaxLength="200" Size="sm" />
-								<TelerikValidationTooltip For="@(() => MovimientoInsertar.DescripcionReferencia)" TargetSelector="#descreferencia" />
+
+						@* AQUÍ IRÁ EL BOTÓN DE ALMACÉN DESTINO column 3 *@
+						<FormItem ColSpan="2">
+							<Template> 
+								<label>Local:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(MovimientoInsertar.CodigoLocal)" DebounceDelay="@(0)" ValueChanged="@ValueChangeLocalHandler" ValueExpression="@(() => MovimientoInsertar.CodigoLocal)" OnChange="@OnChangeLocalHandler" Id="local" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="60px" MaxLength="3" />
+									<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
+									<TelerikTextBox @bind-Value="@(Movimiento.NombreLocal)" Title="@(Movimiento.NombreLocal)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoLocal)" TargetSelector="#local" /> 
+							</Template>
+						</FormItem>
+						<FormItem ColSpan="4">
+							<Template> 
+								<label>Centro de costo:</label>
+								<div class="item-group">
+									<TelerikTextBox Value="@(MovimientoInsertar.CodigoCentroCosto)" DebounceDelay="@(0)" ValueChanged="@ValueChangeCentroCostoHandler" ValueExpression="@(() => MovimientoInsertar.CodigoCentroCosto)" OnChange="@OnChangeCentroCostoHandler" Id="ccosto" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="185px" MaxLength="18" />
+									<Principal.CentroCostoCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoCentroCosto)" CodigoExcluir="@(MovimientoInsertar.CodigoCentroCosto)" />
+									<TelerikTextBox @bind-Value="@(Movimiento.NombreCentroCosto)" Title="@(Movimiento.NombreCentroCosto)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
+								</div>
+								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoCentroCosto)" TargetSelector="#ccosto" />
 							</Template>
 						</FormItem>
 
@@ -160,7 +144,19 @@
 								<TelerikTextBox @bind-Value="@(MovimientoInsertar.Observacion)" OnChange="@OnChangeObservacionHandler" Id="observacion" AutoComplete="off" Title="@(MovimientoInsertar.Observacion)" MaxLength="100" Size="sm" />
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.Observacion)" TargetSelector="#observacion" />
 							</Template>
-						</FormItem> 
+						</FormItem>
+						@* AQUÍ IRÁ LA OPERACION REFERENCIA - ES GENERADO AUTOMATICO - ESTA EN ASIENTO CONTABLE *@
+
+						<FormItem ColSpan="9">
+							<Template>
+								<label>Comentario:</label>
+								<TelerikTextArea @bind-Value="@(MovimientoInsertar.Comentario)" OnChange="@OnChangeComentarioHandler" Rows="2" AutoComplete="off" Class="textarea-vertical" Title="@(MovimientoInsertar.Comentario)" Width="40%" Size="sm" />
+							</Template>
+						</FormItem>
+
+						
+
+						
 					</FormGroup>
 
 					<FormItem Field="Detalle">

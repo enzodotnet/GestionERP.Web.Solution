@@ -20,7 +20,6 @@ public class MovimientoInsertarDto
     public string CodigoDocumentoReferencia { get; set; }
     public string SerieDocumentoReferencia { get; set; }
     public string NumeroDocumentoReferencia { get; set; }
-    public string DescripcionReferencia { get; set; }
     public string CodigoCentroCosto { get; set; }
     public string Observacion { get; set; }
     public string Comentario { get; set; }
@@ -55,8 +54,6 @@ public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarD
         RuleFor(p => p.FechaHoraOperacion).NotNull().WithMessage("El campo {PropertyName} es requerido");
 
         RuleFor(p => p.Observacion).MaximumLength(100).WithMessage("El campo {PropertyName} debe tener como máximo 100 caracteres");
-
-        RuleFor(p => p.DescripcionReferencia).MaximumLength(200).WithMessage("El campo {PropertyName} debe tener como máximo 200 caracteres");
 
         When(p => p.FlagTipoRegistro == "T", () => { 
             RuleFor(p => p.CodigoAlmacenDestino).NotEmpty().WithMessage("El campo {PropertyName} es requerido para generar la transferencia"); 

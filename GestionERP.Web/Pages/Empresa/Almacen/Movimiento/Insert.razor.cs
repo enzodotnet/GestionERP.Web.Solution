@@ -270,11 +270,6 @@ public partial class Insert : IDisposable
     private bool VerificarRegistroEsValido()
     {
         bool esValido  = true;
-        if (string.IsNullOrEmpty(MovimientoInsertar.CodigoLocal) && string.IsNullOrEmpty(MovimientoInsertar.DescripcionReferencia))
-        {
-            Fnc.MostrarAlerta(Alert, "Es necesario que especifique un local de recepción o describa el lugar de recojo", "error");
-            esValido = false;
-        }
         if (GridDetalles.Count == 0)
         {
             Fnc.MostrarAlerta(Alert, "Es obligatorio que agregue ítem(s) al detalle de la orden de compra", "error");
