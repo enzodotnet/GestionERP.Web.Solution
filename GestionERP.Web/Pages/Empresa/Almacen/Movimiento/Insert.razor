@@ -80,12 +80,12 @@
 							<Template>
 								<label>Moneda*:</label>
 								<div class="item-group">
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Placeholder="Código" Title="Código" ReadOnly="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Size="sm" Width="65px" />
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoMoneda)" Id="codmoneda" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" Size="sm" Width="65px" />
 									@if (!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)
 									{
 										<Principal.MonedaCatalogoComponent CargarItemSeleccionado="@(CargarItemCatalogoMoneda)" CodigoExcluir="@(MovimientoInsertar.CodigoMoneda)" />
 									}
-									<TelerikTextBox @bind-Value="@(Movimiento.NombreMoneda)" Title="@(Movimiento.NombreMoneda)" Placeholder="Nombre" ReadOnly="@(true)" Size="sm" />
+									<TelerikTextBox @bind-Value="@(Movimiento.NombreMoneda)" Title="@(Movimiento.NombreMoneda)" Placeholder="Nombre" Enabled="@(false)" Size="sm" />
 								</div>
 								<TelerikValidationTooltip For="@(() => MovimientoInsertar.CodigoMoneda)" TargetSelector="#codmoneda" />
 							</Template>

@@ -11970,7 +11970,8 @@ select.k-picker-lg {
 }
 
 .k-input:not(:-webkit-autofill) {
-	animation-name: autoFillEnd
+	animation-name: autoFillEnd;
+    pointer-events: auto
 }
 
 .k-input-solid {

@@ -4,12 +4,12 @@ namespace GestionERP.Web.Models.Dtos.Almacen;
 
 public class MovimientoInsertarDto
 {
-    private DateTime? fechaHoraOperacion;
-
     public string FlagTipoRegistro { get; set; } 
     public string CodigoOperacionLogistica { get; set; }
+    private DateTime? fechaHoraOperacion;
     public DateTime? FechaHoraOperacion { get => fechaHoraOperacion; set => fechaHoraOperacion = value?.Date.Add(DateTime.Now.TimeOfDay); }
-    public string CodigoEntidad { get; set; }
+    private string codigoEntidad; 
+    public string CodigoEntidad { get => codigoEntidad; set => codigoEntidad = value?.TrimEnd(); }
     public string CodigoLocal { get; set; }
     public string CodigoAlmacenDestino { get; set; }
     public string CodigoMoneda { get; set; }
@@ -20,7 +20,8 @@ public class MovimientoInsertarDto
     public string CodigoDocumentoReferencia { get; set; }
     public string SerieDocumentoReferencia { get; set; }
     public string NumeroDocumentoReferencia { get; set; }
-    public string CodigoCentroCosto { get; set; }
+    private string codigoCentroCosto;
+    public string CodigoCentroCosto { get => codigoCentroCosto; set => codigoCentroCosto = value?.TrimEnd(); }
     public string Observacion { get; set; }
     public string Comentario { get; set; }
     public List<MovimientoDetalleInsertarDto> Detalles { get; set; } = [];
@@ -61,10 +62,7 @@ public class MovimientoInsertarValidator : AbstractValidator<MovimientoInsertarD
 
         RuleFor(p => p.CodigoCentroCosto)
             .Cascade(CascadeMode.Stop)
-            //.Matches("^[XY]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
-            //.Matches(@"^[""!@$%^&*(){}:;<>,.?/+_=|'~\\-]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
-            //.Matches("^[A-Za-z0-9-]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
-            .Matches(@"^[A-Za-z0-9-]+$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            .Matches(@"^[a-zA-Z0-9]+(-?[a-zA-Z0-9]+)*$").WithMessage("El centro de costo solo debe contener caracteres alfanuméricos y opcionalmente solo un guión entre ellos.")
             .Must(x => string.IsNullOrEmpty(MsgErrorCentroCosto)).WithMessage(x => MsgErrorCentroCosto);
 
         When(p => EsRequeridoReferencia, () => {
