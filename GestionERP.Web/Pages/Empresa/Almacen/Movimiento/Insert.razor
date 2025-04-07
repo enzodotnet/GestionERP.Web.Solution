@@ -56,8 +56,8 @@
 							<Template>
 								<label>Tipo de cambio:</label>
 								<div class="item-group">
-									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoTipoCambioDia)" AutoComplete="off" Placeholder="Código" Title="Código" ReadOnly="@(true)" Class="t-main" Size="sm" Width="80px" />
-									<TelerikNumericTextBox @bind-Value="@(MovimientoInsertar.MontoTipoCambioDia)" Class="t-main" Arrows="@(false)" ReadOnly="@true" Width="60px" Min="0" Format="N4" Decimals="4" Size="sm" />
+									<TelerikTextBox @bind-Value="@(MovimientoInsertar.CodigoTipoCambioDia)" AutoComplete="off" Placeholder="Código" Title="Código" Enabled="@(false)" Size="sm" Width="80px" />
+									<TelerikNumericTextBox @bind-Value="@(MovimientoInsertar.MontoTipoCambioDia)" Arrows="@(false)" Enabled="@false" Width="60px" Min="0" Format="N4" Decimals="4" Size="sm" />
 								</div>
 							</Template>
 						</FormItem>
