@@ -190,11 +190,15 @@
 										<EditorTemplate>
 											@{
 												MovimientoDetalleGrid item = context as MovimientoDetalleGrid;
-												<TelerikTextBox @bind-Value="@(item.CodigoAlmacen)" DebounceDelay="@(0)" Id="almacen" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="100%" ShowSuffixSeparator="@(true)" MaxLength="3" >
-													<TextBoxSuffixTemplate>
-														<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
-													</TextBoxSuffixTemplate>
-												</TelerikTextBox> 
+
+
+
+
+												// <TelerikTextBox @bind-Value="@(item.CodigoAlmacen)" DebounceDelay="@(0)" Id="almacen" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="100%" ShowSuffixSeparator="@(true)" MaxLength="3" >
+												// 	<TextBoxSuffixTemplate>
+												// 		<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
+												// 	</TextBoxSuffixTemplate>
+												// </TelerikTextBox> 
 												<TelerikValidationTooltip For="@(() => item.Cantidad)" TargetSelector="#griddetcantidad" />
 											}
 										</EditorTemplate>
