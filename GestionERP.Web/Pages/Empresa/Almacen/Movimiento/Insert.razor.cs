@@ -43,6 +43,7 @@ public partial class Insert : IDisposable
     private MonedaConsultaPorTipoDto ME { get; set; }
     public bool IsInitPage { get; set; }
     public bool IsEditingGridDetalle { get; set; } 
+    public bool IsEditableGridCell { get; set; }
     public string CodigoTipoMovimiento { get; set; }
     public List<DateTime> FechasCerradoOperacion { get; set; }
     public EmpresaEjercicioConsultaIntervaloFechaDto FechaIntervalo { get; set; }
@@ -622,6 +623,7 @@ public partial class Insert : IDisposable
                 return;
         }
 
+        IsEditableGridCell = false;
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         foreach (OrdenDetalleCatalogoIngresarDto itemCatalogo in ItemsSelectedDetalleOrden)
         {
@@ -635,16 +637,17 @@ public partial class Insert : IDisposable
 
             MovimientoInsertar.Detalles.Add(DetalleInsertar);
             GridDetalles.Add(ItemGridDetalle);
-            detalleState.InsertedItem = ItemGridDetalle;
+            detalleState.InsertedItem = ItemGridDetalle; 
             await GridDetalleRef.SetStateAsync(detalleState);
         }
 
-        detalleState.InsertedItem =  detalleState.OriginalEditItem = detalleState.EditItem = null;
+        detalleState.InsertedItem = detalleState.OriginalEditItem = detalleState.EditItem = null;
         await GridDetalleRef.SetStateAsync(detalleState);
 
         //ModificarImportesTotales();
         EsVisibleBotonQuitarReferencia = GridDetalles.Count == 0;
         EsVisibleCatalogoDetallesOrden = false;
+        IsEditableGridCell = true;
     } 
     #endregion
     #endregion

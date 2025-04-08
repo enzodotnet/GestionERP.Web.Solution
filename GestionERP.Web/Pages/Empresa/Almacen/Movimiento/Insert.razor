@@ -186,12 +186,15 @@
 								</GridToolBarTemplate>
 
 								<GridColumns>
-									<GridColumn Field="CodigoAlmacen" Width="100px" Title="Almacén" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellAlmacenRenderHandler" >
+									<GridColumn Field="CodigoAlmacen" Width="90px" Title="Almacén" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellAlmacenRenderHandler" Editable=@(IsEditableGridCell) >
 										<EditorTemplate>
 											@{
 												MovimientoDetalleGrid item = context as MovimientoDetalleGrid;
-												<TelerikNumericTextBox @bind-Value="@(item.Cantidad)" Id="griddetcantidad" AutoComplete="off" Arrows="@(false)" Width="100%" Min="0" Format="N3" Decimals="3" Size="sm" />
-												<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" /> 
+												<TelerikTextBox @bind-Value="@(item.CodigoAlmacen)" DebounceDelay="@(0)" Id="almacen" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="100%" ShowSuffixSeparator="@(true)" MaxLength="3" >
+													<TextBoxSuffixTemplate>
+														<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
+													</TextBoxSuffixTemplate>
+												</TelerikTextBox> 
 												<TelerikValidationTooltip For="@(() => item.Cantidad)" TargetSelector="#griddetcantidad" />
 											}
 										</EditorTemplate>
@@ -203,7 +206,7 @@
 									<GridColumn Field="CodigoUnidadMedida" Width="45px" Editable="@false" >
 										<HeaderTemplate> <span title="Unidad de Medida">U.M.</span> </HeaderTemplate>
 									</GridColumn>
-									<GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellCantidadRenderHandler">
+									<GridColumn Field="Cantidad" Width="110px" Title="Cantidad" DisplayFormat="{0:N3}" TextAlign="@ColumnTextAlign.Right" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellCantidadRenderHandler" Editable=@(IsEditableGridCell)>
 										<EditorTemplate>
 											@{
 												MovimientoDetalleGrid item = context as MovimientoDetalleGrid;
