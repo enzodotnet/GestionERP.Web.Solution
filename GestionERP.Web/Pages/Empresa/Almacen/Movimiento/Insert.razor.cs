@@ -636,9 +636,11 @@ public partial class Insert : IDisposable
             MovimientoInsertar.Detalles.Add(DetalleInsertar);
             GridDetalles.Add(ItemGridDetalle);
             detalleState.InsertedItem = ItemGridDetalle;
-
             await GridDetalleRef.SetStateAsync(detalleState);
         }
+
+        detalleState.InsertedItem =  detalleState.OriginalEditItem = detalleState.EditItem = null;
+        await GridDetalleRef.SetStateAsync(detalleState);
 
         //ModificarImportesTotales();
         EsVisibleBotonQuitarReferencia = GridDetalles.Count == 0;
@@ -648,7 +650,7 @@ public partial class Insert : IDisposable
     #endregion
      
     #region Detalle
-    public void InvalidarAccionDetalle(EditContext editContext) => Fnc.MostrarAlerta(AlertDetalle, Cnf.MsgErrorInvalidEditContext, "error");
+    public void InvalidarAccionDetalle(EditContext _) => Fnc.MostrarAlerta(AlertDetalle, Cnf.MsgErrorInvalidEditContext, "error");
 
 	private async Task CerrarDetalle()
 	{
@@ -693,6 +695,22 @@ public partial class Insert : IDisposable
 		IniciarAccionModal("M", "detalle");
 	}
 
+    public async Task ActivarModificacionDetalle(MovimientoDetalleGrid item)
+    {
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        detalleState.InsertedItem = null;
+        detalleState.OriginalEditItem = item; 
+        detalleState.EditItem = (MovimientoDetalleGrid) item.Clone();
+        detalleState.EditItem.IsEditingItem = true; 
+        IsEditingGridDetalle = true;
+        CodigoItemAccion = item.CodigoArticulo;
+        GridDetalleValidator = new()
+        {
+            UnidadConversion = item.UnidadConversion
+        };
+        await GridDetalleRef.SetStateAsync(detalleState);  
+    }
+
     private void MostrarQuitarDetalle(string codigoItem)
     {
         CodigoItemAccion = codigoItem;
@@ -722,34 +740,47 @@ public partial class Insert : IDisposable
 
     public static void OnCellCantidadRenderHandler(GridCellRenderEventArgs args) => args.Class = !(args.Item as MovimientoDetalleGrid).Cantidad.HasValue ? "cell-error" : "cell-editable";
 
+    public static void OnCellAlmacenRenderHandler(GridCellRenderEventArgs args) => args.Class = string.IsNullOrEmpty((args.Item as MovimientoDetalleGrid).CodigoAlmacen) ? "cell-error" : "cell-editable";
+
     //public static void OnCellPrecioUnitarioRenderHandler(GridCellRenderEventArgs args) => args.Class = !(args.Item as MovimientoDetalleGrid).PrecioUnitario.HasValue ? "cell-error" : "cell-editable";
 
-    public void EditDetalleHandler(GridCommandEventArgs args)
-    {
-        IsEditingGridDetalle = args.Field is "Cantidad" or "PrecioUnitario";
-        if (IsEditingGridDetalle)
-        { 
-            GridDetalleValidator = new()
-            {
-                UnidadConversion = (args.Item as MovimientoDetalleGrid).UnidadConversion
-            };
-        }
+    public async Task CancelDetalleHandler(GridCommandEventArgs args) => await DesactivarModificacionDetalle();
+
+    private async Task DesactivarModificacionDetalle()
+    { 
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        detalleState.InsertedItem = detalleState.OriginalEditItem = detalleState.EditItem = null;
+        IsEditingGridDetalle = false;
+        CodigoItemAccion = "";
+        await GridDetalleRef.SetStateAsync(detalleState);
     }
 
-    public void CancelDetalleHandler(GridCommandEventArgs args) => IsEditingGridDetalle = !(args.Field is "Cantidad" or "PrecioUnitario");
+    private async Task GrabarModificacionDetalle()
+    {
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        UpdateItemDetalleHandler(new GridCommandEventArgs() { Item = detalleState.EditItem is not null ? detalleState.EditItem : detalleState.InsertedItem});
+        await DesactivarModificacionDetalle();
+    }
 
     public void UpdateItemDetalleHandler(GridCommandEventArgs args)
     {
 		MovimientoDetalleGrid item = (MovimientoDetalleGrid) args.Item;   
         int index = GridDetalles.FindIndex(i => i.CodigoArticulo == item.CodigoArticulo);
 
-        //if (args.Field == "PrecioUnitario") 
-        //    MovimientoInsertar.Detalles[index].PrecioUnitario = GridDetalles[index].PrecioUnitario = item.PrecioUnitario; 
-        //else if (args.Field == "Cantidad")
-        //    MovimientoInsertar.Detalles[index].Cantidad = GridDetalles[index].Cantidad = item.Cantidad;
-          
+        if (args.Field is null)
+        {
+            MovimientoInsertar.Detalles[index] = IMapper.Map<MovimientoDetalleInsertarDto>(item);
+            GridDetalles[index] = item;
+            GridDetalles[index].IsEditingItem = false;
+        }
+        else if (args.Field == "Cantidad")
+        {
+            MovimientoInsertar.Detalles[index].Cantidad = GridDetalles[index].Cantidad = item.Cantidad;
+        }
+            
+
         //ModificarImportesItem(item.Cantidad, item.PrecioUnitario, item.EsAfectoImpuesto, index);
-		ModificarImportesTotales();
+        ModificarImportesTotales();
         IsEditingGridDetalle = false;
     }
 

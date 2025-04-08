@@ -26,5 +26,6 @@ public class AlmacenMovimientoProfile : Profile
         CreateMap<OrdenDetalleCatalogoIngresarDto, MovimientoDetalleObtenerDto>();
         CreateMap<MovimientoDetalleInsertarDto, MovimientoDetalleObtenerDto>().ReverseMap();
         CreateMap<MovimientoDetalleGrid, MovimientoDetalleObtenerDto>().ReverseMap();
+        CreateMap<MovimientoDetalleGrid, MovimientoDetalleInsertarDto>();
     }
 }
