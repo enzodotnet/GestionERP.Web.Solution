@@ -28,12 +28,22 @@ public class MovimientoDetalleGrid : ICloneable
 public class MovimientoDetalleGridValidator : AbstractValidator<MovimientoDetalleGrid>
 {
     public decimal? UnidadConversion { get; set; }
+    public string MsgErrorAlmacen { get; set; }
+    public string MsgErrorArticulo { get; set; }
 
     public MovimientoDetalleGridValidator()
     {
+        RuleFor(p => p.CodigoAlmacen)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty().WithMessage("El campo {PropertyName} es requerido")
+            .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            .Must(x => string.IsNullOrEmpty(MsgErrorAlmacen)).WithMessage(x => MsgErrorAlmacen);
+
         RuleFor(p => p.CodigoArticulo)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("El campo {PropertyName} es requerido");
+            .NotEmpty().WithMessage("El campo {PropertyName} es requerido")
+            .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+            .Must(x => string.IsNullOrEmpty(MsgErrorArticulo)).WithMessage(x => MsgErrorArticulo); ;
 
         RuleFor(p => p.Cantidad)
             .Cascade(CascadeMode.Stop)

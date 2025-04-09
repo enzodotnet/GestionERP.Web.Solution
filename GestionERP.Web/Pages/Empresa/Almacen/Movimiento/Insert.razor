@@ -160,7 +160,7 @@
 							<label>Detalle*:</label>
 							<TelerikGrid Data="@(GridDetalles)" Height="auto" Pageable="false" Sortable="true" Resizable="true" Size="sm" EditMode="@(GridEditMode.Inline)" OnUpdate=@UpdateItemDetalleHandler OnCancel="@CancelDetalleHandler" @ref="GridDetalleRef">
 								<GridSettings>
-									<GridValidationSettings>
+									<GridValidationSettings Enabled=@(true)>
 										<ValidatorTemplate>
 											<FluentValidationValidator Validator="@(GridDetalleValidator)"/>
 										</ValidatorTemplate>
@@ -168,7 +168,7 @@
 								</GridSettings>
 
 								<GridToolBarTemplate>
-									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@(MostrarAgregarDetalle)">Agregar ítem</TelerikButton>
+									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@AgregarItemDetalle">Agregar ítem</TelerikButton>
 
 									<TelerikButton Icon="@(SvgIcon.ZoomIn)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(EsVisibleBotonCatalogoDetallesReferencia)" Enabled="@(!IsLoadingCatalogoDetallesReferencia & !IsEditingGridDetalle)" Title="Abrir catálogo de artículos de la orden por ingresar" Size="sm" OnClick="@(MostrarCatalogoDetallesReferencia)">
 										Abrir catálogo de artículos
@@ -186,24 +186,20 @@
 								</GridToolBarTemplate>
 
 								<GridColumns>
-									<GridColumn Field="CodigoAlmacen" Width="90px" Title="Almacén" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellAlmacenRenderHandler" Editable=@(IsEditableGridCell) >
+									<GridColumn Field="CodigoAlmacen" Width="70px" Title="Almacén" HeaderClass="k-justify-content-center grid-column-edit" OnCellRender="@OnCellAlmacenRenderHandler" Editable=@(IsEditableGridCell) >
 										<EditorTemplate>
 											@{
 												MovimientoDetalleGrid item = context as MovimientoDetalleGrid;
-
-
-
-
-												// <TelerikTextBox @bind-Value="@(item.CodigoAlmacen)" DebounceDelay="@(0)" Id="almacen" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="100%" ShowSuffixSeparator="@(true)" MaxLength="3" >
-												// 	<TextBoxSuffixTemplate>
-												// 		<Empresa.LocalCatalogoComponent CodigoEmpresa="@Empresa.Codigo" CargarItemSeleccionado="@(CargarItemCatalogoLocal)" CodigoExcluir="@(MovimientoInsertar.CodigoLocal)" />
-												// 	</TextBoxSuffixTemplate>
-												// </TelerikTextBox> 
-												<TelerikValidationTooltip For="@(() => item.Cantidad)" TargetSelector="#griddetcantidad" />
+												<TelerikTextBox Value="@(item.CodigoAlmacen)" DebounceDelay="@(0)" ValueChanged="@ValueChangeAlmacenDetalleHandler" ValueExpression="@(() => item.CodigoAlmacen)" OnChange="@OnChangeAlmacenDetalleHandler" Id="almacen" AutoComplete="off" Placeholder="Código" Title="Código" Size="sm" Width="100%" MaxLength="3">
+													<TextBoxSuffixTemplate>
+														<Empresa.AlmacenCatalogoPorOperacionLogisticaSesionComponent CodigoEmpresa="@Empresa.Codigo" CodigoOperacionLogistica="@(MovimientoInsertar.CodigoOperacionLogistica)" CodigoTipoArticulo="@(item.CodigoTipoArticulo)" CodigoAlmacenDestino="@(MovimientoInsertar.CodigoAlmacenDestino)" CargarItemSeleccionado="@(CargarItemCatalogoAlmacen)" CodigoExcluir="@(item.CodigoAlmacen)" />
+													</TextBoxSuffixTemplate>
+												</TelerikTextBox> 
+												<TelerikValidationTooltip For="@(() => item.CodigoAlmacen)" TargetSelector="#almacen" />
 											}
 										</EditorTemplate>
 									</GridColumn> 
-									<GridColumn Field="NombreTipoArticulo" Width="80px" Title="Tipo" Editable="@false" />
+									<GridColumn Field="NombreTipoArticulo" Width="80px" Title="Tipo artículo" Editable="@false" />
 									<GridColumn Field="CodigoArticulo" Width="120px" Title="Código artículo" Editable="@false" />
 									<GridColumn Field="NombreArticulo" Width="400px" Title="Nombre de artículo" Editable="@false" />
 									<GridColumn Field="Presentacion" Width="200px" Title="Presentación del artículo" Editable="@false" />
@@ -353,9 +349,9 @@
 
 			<TelerikDialog @bind-Visible="@EsVisibleDialogDetalle" Width="auto" ShowCloseButton="@(false)" CloseOnOverlayClick="@(false)" ThemeColor="dark" FocusedElementSelector=".ok-btn" ButtonsLayout="@(DialogButtonsLayout.Center)">
 				<DialogTitle> Quitando ítem del detalle </DialogTitle>
-				<DialogContent> ¿Está seguro de quitar el ítem @Detalle.CodigoArticulo? </DialogContent>
+				<DialogContent> ¿Está seguro de quitar el ítem @CodigoItemDetalle? </DialogContent>
 				<DialogButtons>
-					<TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="secondary" OnClick="@(() => AccionarDetalle(TipoAccionDialog))" Size="sm">Sí</TelerikButton>
+					<TelerikButton Class="ok-btn" Icon="@(SvgIcon.Check)" ThemeColor="secondary" OnClick="@(QuitarItemDetalle)" Size="sm">Sí</TelerikButton>
 					<TelerikButton Class="undo-btn" Icon="@(SvgIcon.X)" OnClick="@(() => CerrarDialog())" Size="sm">No</TelerikButton>
 				</DialogButtons>
 			</TelerikDialog>

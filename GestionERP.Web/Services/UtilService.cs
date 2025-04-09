@@ -29,6 +29,7 @@ public class UtilService
     IPrincipalEntidad entidad,
     IPrincipalArticulo articulo,
     IPrincipalLocal local,
+    IPrincipalAlmacen almacen,
     IPrincipalCentroCosto centroCosto,
     IPrincipalUsuario usuario,
     IImportacionNotaReporteOrden notaReporteOrden,
@@ -463,6 +464,34 @@ public class UtilService
         {
             if ((await IAuthState.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated)
                 resultado.item = await local.ObtenerPorCodigoEmpresa(codigo, codigoEmpresa);
+            else
+                Fnc.MostrarAlerta(alertNotify, Cnf.MsgErrorNoAuthenticated, "error");
+        }
+        catch (Exception ex)
+        {
+            if (ex is HttpRequestException)
+                Fnc.MostrarAlerta(alertNotify, Cnf.MsgErrorNotConnectApi, "error");
+            else if (ex is HttpResponseException)
+            {
+                string codeError = (ex as HttpResponseException).Code;
+                if (codeError is "VA")
+                    resultado.messageError = ex.Message;
+                else
+                    Fnc.MostrarAlerta(alertNotify, codeError is "NF" ? Cnf.MsgErrorNotFoundAPi : codeError is "TK" ? Cnf.MsgErrorExpiredToken : ex.Message, "error");
+            }
+            else
+                Fnc.MostrarAlerta(alertNotify, Cnf.MsgErrorFuncAppWeb, "error");
+        }
+        return resultado;
+    }
+
+    public async Task<(AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto item, string mensajeError)> ObtenerAlmacenPorCodigoEmpresaOperacionLogisticaSesion(TelerikNotification alertNotify, string codigo, string codigoEmpresa, string codigoOperacionLogistica, string codigoTipoArticulo = null, string codigoAlmacenDestino = null)
+    {
+        (AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto item, string messageError) resultado = (null, null);
+        try
+        {
+            if ((await IAuthState.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated)
+                resultado.item = await almacen.ObtenerPorCodigoEmpresaOperacionLogisticaSesion(codigo, codigoEmpresa, codigoOperacionLogistica, codigoTipoArticulo, codigoAlmacenDestino);
             else
                 Fnc.MostrarAlerta(alertNotify, Cnf.MsgErrorNoAuthenticated, "error");
         }

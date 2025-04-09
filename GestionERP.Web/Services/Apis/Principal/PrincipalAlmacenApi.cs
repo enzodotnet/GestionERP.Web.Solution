@@ -1,29 +1,22 @@
 ﻿using GestionERP.Web.Models.Dtos.Principal;
-using GestionERP.Web.Services.Interfaces;
-using System.Net.Http.Json; 
+using GestionERP.Web.Services.Interfaces; 
 using System.Net;
 using GestionERP.Web.Models.Responses;
-using GestionERP.Web.Handlers; 
+using GestionERP.Web.Handlers;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace GestionERP.Web.Services.Apis;
  
-public class PrincipalAlmacenApi : IPrincipalAlmacen
+public class PrincipalAlmacenApi(HttpClient httpClient) : IPrincipalAlmacen
 {
-    private readonly HttpClient _httpClient;
-    protected ErrorEndpointResponse error;
+    protected ErrorEndpointResponse error = new();
     private const string pathApi = "almacenes";
-
-    public PrincipalAlmacenApi(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-        error = new();
-    }
 
     public async Task<IEnumerable<AlmacenListarDto>> Listar()
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.GetAsync(pathApi); 
+            using HttpResponseMessage response = await httpClient.GetAsync(pathApi); 
             if (response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NoContent) 
@@ -47,7 +40,7 @@ public class PrincipalAlmacenApi : IPrincipalAlmacen
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.GetAsync($"{pathApi}/catalogo"); 
+            using HttpResponseMessage response = await httpClient.GetAsync($"{pathApi}/catalogo"); 
             if (response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NoContent) 
@@ -71,7 +64,7 @@ public class PrincipalAlmacenApi : IPrincipalAlmacen
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"{pathApi}/{id}", almacen); 
+            using HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{pathApi}/{id}", almacen); 
             if (!response.IsSuccessStatusCode)
             {
                 error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
@@ -88,7 +81,7 @@ public class PrincipalAlmacenApi : IPrincipalAlmacen
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.DeleteAsync($"{pathApi}/{id}"); 
+            using HttpResponseMessage response = await httpClient.DeleteAsync($"{pathApi}/{id}"); 
             if (!response.IsSuccessStatusCode)
             {
                 error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
@@ -105,7 +98,7 @@ public class PrincipalAlmacenApi : IPrincipalAlmacen
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.PostAsJsonAsync(pathApi, almacen); 
+            using HttpResponseMessage response = await httpClient.PostAsJsonAsync(pathApi, almacen); 
             if (response.IsSuccessStatusCode)
             {
                 return (await response.Content.ReadFromJsonAsync<AlmacenObtenerDto>()).Id; 
@@ -126,7 +119,7 @@ public class PrincipalAlmacenApi : IPrincipalAlmacen
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.GetAsync($"{pathApi}/{id}"); 
+            using HttpResponseMessage response = await httpClient.GetAsync($"{pathApi}/{id}"); 
             if (response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NoContent) 
@@ -144,6 +137,64 @@ public class PrincipalAlmacenApi : IPrincipalAlmacen
         {
             throw new HttpRequestException();
         } 
+    }
+
+    public async Task<IEnumerable<AlmacenCatalogoPorEmpresaOperacionLogisticaSesionDto>> CatalogoPorEmpresaOperacionLogisticaSesion(string codigoEmpresa, string codigoOperacionLogistica, string codigoTipoArticulo = null, string codigoAlmacenDestino = null)
+    {
+        try
+        {
+            Dictionary<string, string> query = new()
+            {
+                ["codigoEmpresa"] = codigoEmpresa,
+                ["codigoOperacionLogistica"] = codigoOperacionLogistica,
+                ["codigoTipoArticulo"] = codigoTipoArticulo ?? "",
+                ["codigoAlmacenDestino"] = codigoAlmacenDestino ?? ""
+            };
+            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/catalogo/empresa/operacion-logistica/sesion", query));
+            if (response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                    return default;
+                return await response.Content.ReadFromJsonAsync<IEnumerable<AlmacenCatalogoPorEmpresaOperacionLogisticaSesionDto>>();
+            }
+            else
+            {
+                error = response.StatusCode == HttpStatusCode.NotFound ? new() { Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
+                throw new HttpResponseException(error.Message, error.Code);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            throw new HttpRequestException();
+        }
+    }
+
+    public async Task<AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto> ObtenerPorCodigoEmpresaOperacionLogisticaSesion(string codigoAlmacen, string codigoEmpresa, string codigoOperacionLogistica, string codigoTipoArticulo = null, string codigoAlmacenDestino = null)
+    {
+        try
+        {
+            Dictionary<string, string> query = new()
+            {
+                ["codigoEmpresa"] = codigoEmpresa,
+                ["codigoOperacionLogistica"] = codigoOperacionLogistica,
+                ["codigoTipoArticulo"] = codigoTipoArticulo ?? "",
+                ["codigoAlmacenDestino"] = codigoAlmacenDestino ?? ""
+            };
+            using HttpResponseMessage response = await httpClient.GetAsync(QueryHelpers.AddQueryString($"{pathApi}/codigo/{codigoAlmacen}/empresa/operacion-logistica/sesion",query));
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto>();
+            }
+            else
+            {
+                error = response.StatusCode == HttpStatusCode.NotFound ? new(){ Code = "NF" } : await response.Content.ReadFromJsonAsync<ErrorEndpointResponse>();
+                throw new HttpResponseException(error.Message, error.Code);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            throw new HttpRequestException();
+        }
     }
 }
  

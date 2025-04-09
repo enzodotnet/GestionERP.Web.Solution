@@ -13,7 +13,8 @@ using AutoMapper;
 using GestionERP.Web.Models.Dtos.Principal;
 using GestionERP.Web.Global;
 using GestionERP.Web.Services;
-using GestionERP.Web.Models.Dtos.Compra; 
+using GestionERP.Web.Models.Dtos.Compra;
+using FluentValidation;
 
 namespace GestionERP.Web.Pages.Empresa.Almacen.Movimiento;
 
@@ -28,16 +29,13 @@ public partial class Insert : IDisposable
     private const string rutaServicio = "/movimientos";
      
 	public MovimientoInsertarDto MovimientoInsertar { get; set; }
-    public MovimientoObtenerDto Movimiento { get; set; }
-    public MovimientoDetalleInsertarDto DetalleInsertar { get; set; }
-    public MovimientoDetalleObtenerDto Detalle { get; set; }
+    public MovimientoObtenerDto Movimiento { get; set; } 
     public List<MovimientoDetalleGrid> GridDetalles { get; set; }
 	public MovimientoDetalleGrid ItemGridDetalle { get; set; }
 	private EditContext EditContext { get; set; }
     private EditContext DetalleContext { get; set; }
     public MovimientoDetalleGridValidator GridDetalleValidator { get; set; }
-    public MovimientoInsertarValidator Validator { get; set; }
-    public MovimientoDetalleInsertarValidator DetalleValidator { get; set; }
+    public MovimientoInsertarValidator Validator { get; set; } 
     public TipoMovimientoConsultaPorCodigoDto TipoMovimiento { get; set; }
     private MonedaConsultaPorTipoDto MN { get; set; }
     private MonedaConsultaPorTipoDto ME { get; set; }
@@ -69,14 +67,11 @@ public partial class Insert : IDisposable
     private bool IsLoadingCatalogoDetallesReferencia { get; set; }
     private bool IsLoadingCatalogoReferencias { get; set; }
     public string VerboAccionModal { get; set; }
-    public string DescripcionAccionModal { get; set; }
-    public string TipoAccionModal { get; set; }
-    public string TipoAccionDialog { get; set; }
-    public string OrigenDialog { get; set; }
+    public string DescripcionAccionModal { get; set; } 
     public string OrigenModal { get; set; }
     public bool EsVisibleDialogDetalle { get; set; }
     public bool EsVisibleModalDetalle { get; set; }
-    public string CodigoItemAccion { get; set; }
+    public string CodigoItemDetalle { get; set; }
     public string CodigoPermisoRegistrar { get; set; }
     public string TituloTipoRegistro { get; set; }
     public ISvgIcon IconoAccionModal { get; set; } 
@@ -139,8 +134,6 @@ public partial class Insert : IDisposable
             Movimiento = new();
             GridDetalles = [];
             ItemGridDetalle = new();
-            DetalleInsertar = new();
-            Detalle = new();
 
             TipoMovimiento = new();
             FechasCerradoOperacion = []; 
@@ -314,62 +307,10 @@ public partial class Insert : IDisposable
         MovimientoInsertar.CodigoTipoCambioDia = tipoCambioDia.Codigo;
         MovimientoInsertar.MontoTipoCambioDia = tipoCambioDia.Monto;
     }
-
-    private void IniciarAccionModal(string tipoAccion, string origenModal)
-    {
-        TipoAccionModal = tipoAccion;
-        OrigenModal = origenModal;
-        switch (tipoAccion)
-        {
-            case "I":
-                IconoAccionModal = SvgIcon.TableAdd;
-                VerboAccionModal = "Agregar";
-                DescripcionAccionModal = "Agregando";
-                break;
-            case "M":
-                IconoAccionModal = SvgIcon.TableCellProperties;
-                VerboAccionModal = "Modificar";
-                DescripcionAccionModal = "Modificando";
-                break;
-            case "V":
-                DescripcionAccionModal = "Visualizando";
-                break;
-        }
-        switch (origenModal)
-        {
-            case "detalle":
-                if (tipoAccion is "I" or "M")
-                    DetalleContext = new EditContext(DetalleInsertar);
-                EsVisibleModalDetalle = true;
-                break;
-        }
-    }
-
-    private void IniciarAccionDialog(string tipoAccion, string origenDialog)
-    {
-        TipoAccionDialog = tipoAccion;
-        OrigenDialog = origenDialog;
-        if(origenDialog is "detalle")
-            EsVisibleDialogDetalle = true;
-    }
-
-    public void CerrarModal()
-    {
-        if (OrigenModal is "detalle")
-            IsModifiedDetalle = EsVisibleModalDetalle = false; 
-        VerboAccionModal = DescripcionAccionModal = TipoAccionModal = CodigoItemAccion = "";
-        StateHasChanged();
-    }
-
+      
     private void Volver() => INavigation.NavigateTo($"{rutaEmpresa}{rutaServicio}");
- 
-    public void CerrarDialog()
-    {
-        if (OrigenDialog is "detalle")
-            EsVisibleDialogDetalle = false;
-        TipoAccionDialog = OrigenDialog = "";
-        StateHasChanged();
-    }
+
+    public void CerrarDialog() => EsVisibleDialogDetalle = false;
 
     private void ActualizarHoraOperacion() => MovimientoInsertar.FechaHoraOperacion = MovimientoInsertar.FechaHoraOperacion?.Date.Add(DateTime.Now.TimeOfDay);
 
@@ -626,16 +567,9 @@ public partial class Insert : IDisposable
         IsEditableGridCell = false;
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         foreach (OrdenDetalleCatalogoIngresarDto itemCatalogo in ItemsSelectedDetalleOrden)
-        {
-            DetalleInsertar = new();
-            Detalle = new();
-
-            IMapper.Map(itemCatalogo, Detalle);
-            IMapper.Map(Detalle, DetalleInsertar);
-
-            ItemGridDetalle = IMapper.Map<MovimientoDetalleGrid>(Detalle);
-
-            MovimientoInsertar.Detalles.Add(DetalleInsertar);
+        { 
+            ItemGridDetalle = IMapper.Map<MovimientoDetalleGrid>(itemCatalogo); 
+            MovimientoInsertar.Detalles.Add(IMapper.Map<MovimientoDetalleInsertarDto>(ItemGridDetalle));
             GridDetalles.Add(ItemGridDetalle);
             detalleState.InsertedItem = ItemGridDetalle; 
             await GridDetalleRef.SetStateAsync(detalleState);
@@ -648,21 +582,12 @@ public partial class Insert : IDisposable
         EsVisibleBotonQuitarReferencia = GridDetalles.Count == 0;
         EsVisibleCatalogoDetallesOrden = false;
         IsEditableGridCell = true;
-    } 
+    }
     #endregion
     #endregion
-     
-    #region Detalle
-    public void InvalidarAccionDetalle(EditContext _) => Fnc.MostrarAlerta(AlertDetalle, Cnf.MsgErrorInvalidEditContext, "error");
 
-	private async Task CerrarDetalle()
-	{
-        if (TipoAccionModal is not "V" && IsModifiedDetalle && !await Dialog.ConfirmAsync("¿Está seguro de cerrar el formulario y que los datos no se carguen?", "Saliendo del formulario"))
-            return;
-        CerrarModal();
-	}
-
-	private bool AgregarItemDetalleEsValido()
+    #region Detalle 
+    private bool AgregarItemDetalleEsValido()
     {
 		bool esValido = true;
 		if (string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica))
@@ -673,64 +598,59 @@ public partial class Insert : IDisposable
         return esValido;
 	}
 
-    public void MostrarAgregarDetalle()
-    { 
-        if (AgregarItemDetalleEsValido())
-        {
-            DetalleInsertar = new();
-            Detalle = new();
-            DetalleValidator = new();
-            IniciarAccionModal("I", "detalle");
-        }
+    public void AgregarItemDetalle()
+    {  
+        GridDetalleValidator = new(); 
     }
 
-    public void MostrarModificarDetalle(MovimientoDetalleGrid item = null)
-    {
-		if (TipoAccionModal is not "V")
-			Detalle = IMapper.Map<MovimientoDetalleObtenerDto>(item);
+    public async Task CancelDetalleHandler(GridCommandEventArgs args) => await DesactivarModificacionDetalle();
 
-		DetalleInsertar = IMapper.Map<MovimientoDetalleInsertarDto>(Detalle);
-		CodigoItemAccion = Detalle.CodigoArticulo; 
-        DetalleValidator = new()
-        {
-            UnidadConversion = Detalle.UnidadConversion
-        };
-		IniciarAccionModal("M", "detalle");
-	}
+    private async Task DesactivarModificacionDetalle()
+    {
+        if (IsModifiedDetalle && !await Dialog.ConfirmAsync("¿Está seguro de cancelar la edición del detalle y que los datos no se graben?", "Cancelando edición del detalle"))
+            return;
+
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        detalleState.InsertedItem = detalleState.OriginalEditItem = detalleState.EditItem = null;
+        IsEditingGridDetalle = IsModifiedDetalle = false;
+        CodigoItemDetalle = "";
+        await GridDetalleRef.SetStateAsync(detalleState);
+    }
+
+    private async Task GrabarModificacionDetalle()
+    {
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        UpdateItemDetalleHandler(new GridCommandEventArgs() { Item = detalleState.EditItem is not null ? detalleState.EditItem : detalleState.InsertedItem });
+        await DesactivarModificacionDetalle();
+    }
 
     public async Task ActivarModificacionDetalle(MovimientoDetalleGrid item)
     {
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         detalleState.InsertedItem = null;
-        detalleState.OriginalEditItem = item; 
+        detalleState.OriginalEditItem = item;
         detalleState.EditItem = (MovimientoDetalleGrid) item.Clone();
         detalleState.EditItem.IsEditingItem = true; 
         IsEditingGridDetalle = true;
-        CodigoItemAccion = item.CodigoArticulo;
+        CodigoItemDetalle = item.CodigoArticulo;
+        IsModifiedDetalle = false;
         GridDetalleValidator = new()
         {
             UnidadConversion = item.UnidadConversion
-        };
+        }; 
         await GridDetalleRef.SetStateAsync(detalleState);  
     }
 
     private void MostrarQuitarDetalle(string codigoItem)
     {
-        CodigoItemAccion = codigoItem;
-        IniciarAccionDialog("Q", "detalle");
-    }
-
-	public void VerItemDetalle(MovimientoDetalleGrid item)
-	{
-		Detalle = IMapper.Map<MovimientoDetalleObtenerDto>(item);
-		CodigoItemAccion = item.CodigoArticulo;
-		IniciarAccionModal("V", "detalle");
-	} 
+        CodigoItemDetalle = codigoItem; 
+        EsVisibleDialogDetalle = true;
+    } 
      
     private void OnChangeDetalleCantidadHandler(object value)
     {
-        decimal? cantidad = (decimal?)value;
-        IsModifiedDetalle = Fnc.VerifyContextIsChanged(Detalle.Cantidad != cantidad, DetalleContext, "Cantidad");
+        //decimal? cantidad = (decimal?)value;
+        //IsModifiedDetalle = Fnc.VerifyContextIsChanged(Detalle.Cantidad != cantidad, DetalleContext, "Cantidad");
         //ModificarImportesItem(cantidad, DetalleInsertar.PrecioUnitario, DetalleInsertar.EsAfectoImpuesto);
     }
 
@@ -746,25 +666,7 @@ public partial class Insert : IDisposable
     public static void OnCellAlmacenRenderHandler(GridCellRenderEventArgs args) => args.Class = string.IsNullOrEmpty((args.Item as MovimientoDetalleGrid).CodigoAlmacen) ? "cell-error" : "cell-editable";
 
     //public static void OnCellPrecioUnitarioRenderHandler(GridCellRenderEventArgs args) => args.Class = !(args.Item as MovimientoDetalleGrid).PrecioUnitario.HasValue ? "cell-error" : "cell-editable";
-
-    public async Task CancelDetalleHandler(GridCommandEventArgs args) => await DesactivarModificacionDetalle();
-
-    private async Task DesactivarModificacionDetalle()
-    { 
-        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
-        detalleState.InsertedItem = detalleState.OriginalEditItem = detalleState.EditItem = null;
-        IsEditingGridDetalle = false;
-        CodigoItemAccion = "";
-        await GridDetalleRef.SetStateAsync(detalleState);
-    }
-
-    private async Task GrabarModificacionDetalle()
-    {
-        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
-        UpdateItemDetalleHandler(new GridCommandEventArgs() { Item = detalleState.EditItem is not null ? detalleState.EditItem : detalleState.InsertedItem});
-        await DesactivarModificacionDetalle();
-    }
-
+     
     public void UpdateItemDetalleHandler(GridCommandEventArgs args)
     {
 		MovimientoDetalleGrid item = (MovimientoDetalleGrid) args.Item;   
@@ -779,9 +681,7 @@ public partial class Insert : IDisposable
         else if (args.Field == "Cantidad")
         {
             MovimientoInsertar.Detalles[index].Cantidad = GridDetalles[index].Cantidad = item.Cantidad;
-        }
-            
-
+        } 
         //ModificarImportesItem(item.Cantidad, item.PrecioUnitario, item.EsAfectoImpuesto, index);
         ModificarImportesTotales();
         IsEditingGridDetalle = false;
@@ -828,95 +728,105 @@ public partial class Insert : IDisposable
         //MovimientoInsertar.TotalImporteImpuesto = esGridVacio ? 0 : GridDetalles.Sum(x => x.ImporteImpuesto);
         //MovimientoInsertar.TotalImporteNeto = esGridVacio ? 0 : GridDetalles.Sum(x => x.ImporteNeto);
     }
+     
+    private async Task QuitarItemDetalle()
+    {
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        int index = GridDetalles.FindIndex(i => i.CodigoArticulo == CodigoItemDetalle);
+
+        MovimientoInsertar.Detalles.RemoveAt(index);
+        GridDetalles.RemoveAt(index);
+        CerrarDialog();
+
+        ModificarImportesTotales();
+        EsVisibleBotonQuitarReferencia = GridDetalles.Count == 0;
+
+        await GridDetalleRef.SetStateAsync(detalleState);
+    }
 
     private void ValueChangeArticuloHandler(string value)
     {
-        DetalleInsertar.CodigoArticulo = value?.Trim().ToUpper();
-        if (!string.IsNullOrEmpty(DetalleValidator.MsgErrorArticulo) && (Detalle.CodigoArticulo ?? "").Trim() != (DetalleInsertar.CodigoArticulo ?? ""))
-	        Detalle.CodigoArticulo = DetalleValidator.MsgErrorArticulo = null;
+        //DetalleInsertar.CodigoArticulo = value?.Trim().ToUpper();
+        //if (!string.IsNullOrEmpty(GridDetalleValidator.MsgErrorArticulo) && (Detalle.CodigoArticulo ?? "").Trim() != (DetalleInsertar.CodigoArticulo ?? ""))
+        //    Detalle.CodigoArticulo = GridDetalleValidator.MsgErrorArticulo = null;
     }
 
     private async Task OnChangeArticuloHandler(object value)
     {
-		string codigo = (string)(value ?? "");
-		if (DetalleContext.IsValid(DetalleContext.Field("CodigoArticulo")))
-		{
-			if ((Detalle.CodigoArticulo ?? "") == codigo) goto exit;
-            if (GridDetalles.Any(x => x.CodigoArticulo.Trim() == codigo))
-            {
-                DetalleValidator.MsgErrorArticulo = "El código ya existe en el detalle del registro";
-            }
-            else
-            {  
-                (ArticuloObtenerPorCodigoEmpresaProcesoDocumentoDto item, DetalleValidator.MsgErrorArticulo) = await IUtil.ObtenerArticuloPorCodigoEmpresaProcesoDocumento(AlertDetalle, codigo, Empresa.Codigo, CodigoTipoMovimiento);
-			    if (item is not null)
-			    {
-			        Detalle.CodigoArticulo = item.CodigoArticulo.Trim();
-			        Detalle.NombreArticulo = item.NombreArticulo;
-			        Detalle.UnidadConversion = DetalleValidator.UnidadConversion = item.UnidadConversion; 
-			        Detalle.CodigoUnidadMedida = item.CodigoUnidadMedida;
-			        Detalle.NombreUnidadMedida = item.NombreUnidadMedida;
-			        Detalle.Presentacion = item.Presentacion;
-			        Detalle.CodigoTipoArticulo = item.CodigoTipoArticulo;
-			        Detalle.NombreTipoArticulo = item.NombreTipoArticulo;
-			        if (DetalleInsertar.Cantidad.HasValue)
-				        DetalleContext.NotifyFieldChanged(DetalleContext.Field("Cantidad"));
-         //           if (Detalle.EsAfectoImpuesto != item.EsAfectoImpuesto)
-         //           {
-         //               DetalleInsertar.EsAfectoImpuesto = Detalle.EsAfectoImpuesto = item.EsAfectoImpuesto;
-					    //if (DetalleInsertar.Cantidad.HasValue && DetalleContext.IsValid(DetalleContext.Field("Cantidad")) && DetalleInsertar.PrecioUnitario.HasValue)
-						   // ModificarImportesItem(DetalleInsertar.Cantidad, DetalleInsertar.PrecioUnitario, DetalleInsertar.EsAfectoImpuesto);
-         //           }
-				    goto exit;
-			    }
-            } 
-            DetalleContext.NotifyFieldChanged(DetalleContext.Field("CodigoArticulo"));
-		}
-        Detalle.CodigoArticulo = codigo;
-		Detalle.NombreArticulo = Detalle.CodigoUnidadMedida = Detalle.NombreUnidadMedida = Detalle.CodigoTipoArticulo = Detalle.NombreTipoArticulo = Detalle.Presentacion = null;
-		Detalle.UnidadConversion = DetalleValidator.UnidadConversion = null;
-		if (string.IsNullOrEmpty(codigo)) 
-            DetalleContext.MarkAsUnmodified(DetalleContext.Field("CodigoArticulo")); 
-		if (DetalleInsertar.Cantidad.HasValue)
-			DetalleContext.NotifyFieldChanged(DetalleContext.Field("Cantidad"));
-	exit:
-		IsModifiedDetalle = DetalleContext.IsModified();
-	} 
+        //string codigo = (string)(value ?? "");
+        //if (DetalleContext.IsValid(DetalleContext.Field("CodigoArticulo")))
+        //{
+        //    if ((Detalle.CodigoArticulo ?? "") == codigo) goto exit;
+        //    if (GridDetalles.Any(x => x.CodigoArticulo.Trim() == codigo))
+        //    {
+        //        GridDetalleValidator.MsgErrorArticulo = "El código ya existe en el detalle del registro";
+        //    }
+        //    else
+        //    {
+        //        (ArticuloObtenerPorCodigoEmpresaProcesoDocumentoDto item, GridDetalleValidator.MsgErrorArticulo) = await IUtil.ObtenerArticuloPorCodigoEmpresaProcesoDocumento(AlertDetalle, codigo, Empresa.Codigo, CodigoTipoMovimiento);
+        //        if (item is not null)
+        //        {
+        //            Detalle.CodigoArticulo = item.CodigoArticulo.Trim();
+        //            Detalle.NombreArticulo = item.NombreArticulo;
+        //            Detalle.UnidadConversion = GridDetalleValidator.UnidadConversion = item.UnidadConversion;
+        //            Detalle.CodigoUnidadMedida = item.CodigoUnidadMedida;
+        //            Detalle.NombreUnidadMedida = item.NombreUnidadMedida;
+        //            Detalle.Presentacion = item.Presentacion;
+        //            Detalle.CodigoTipoArticulo = item.CodigoTipoArticulo;
+        //            Detalle.NombreTipoArticulo = item.NombreTipoArticulo;
+        //            if (DetalleInsertar.Cantidad.HasValue)
+        //                DetalleContext.NotifyFieldChanged(DetalleContext.Field("Cantidad"));
+        //            goto exit;
+        //        }
+        //    }
+        //    DetalleContext.NotifyFieldChanged(DetalleContext.Field("CodigoArticulo"));
+        //}
+        //Detalle.CodigoArticulo = codigo;
+        //Detalle.NombreArticulo = Detalle.CodigoUnidadMedida = Detalle.NombreUnidadMedida = Detalle.CodigoTipoArticulo = Detalle.NombreTipoArticulo = Detalle.Presentacion = null;
+        //Detalle.UnidadConversion = GridDetalleValidator.UnidadConversion = null;
+        //if (string.IsNullOrEmpty(codigo))
+        //    DetalleContext.MarkAsUnmodified(DetalleContext.Field("CodigoArticulo"));
+        //if (DetalleInsertar.Cantidad.HasValue)
+        //    DetalleContext.NotifyFieldChanged(DetalleContext.Field("Cantidad"));
+        //exit:
+        //IsModifiedDetalle = DetalleContext.IsModified();
+    }
 
-    private async Task AccionarDetalle(string tipoAccion)
+    private async Task ValueChangeAlmacenDetalleHandler(string value)
     {
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
-        int index = GridDetalles.FindIndex(i => i.CodigoArticulo == CodigoItemAccion);
 
-        switch (tipoAccion)
-        {
-            case "I" or "M":
-				ItemGridDetalle = IMapper.Map<MovimientoDetalleGrid>(IMapper.Map(DetalleInsertar, Detalle));
-				if (tipoAccion == "I")
-                {
-                    MovimientoInsertar.Detalles.Add(DetalleInsertar);
-                    GridDetalles.Add(ItemGridDetalle);
-                    detalleState.InsertedItem = ItemGridDetalle;
-                }
-                else
-                {
-                    MovimientoInsertar.Detalles[index] = DetalleInsertar;
-                    GridDetalles[index] = ItemGridDetalle; 
-				} 
-                break;
-            case "Q":
-                MovimientoInsertar.Detalles.RemoveAt(index);
-                GridDetalles.RemoveAt(index);
-                CerrarDialog();
-                break;
-        };
-        CerrarModal();
-        ModificarImportesTotales();
-        
-		EsVisibleBotonOperacion = GridDetalles.Count == 0;
+        detalleState.EditItem.CodigoAlmacen = value?.Trim().ToUpper();
+        if (!string.IsNullOrEmpty(GridDetalleValidator.MsgErrorAlmacen) && (detalleState.OriginalEditItem.CodigoAlmacen ?? "").Trim() != (detalleState.EditItem.CodigoAlmacen ?? ""))
+            detalleState.OriginalEditItem.CodigoAlmacen = GridDetalleValidator.MsgErrorAlmacen = null;
 
-		await GridDetalleRef.SetStateAsync(detalleState);
+        await GridDetalleRef.SetStateAsync(detalleState);
     }
+
+    private async Task OnChangeAlmacenDetalleHandler(object value)
+    {
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        string codigo = (string)(value ?? "");
+        if (DetalleContext.IsValid(DetalleContext.Field("CodigoAlmacen")))
+        {
+            if ((detalleState.OriginalEditItem.CodigoAlmacen ?? "") == codigo) goto exit;
+            (AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto item, Validator.MsgErrorLocal) = await IUtil.ObtenerAlmacenPorCodigoEmpresaOperacionLogisticaSesion(Alert, codigo, Empresa.Codigo, MovimientoInsertar.CodigoOperacionLogistica, detalleState.EditItem.CodigoTipoArticulo, MovimientoInsertar.CodigoAlmacenDestino);
+            if (item is not null)
+            {
+                detalleState.OriginalEditItem.CodigoAlmacen = item.CodigoAlmacen;
+                detalleState.OriginalEditItem.NombreAlmacen = detalleState.EditItem.NombreAlmacen = item.NombreAlmacen;
+                goto exit;
+            }
+            DetalleContext.NotifyFieldChanged(DetalleContext.Field("CodigoAlmacen"));
+        }
+        detalleState.OriginalEditItem.CodigoAlmacen = codigo;
+        detalleState.OriginalEditItem.NombreAlmacen = detalleState.EditItem.NombreAlmacen = null;
+        if (string.IsNullOrEmpty(codigo))
+            DetalleContext.MarkAsUnmodified(DetalleContext.Field("CodigoAlmacen"));
+    exit:
+        IsModifiedDetalle = DetalleContext.IsModified();
+        await GridDetalleRef.SetStateAsync(detalleState);
+    } 
     #endregion
 
     #region Catalogos
@@ -943,6 +853,19 @@ public partial class Insert : IDisposable
         EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
         ActualizarHoraOperacion();
         IsModified = EditContext.IsModified();
+    }
+
+    private async Task CargarItemCatalogoAlmacen(AlmacenCatalogoPorEmpresaOperacionLogisticaSesionDto item)
+    {
+        GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        detalleState.EditItem.CodigoAlmacen = item.CodigoAlmacen;
+        detalleState.EditItem.NombreAlmacen = item.NombreAlmacen;
+        //MovimientoInsertar.CodigoLocal = Movimiento.CodigoLocal = item.CodigoLocal;
+        //Movimiento.NombreLocal = item.NombreLocal;
+        //Validator.MsgErrorLocal = null;
+        //EditContext.NotifyFieldChanged(EditContext.Field("CodigoLocal"));
+
+        await GridDetalleRef.SetStateAsync(detalleState);
     }
 
     private void CargarItemCatalogoCentroCosto(CentroCostoCatalogoDto item)

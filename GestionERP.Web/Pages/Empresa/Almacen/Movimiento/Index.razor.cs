@@ -67,7 +67,7 @@ public partial class Index : IDisposable
             EsAsignadoRegistrarIngreso = await IPermiso.ConsultaEsAsignadoPorSesion(MovimientoAcceso.RegistrarIngreso, Empresa.Codigo);
             EsAsignadoRegistrarSalida = await IPermiso.ConsultaEsAsignadoPorSesion(MovimientoAcceso.RegistrarSalida, Empresa.Codigo);
             EsAsignadoRegistrarTransferencia = await IPermiso.ConsultaEsAsignadoPorSesion(MovimientoAcceso.RegistrarTransferencia, Empresa.Codigo);
-
+             
             rutaEmpresa = INavigation.Uri.Replace(INavigation.BaseUri, "").Split("?")[0].Replace(rutaServicio, "");
 
             CatalogoEjercicios = await IEmpresa.CatalogoEjercicios(Empresa.Codigo) ?? [];
