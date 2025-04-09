@@ -9,7 +9,8 @@ public class MovimientoDetalleGrid : ICloneable
     public string NombreAlmacen { get; set; }
     public string CodigoTipoArticulo { get; set; }
     public string NombreTipoArticulo { get; set; }
-    public string CodigoArticulo { get; set; }
+    private string codigoArticulo;
+    public string CodigoArticulo { get => codigoArticulo; set => codigoArticulo = value?.TrimEnd(); }
     public string NombreArticulo { get; set; } 
     public string CodigoUnidadMedida { get; set; }
     public string NombreUnidadMedida { get; set; }
@@ -39,11 +40,11 @@ public class MovimientoDetalleGridValidator : AbstractValidator<MovimientoDetall
             .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
             .Must(x => string.IsNullOrEmpty(MsgErrorAlmacen)).WithMessage(x => MsgErrorAlmacen);
 
-        RuleFor(p => p.CodigoArticulo)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("El campo {PropertyName} es requerido")
-            .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
-            .Must(x => string.IsNullOrEmpty(MsgErrorArticulo)).WithMessage(x => MsgErrorArticulo); ;
+        //RuleFor(p => p.CodigoArticulo)
+        //    .Cascade(CascadeMode.Stop)
+        //    .NotEmpty().WithMessage("El campo {PropertyName} es requerido")
+        //    .Matches("^[A-Za-z0-9]*$").WithMessage("El campo {PropertyName} solo debe contener caracteres alfanuméricos")
+        //    .Must(x => string.IsNullOrEmpty(MsgErrorArticulo)).WithMessage(x => MsgErrorArticulo); ;
 
         RuleFor(p => p.Cantidad)
             .Cascade(CascadeMode.Stop)

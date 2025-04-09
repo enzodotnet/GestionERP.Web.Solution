@@ -607,8 +607,8 @@ public partial class Insert : IDisposable
 
     private async Task DesactivarModificacionDetalle()
     {
-        if (IsModifiedDetalle && !await Dialog.ConfirmAsync("¿Está seguro de cancelar la edición del detalle y que los datos no se graben?", "Cancelando edición del detalle"))
-            return;
+        //if (IsModifiedDetalle && !await Dialog.ConfirmAsync("¿Está seguro de cancelar la edición del detalle y que los datos no se graben?", "Cancelando edición del detalle"))
+        //    return;
 
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         detalleState.InsertedItem = detalleState.OriginalEditItem = detalleState.EditItem = null;
@@ -620,8 +620,15 @@ public partial class Insert : IDisposable
     private async Task GrabarModificacionDetalle()
     {
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
+        DetalleContext = new EditContext(detalleState.EditItem);
+        var x = DetalleContext.Validate();
+
+        DetalleContext = new EditContext(GridDetalleValidator);
+        var y = DetalleContext.Validate();
+
+        //GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         UpdateItemDetalleHandler(new GridCommandEventArgs() { Item = detalleState.EditItem is not null ? detalleState.EditItem : detalleState.InsertedItem });
-        await DesactivarModificacionDetalle();
+            await DesactivarModificacionDetalle();
     }
 
     public async Task ActivarModificacionDetalle(MovimientoDetalleGrid item)
@@ -637,7 +644,8 @@ public partial class Insert : IDisposable
         GridDetalleValidator = new()
         {
             UnidadConversion = item.UnidadConversion
-        }; 
+        };
+        DetalleContext = new EditContext(detalleState.EditItem);
         await GridDetalleRef.SetStateAsync(detalleState);  
     }
 
@@ -671,6 +679,10 @@ public partial class Insert : IDisposable
     {
 		MovimientoDetalleGrid item = (MovimientoDetalleGrid) args.Item;   
         int index = GridDetalles.FindIndex(i => i.CodigoArticulo == item.CodigoArticulo);
+        
+        //asd
+        DetalleContext = new EditContext(item);
+        var x = DetalleContext.Validate();
 
         if (args.Field is null)
         {
@@ -800,7 +812,7 @@ public partial class Insert : IDisposable
         if (!string.IsNullOrEmpty(GridDetalleValidator.MsgErrorAlmacen) && (detalleState.OriginalEditItem.CodigoAlmacen ?? "").Trim() != (detalleState.EditItem.CodigoAlmacen ?? ""))
             detalleState.OriginalEditItem.CodigoAlmacen = GridDetalleValidator.MsgErrorAlmacen = null;
 
-        await GridDetalleRef.SetStateAsync(detalleState);
+        //await GridDetalleRef.SetStateAsync(detalleState);
     }
 
     private async Task OnChangeAlmacenDetalleHandler(object value)
@@ -810,7 +822,7 @@ public partial class Insert : IDisposable
         if (DetalleContext.IsValid(DetalleContext.Field("CodigoAlmacen")))
         {
             if ((detalleState.OriginalEditItem.CodigoAlmacen ?? "") == codigo) goto exit;
-            (AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto item, Validator.MsgErrorLocal) = await IUtil.ObtenerAlmacenPorCodigoEmpresaOperacionLogisticaSesion(Alert, codigo, Empresa.Codigo, MovimientoInsertar.CodigoOperacionLogistica, detalleState.EditItem.CodigoTipoArticulo, MovimientoInsertar.CodigoAlmacenDestino);
+            (AlmacenObtenerPorCodigoEmpresaOperacionLogisticaSesionDto item, GridDetalleValidator.MsgErrorAlmacen) = await IUtil.ObtenerAlmacenPorCodigoEmpresaOperacionLogisticaSesion(Alert, codigo, Empresa.Codigo, MovimientoInsertar.CodigoOperacionLogistica, detalleState.EditItem.CodigoTipoArticulo, MovimientoInsertar.CodigoAlmacenDestino);
             if (item is not null)
             {
                 detalleState.OriginalEditItem.CodigoAlmacen = item.CodigoAlmacen;
@@ -825,7 +837,6 @@ public partial class Insert : IDisposable
             DetalleContext.MarkAsUnmodified(DetalleContext.Field("CodigoAlmacen"));
     exit:
         IsModifiedDetalle = DetalleContext.IsModified();
-        await GridDetalleRef.SetStateAsync(detalleState);
     } 
     #endregion
 
