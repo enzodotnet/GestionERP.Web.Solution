@@ -102,60 +102,12 @@ public partial class Insert : IDisposable
     [Inject] public IPrincipalPermiso IPermiso { get; set; }
     [Inject] public IPrincipalMoneda IMoneda { get; set; }
     [Inject] public IPrincipalTipoMovimiento ITipoMovimiento { get; set; }
+    [Inject] private IServiceProvider ServiceProvider { get; set; }
     [Inject] public UserService IUser { get; set; }
     [Inject] public UtilService IUtil { get; set; }
     [Inject] public NavigationManager INavigation { get; set; }
     [Inject] public IMapper IMapper { get; set; }
-
-    private List<Product> GridData { get; set; } = new();
-
-    private FluentProductValidator GridFluentValidator = new();
-
-    public class FluentProductValidator : AbstractValidator<Product>
-    {
-        public FluentProductValidator()
-        {
-            RuleFor(item => item.Name).NotEmpty().MinimumLength(3).MaximumLength(24);
-            RuleFor(item => item.Price).NotNull().GreaterThan(0);
-            RuleFor(item => item.ReleaseDate).NotEmpty().GreaterThanOrEqualTo(DateTime.Today.AddYears(-10));
-        }
-    }
-
-    private bool GridValidationEnabled { get; set; } = true;
-
-    private int LastId { get; set; }
-
-    private void OnGridCreate(GridCommandEventArgs args)
-    {
-        var createdItem = (Product)args.Item;
-
-        createdItem.Id = ++LastId;
-
-        GridData.Insert(0, createdItem);
-    }
-
-    private void OnGridUpdate(GridCommandEventArgs args)
-    {
-        var updatedItem = (Product)args.Item;
-        int originalItemIndex = GridData.FindIndex(i => i.Id == updatedItem.Id);
-
-        if (originalItemIndex != -1)
-        {
-            GridData[originalItemIndex] = updatedItem;
-        }
-    }
-
-
-    public class Product
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public decimal? Price { get; set; }
-        public int Quantity { get; set; }
-        public DateTime? ReleaseDate { get; set; }
-        public bool Discontinued { get; set; }
-    }
-
+    
     public override async Task SetParametersAsync(ParameterView parameters)
     {
         await base.SetParametersAsync(parameters);
@@ -187,20 +139,7 @@ public partial class Insert : IDisposable
 
             TipoMovimiento = new();
             FechasCerradoOperacion = []; 
-            FechaIntervalo = new();
-
-            for (int i = 1; i <= 5; i++)
-            {
-                GridData.Add(new Product()
-                {
-                    Id = ++LastId,
-                    Name = $"Product {LastId}",
-                    Price = LastId % 2 == 0 ? null : Random.Shared.Next(0, 100) * 1.23m,
-                    Quantity = LastId % 2 == 0 ? 0 : Random.Shared.Next(0, 3000),
-                    ReleaseDate = DateTime.Today.AddDays(-Random.Shared.Next(365, 3650)),
-                    Discontinued = LastId % 2 == 0
-                });
-            }
+            FechaIntervalo = new(); 
 
             TiposRegistro = MovimientoFlag.TiposRegistro();  
             EsVisibleBotonOperacion = true;
@@ -699,7 +638,7 @@ public partial class Insert : IDisposable
     // The issue occurs because `ServiceProvider` is being used as if it were an instance, but it is a type.
     // To resolve this, you need to inject or pass an instance of `IServiceProvider` to the class and use it.
 
-    [Inject] private IServiceProvider ServiceProviderInstance { get; set; } // Inject an instance of IServiceProvider
+     // Inject an instance of IServiceProvider
 
     private async Task GrabarModificacionDetalle()
     {
@@ -707,7 +646,7 @@ public partial class Insert : IDisposable
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
 
         DetalleContext = new EditContext(detalleState.EditItem);
-        DetalleContext.AddFluentValidation(ServiceProviderInstance, disableAssemblyScanning: false, validator: GridDetalleValidator, fluentValidationValidator: new FluentValidationValidator());
+        DetalleContext.AddFluentValidation(ServiceProvider, false, GridDetalleValidator, new FluentValidationValidator());
 
         var x = DetalleContext.GetValidationMessages();
         var y = DetalleContext.Validate();
