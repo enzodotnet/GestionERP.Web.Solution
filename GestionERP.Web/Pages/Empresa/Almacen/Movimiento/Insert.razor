@@ -157,6 +157,43 @@
 
 					<FormItem Field="Detalle">
 						<Template>
+							<TelerikGrid Data="@GridData"
+										 EditMode="@GridEditMode.Inline"
+										 OnCreate="@OnGridCreate"
+										 OnUpdate="@OnGridUpdate">
+								<GridSettings>
+									<GridValidationSettings Enabled="@GridValidationEnabled">
+										<ValidatorTemplate>
+											<FluentValidationValidator Validator="@GridFluentValidator" />
+										</ValidatorTemplate>
+									</GridValidationSettings>
+								</GridSettings>
+								<GridToolBarTemplate>
+									<GridCommandButton Command="Add">Add Item</GridCommandButton>
+									<label class="k-checkbox-label">
+										<TelerikCheckBox @bind-Value="@GridValidationEnabled" />
+										Enable Validation
+									</label>
+								</GridToolBarTemplate>
+								<GridColumns>
+									<GridColumn Field="@nameof(Product.Name)" />
+									<GridColumn Field="@nameof(Product.Price)" DisplayFormat="{0:C2}" />
+									<GridColumn Field="@nameof(Product.Quantity)" DisplayFormat="{0:N0}" />
+									<GridColumn Field="@nameof(Product.ReleaseDate)" DisplayFormat="{0:d}" />
+									<GridColumn Field="@nameof(Product.Discontinued)" Width="120px" />
+									<GridCommandColumn Width="180px">
+										<GridCommandButton Command="Edit">Edit</GridCommandButton>
+										<GridCommandButton Command="Save" ShowInEdit="true">Save</GridCommandButton>
+										<GridCommandButton Command="Cancel" ShowInEdit="true">Cancel</GridCommandButton>
+									</GridCommandColumn>
+								</GridColumns>
+							</TelerikGrid>
+
+						</Template>
+					</FormItem>
+
+					<FormItem Field="Detalle">
+						<Template>
 							<label>Detalle*:</label>
 							<TelerikGrid Data="@(GridDetalles)" Height="auto" Pageable="false" Sortable="true" Resizable="true" Size="sm" EditMode="@(GridEditMode.Inline)" OnUpdate=@UpdateItemDetalleHandler OnCancel="@CancelDetalleHandler" @ref="GridDetalleRef">
 								<GridSettings>
@@ -166,6 +203,7 @@
 										</ValidatorTemplate>
 									</GridValidationSettings>
 								</GridSettings>
+
 
 								<GridToolBarTemplate>
 									<TelerikButton Icon="@(SvgIcon.Plus)" Class="b-primary b-action" ButtonType="@ButtonType.Button" Id="tbtn" Visible="@(!string.IsNullOrEmpty(MovimientoInsertar.CodigoOperacionLogistica) && !TipoMovimiento.EsRequeridoReferencia)" Title="Ir a agregar nuevo ítem" Size="sm" Enabled="@(!IsEditingGridDetalle)" OnClick="@AgregarItemDetalle">Agregar ítem</TelerikButton>
