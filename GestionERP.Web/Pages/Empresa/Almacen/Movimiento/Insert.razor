@@ -155,7 +155,7 @@
 						</FormItem>
 					</FormGroup>
 
-					<FormItem Field="Detalle">
+				@* 	<FormItem Field="Detalle">
 						<Template>
 							<TelerikGrid Data="@GridData"
 										 EditMode="@GridEditMode.Inline"
@@ -190,12 +190,12 @@
 							</TelerikGrid>
 
 						</Template>
-					</FormItem>
+					</FormItem> *@
 
 					<FormItem Field="Detalle">
 						<Template>
-							<label>Detalle*:</label>
-							<TelerikGrid Data="@(GridDetalles)" Height="auto" Pageable="false" Sortable="true" Resizable="true" Size="sm" EditMode="@(GridEditMode.Inline)" OnUpdate=@UpdateItemDetalleHandler OnCancel="@CancelDetalleHandler" @ref="GridDetalleRef">
+							<label>Detalle*:</label>																													    
+							<TelerikGrid Data="@(GridDetalles)" Height="auto" Pageable="false" Sortable="true" Resizable="true" Size="sm" EditMode="@(GridEditMode.Inline)" OnEdit="@EditDetalleHandler" OnUpdate=@UpdateItemDetalleHandler OnCancel="@CancelDetalleHandler" @ref="GridDetalleRef">
 								<GridSettings>
 									<GridValidationSettings Enabled=@(true)>
 										<ValidatorTemplate>
