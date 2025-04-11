@@ -706,11 +706,16 @@ public partial class Insert : IDisposable
         // Use the injected ServiceProviderInstance instead of the type name 'ServiceProvider' 
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
 
-        DetalleContext = new EditContext(detalleState.EditItem);
-        DetalleContext.AddFluentValidation(ServiceProviderInstance, disableAssemblyScanning: false, validator: GridDetalleValidator, fluentValidationValidator: new FluentValidationValidator());
+       
 
-        var x = DetalleContext.GetValidationMessages();
-        var y = DetalleContext.Validate();
+        //var x = DetalleContext.GetValidationMessages();
+        //var y = DetalleContext.Validate();
+
+        if (!DetalleContext.Validate())
+        {
+            Fnc.MostrarAlerta(Alert, Cnf.MsgErrorInvalidEditContext, "error");
+            return;
+        }
 
         UpdateItemDetalleHandler(new GridCommandEventArgs() { Item = detalleState.EditItem is not null ? detalleState.EditItem : detalleState.InsertedItem });
         await DesactivarModificacionDetalle();
@@ -731,6 +736,7 @@ public partial class Insert : IDisposable
             UnidadConversion = item.UnidadConversion
         };
         DetalleContext = new EditContext(detalleState.EditItem);
+        DetalleContext.AddFluentValidation(ServiceProviderInstance, disableAssemblyScanning: false, validator: GridDetalleValidator, fluentValidationValidator: new FluentValidationValidator());
         await GridDetalleRef.SetStateAsync(detalleState);  
     }
 
