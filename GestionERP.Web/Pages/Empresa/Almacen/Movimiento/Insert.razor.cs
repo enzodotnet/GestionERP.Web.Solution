@@ -645,11 +645,16 @@ public partial class Insert : IDisposable
         // Use the injected ServiceProviderInstance instead of the type name 'ServiceProvider' 
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
 
-        DetalleContext = new EditContext(detalleState.EditItem);
-        DetalleContext.AddFluentValidation(ServiceProvider, false, GridDetalleValidator, new FluentValidationValidator());
+       
 
-        var x = DetalleContext.GetValidationMessages();
-        var y = DetalleContext.Validate();
+        //var x = DetalleContext.GetValidationMessages();
+        //var y = DetalleContext.Validate();
+
+        if (!DetalleContext.Validate())
+        {
+            Fnc.MostrarAlerta(Alert, Cnf.MsgErrorInvalidEditContext, "error");
+            return;
+        }
 
         UpdateItemDetalleHandler(new GridCommandEventArgs() { Item = detalleState.EditItem is not null ? detalleState.EditItem : detalleState.InsertedItem });
         await DesactivarModificacionDetalle();
@@ -670,6 +675,7 @@ public partial class Insert : IDisposable
             UnidadConversion = item.UnidadConversion
         };
         DetalleContext = new EditContext(detalleState.EditItem);
+        DetalleContext.AddFluentValidation(ServiceProviderInstance, disableAssemblyScanning: false, validator: GridDetalleValidator, fluentValidationValidator: new FluentValidationValidator());
         await GridDetalleRef.SetStateAsync(detalleState);  
     }
 
@@ -824,6 +830,18 @@ public partial class Insert : IDisposable
         //IsModifiedDetalle = DetalleContext.IsModified();
     }
 
+    public void EditDetalleHandler(GridCommandEventArgs args)
+    {
+        IsEditingGridDetalle = args.Field is "Cantidad" or "PrecioUnitario";
+        if (IsEditingGridDetalle)
+        {
+            GridDetalleValidator = new()
+            {
+                UnidadConversion = (args.Item as OrdenDetalleGrid).UnidadConversion
+            };
+        }
+    }
+
     private async Task ValueChangeAlmacenDetalleHandler(string value)
     {
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
@@ -839,6 +857,12 @@ public partial class Insert : IDisposable
     {
         GridState<MovimientoDetalleGrid> detalleState = GridDetalleRef.GetState();
         string codigo = (string)(value ?? "");
+        //DetalleContext = new EditContext(detalleState.EditItem);
+        //DetalleContext.AddFluentValidation(ServiceProviderInstance, disableAssemblyScanning: true, validator: GridDetalleValidator, fluentValidationValidator: new FluentValidationValidator());
+        //var t = DetalleContext.Validate();
+        //var x = DetalleContext.IsValid(DetalleContext.Field("CodigoAlmacen"));
+        //var y = DetalleContext.IsValid(DetalleContext.Field("Cantidad"));
+
         if (DetalleContext.IsValid(DetalleContext.Field("CodigoAlmacen")))
         {
             if ((detalleState.OriginalEditItem.CodigoAlmacen ?? "") == codigo) goto exit;
